@@ -88,6 +88,10 @@ import { tool as macAddressLookup } from './mac-address-lookup';
 import { tool as xmlFormatter } from './xml-formatter';
 import { tool as yamlViewer } from './yaml-viewer';
 import { tool as mybatisSqlConverter } from './mybatis-sql-converter';
+import { tool as snowflakeIdAnalyzer } from './snowflake-id-analyzer';
+import { tool as curlConverter } from './curl-converter';
+import { tool as jsonToEntity } from './json-to-entity';
+import { tool as sqlDdlToEntity } from './sql-ddl-to-entity';
 
 export const toolsByCategory: ToolCategory[] = [
   {
@@ -162,6 +166,10 @@ export const toolsByCategory: ToolCategory[] = [
       emailNormalizer,
       regexTester,
       regexMemo,
+      snowflakeIdAnalyzer,
+      curlConverter,
+      jsonToEntity,
+      sqlDdlToEntity,
     ],
   },
   {

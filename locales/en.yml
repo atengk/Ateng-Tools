@@ -157,6 +157,34 @@ tools:
     mismatchTag: Mismatch
     warningTitle: Warning on Statement
 
+  snowflake-id-analyzer:
+    title: Snowflake ID analyzer
+    description: Decompose, analyze, and generate 64-bit Snowflake IDs with binary bit layout and timestamp decoding.
+    loadSample: Load Sample
+    paste: Paste
+    clear: Clear
+
+  curl-converter:
+    title: cURL converter
+    description: Parse cURL commands into JavaScript Axios, modern Fetch, and Java HttpClient code with visual parameter inspection.
+    loadSample: Load Sample
+    paste: Paste
+    clear: Clear
+
+  json-to-entity:
+    title: JSON to Entity / Model
+    description: Automatically convert JSON payloads into Java DTOs (Lombok, Jackson) or TypeScript interfaces.
+    loadSample: Load Sample
+    paste: Paste
+    clear: Clear
+
+  sql-ddl-to-entity:
+    title: SQL DDL to Entity
+    description: Convert MySQL CREATE TABLE statements into MyBatis-Plus Java entities and TypeScript interfaces.
+    loadSample: Load Sample
+    paste: Paste
+    clear: Clear
+
   benchmark-builder:
     title: Benchmark builder
     description: Easily compare execution time of tasks with this very simple online benchmark builder.
