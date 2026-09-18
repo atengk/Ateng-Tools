@@ -135,6 +135,26 @@ tools:
     title: SQL 美化和格式化
     description: 在线格式化和美化您的 SQL 查询（它支持各种 SQL 方言）。
 
+  mybatis-sql-converter:
+    title: MyBatis SQL 日志还原
+    description: 从 MyBatis/MyBatis-Plus 控制台日志中提取并还原出可执行的真实 SQL 语句。
+    loadSample: 加载示例
+    paste: 粘贴
+    clear: 清空
+    booleanFormat: "布尔值格式："
+    dialect: "SQL方言："
+    prettify: "美化SQL："
+    inputLabel: 原始 MyBatis 日志
+    inputPlaceholder: 在此粘贴包含 Preparing 和 Parameters 的控制台日志...
+    outputLabel: 还原后可执行 SQL
+    copyAll: 复制全部 SQL
+    copySuccess: 复制 SQL
+    copy: 复制
+    individualStatements: 单条语句列表
+    params: 个参数
+    mismatchTag: 参数不匹配
+    warningTitle: 语句告警
+
   benchmark-builder:
     title: 基准生成器
     description: 简单的在线基准构建器可以轻松比较任务的执行时间。

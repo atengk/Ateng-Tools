@@ -137,6 +137,26 @@ tools:
     title: SQL prettify and format
     description: Format and prettify your SQL queries online (it supports various SQL dialects).
 
+  mybatis-sql-converter:
+    title: MyBatis SQL log converter
+    description: Restore executable SQL statements from MyBatis/MyBatis-Plus console logs with parameter injection.
+    loadSample: Load Sample
+    paste: Paste
+    clear: Clear
+    booleanFormat: "Boolean:"
+    dialect: "Dialect:"
+    prettify: "Prettify SQL:"
+    inputLabel: Raw MyBatis Logs
+    inputPlaceholder: Paste your MyBatis logs with Preparing and Parameters lines here...
+    outputLabel: Executable SQL
+    copyAll: Copy All SQL
+    copySuccess: Copy SQL
+    copy: Copy
+    individualStatements: Individual Statements
+    params: params
+    mismatchTag: Mismatch
+    warningTitle: Warning on Statement
+
   benchmark-builder:
     title: Benchmark builder
     description: Easily compare execution time of tasks with this very simple online benchmark builder.

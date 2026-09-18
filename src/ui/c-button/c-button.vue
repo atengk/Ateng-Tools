@@ -48,7 +48,8 @@ const tag = computed(() => {
 });
 const appTheme = useAppTheme();
 
-const size = computed(() => theme.value.size[sizeName.value]);
+// Defensive fallback to medium size to prevent undefined fontSize crash when invalid size is passed
+const size = computed(() => theme.value.size[sizeName.value] ?? theme.value.size.medium);
 </script>
 
 <template>
