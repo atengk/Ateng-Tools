@@ -11,16 +11,16 @@
 
 ---
 
-## Agent skills
+## Agent 技能配置 (Agent skills)
 
-### Issue tracker
+### 任务跟踪器 (Issue tracker)
 
-Local markdown files in `.scratch/<feature-slug>/`. See `docs/agents/issue-tracker.md`.
+基于 GitHub Issues 进行任务与需求跟踪（通过 `gh` CLI 交互）。详情参见 `docs/agents/issue-tracker.md`。
 
-### Triage labels
+### 分类标签 (Triage labels)
 
-Five canonical roles: `needs-triage`, `needs-info`, `ready-for-agent`, `ready-for-human`, `wontfix`. See `docs/agents/triage-labels.md`.
+包含五种标准分类角色：`needs-triage`、`needs-info`、`ready-for-agent`、`ready-for-human`、`wontfix`。详情参见 `docs/agents/triage-labels.md`。
 
-### Domain docs
+### 领域文档 (Domain docs)
 
-Single-context (`CONTEXT.md` + `docs/adr/` at the repo root). See `docs/agents/domain.md`.
+单上下文架构（根目录 `CONTEXT.md` + `docs/adr/`）。详情参见 `docs/agents/domain.md`。

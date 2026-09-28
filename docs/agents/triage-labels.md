@@ -1,15 +1,15 @@
-# Triage Labels
+# Triage 分类标签映射 (Triage Labels)
 
-The skills speak in terms of five canonical triage roles. This file maps those roles to the actual label strings used in this repo's issue tracker.
+工程技能通过五个标准分类角色（Canonical Triage Roles）进行任务生命周期管理。本文档将这些角色映射至本代码库 Issue 跟踪器中实际使用的标签字符串。
 
-| Label in mattpocock/skills | Label in our tracker | Meaning                                  |
-| -------------------------- | -------------------- | ---------------------------------------- |
-| `needs-triage`             | `needs-triage`       | Maintainer needs to evaluate this issue  |
-| `needs-info`               | `needs-info`         | Waiting on reporter for more information |
-| `ready-for-agent`          | `ready-for-agent`    | Fully specified, ready for an AFK agent  |
-| `ready-for-human`          | `ready-for-human`    | Requires human implementation            |
-| `wontfix`                  | `wontfix`            | Will not be actioned                     |
+| 技能标准角色 (Label in mattpocock/skills) | 本仓库实际标签 (Label in our tracker) | 说明含义 (Meaning)                       |
+| ----------------------------------------- | ------------------------------------- | ---------------------------------------- |
+| `needs-triage`                            | `needs-triage`                        | 待维护者评估分流此 Issue                  |
+| `needs-info`                              | `needs-info`                          | 等待提交者补充更多信息                   |
+| `ready-for-agent`                         | `ready-for-agent`                     | 规格已完备，可由 Agent 独立执行          |
+| `ready-for-human`                         | `ready-for-human`                     | 需人工介入实现（设计决策、手工测试等）   |
+| `wontfix`                                 | `wontfix`                             | 不予处理或关闭                           |
 
-When a skill mentions a role (e.g. "apply the AFK-ready triage label"), use the corresponding label string from this table.
+当技能提及某一角色时（例如“添加 AFK-ready 分类标签”），请从上表中查找对应的实际标签字符串。
 
-Edit the right-hand column to match whatever vocabulary you actually use.
+如果本仓库实际使用不同的标签命名，直接修改上表右侧列（“本仓库实际标签”）即可。
