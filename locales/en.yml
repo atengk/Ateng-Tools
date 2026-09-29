@@ -185,6 +185,11 @@ tools:
     paste: Paste
     clear: Clear
 
+  websocket-and-sse-client:
+    title: WebSocket & SSE Stream Client
+    description: Client-side WebSocket full-duplex messaging and SSE stream debugger with frame timeline, LLM stream aggregation, and heartbeat keepalive.
+
+
   benchmark-builder:
     title: Benchmark builder
     description: Easily compare execution time of tasks with this very simple online benchmark builder.

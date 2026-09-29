@@ -183,6 +183,11 @@ tools:
     paste: 粘贴
     clear: 清空
 
+  websocket-and-sse-client:
+    title: WebSocket & SSE 调试助手
+    description: 纯客户端 WebSocket 全双工通信与 SSE 单向事件流调试，支持分帧时间轴、大模型流式聚合与心跳保活。
+
+
   benchmark-builder:
     title: 基准生成器
     description: 简单的在线基准构建器可以轻松比较任务的执行时间。
