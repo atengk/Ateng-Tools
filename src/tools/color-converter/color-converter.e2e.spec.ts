@@ -6,7 +6,7 @@ test.describe('Tool - Color converter', () => {
   });
 
   test('Has title', async ({ page }) => {
-    await expect(page).toHaveTitle('Color converter - IT Tools');
+    await expect(page).toHaveTitle('Color converter - Ateng-Tools');
   });
 
   test('Color is converted from its name to other formats', async ({ page }) => {
@@ -21,3 +21,4 @@ test.describe('Tool - Color converter', () => {
     expect(await page.getByTestId('input-lch').inputValue()).toEqual('lch(52.15% 56.81 99.57)');
   });
 });
+

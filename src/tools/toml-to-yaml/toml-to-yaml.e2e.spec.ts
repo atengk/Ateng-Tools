@@ -6,7 +6,7 @@ test.describe('Tool - TOML to YAML', () => {
   });
 
   test('Has correct title', async ({ page }) => {
-    await expect(page).toHaveTitle('TOML to YAML - IT Tools');
+    await expect(page).toHaveTitle('TOML to YAML - Ateng-Tools');
   });
 
   test('TOML is parsed and outputs clean YAML', async ({ page }) => {
@@ -34,3 +34,4 @@ list:
     );
   });
 });
+

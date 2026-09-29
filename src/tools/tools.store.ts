@@ -38,11 +38,18 @@ export const useToolStore = defineStore('tools', () => {
       .filter(Boolean) as ToolWithCategory[]; // cast because .filter(Boolean) does not remove undefined from type
   });
 
+  const selectedCategory = ref<string>('all');
+
   return {
     tools,
     favoriteTools,
     toolsByCategory,
+    selectedCategory,
     newTools: computed(() => tools.value.filter(({ isNew }) => isNew)),
+
+    setSelectedCategory(category: string) {
+      selectedCategory.value = category;
+    },
 
     addToolToFavorites({ tool }: { tool: MaybeRef<Tool> }) {
       const toolPath = get(tool).path;

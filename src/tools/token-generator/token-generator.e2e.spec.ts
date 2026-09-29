@@ -6,7 +6,7 @@ test.describe('Tool - Token generator', () => {
   });
 
   test('Has title', async ({ page }) => {
-    await expect(page).toHaveTitle('Token generator - IT Tools');
+    await expect(page).toHaveTitle('Token generator - Ateng-Tools');
   });
 
   test('New token on refresh', async ({ page }) => {
@@ -17,3 +17,4 @@ test.describe('Tool - Token generator', () => {
     expect(newToken).not.toEqual(initialToken);
   });
 });
+

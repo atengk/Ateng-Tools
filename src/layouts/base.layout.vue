@@ -1,26 +1,20 @@
 <script lang="ts" setup>
 import { NIcon, useThemeVars } from 'naive-ui';
-
-import { RouterLink } from 'vue-router';
-import { Heart, Home2, Menu2 } from '@vicons/tabler';
-
+import { RouterLink, useRoute } from 'vue-router';
+import { Menu2 } from '@vicons/tabler';
 import { storeToRefs } from 'pinia';
-import HeroGradient from '../assets/hero-gradient.svg?component';
 import MenuLayout from '../components/MenuLayout.vue';
 import NavbarButtons from '../components/NavbarButtons.vue';
 import { useStyleStore } from '@/stores/style.store';
-import { config } from '@/config';
 import type { ToolCategory } from '@/tools/tools.types';
 import { useToolStore } from '@/tools/tools.store';
-import { useTracker } from '@/modules/tracker/tracker.services';
 import CollapsibleToolMenu from '@/components/CollapsibleToolMenu.vue';
 
 const themeVars = useThemeVars();
 const styleStore = useStyleStore();
-const version = config.app.version;
-const commitSha = config.app.lastCommitSha.slice(0, 7);
+const route = useRoute();
+const isHomePage = computed(() => route.path === '/');
 
-const { tracker } = useTracker();
 const { t } = useI18n();
 
 const toolStore = useToolStore();
@@ -35,183 +29,213 @@ const tools = computed<ToolCategory[]>(() => [
 <template>
   <MenuLayout class="menu-layout" :class="{ isSmallScreen: styleStore.isSmallScreen }">
     <template #sider>
-      <RouterLink to="/" class="hero-wrapper">
-        <HeroGradient class="gradient" />
-        <div class="text-wrapper">
-          <div class="title">
-            IT - TOOLS
+      <!-- 左上角 64px 矢量品牌栏 -->
+      <RouterLink to="/" class="brand-header">
+        <div class="brand-logo">
+          <svg class="brand-logo-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+          </svg>
+        </div>
+        <div class="brand-text">
+          <div class="brand-title-wrap">
+            <span class="brand-title">{{ $t('home.brand') }}</span>
+            <span class="brand-badge">{{ $t('home.badge') }}</span>
           </div>
-          <div class="divider" />
-          <div class="subtitle">
+          <div class="brand-subtitle">
             {{ $t('home.subtitle') }}
           </div>
         </div>
       </RouterLink>
 
       <div class="sider-content">
-        <div v-if="styleStore.isSmallScreen" flex flex-col items-center>
-          <locale-selector w="90%" />
-
+        <div v-if="styleStore.isSmallScreen" flex flex-col items-center mb-4>
+          <locale-selector w="90%" mb-2 />
           <div flex justify-center>
             <NavbarButtons />
           </div>
         </div>
 
+        <!-- 侧边栏分类导航列表 (对齐原型) -->
         <CollapsibleToolMenu :tools-by-category="tools" />
-
-        <div class="footer">
-          <div>
-            IT-Tools
-
-            <c-link target="_blank" rel="noopener" :href="`https://github.com/CorentinTh/it-tools/tree/v${version}`">
-              v{{ version }}
-            </c-link>
-
-            <template v-if="commitSha && commitSha.length > 0">
-              -
-              <c-link
-                target="_blank"
-                rel="noopener"
-                type="primary"
-                :href="`https://github.com/CorentinTh/it-tools/tree/${commitSha}`"
-              >
-                {{ commitSha }}
-              </c-link>
-            </template>
-          </div>
-          <div>
-            © {{ new Date().getFullYear() }}
-            <c-link target="_blank" rel="noopener" href="https://corentin.tech?utm_source=it-tools&utm_medium=footer">
-              Corentin Thomasset
-            </c-link>
-          </div>
-        </div>
       </div>
     </template>
 
     <template #content>
-      <div flex items-center justify-center gap-2>
-        <c-button
-          circle
-          variant="text"
-          :aria-label="$t('home.toggleMenu')"
-          @click="styleStore.isMenuCollapsed = !styleStore.isMenuCollapsed"
-        >
-          <NIcon size="25" :component="Menu2" />
-        </c-button>
+      <!-- 顶栏 Top Navbar (深度对齐原型) -->
+      <header class="top-navbar">
+        <!-- 顶栏左侧：收起展开按钮 + 页面标识 -->
+        <div class="nav-left">
+          <button
+            type="button"
+            class="hamburger-btn"
+            :title="$t('home.toggleMenu')"
+            :aria-label="$t('home.toggleMenu')"
+            @click="styleStore.isMenuCollapsed = !styleStore.isMenuCollapsed"
+          >
+            <NIcon size="18" :component="Menu2" />
+          </button>
 
-        <c-tooltip :tooltip="$t('home.home')" position="bottom">
-          <c-button to="/" circle variant="text" :aria-label="$t('home.home')">
-            <NIcon size="25" :component="Home2" />
-          </c-button>
-        </c-tooltip>
-
-        <c-tooltip :tooltip="$t('home.uiLib')" position="bottom">
-          <c-button v-if="config.app.env === 'development'" to="/c-lib" circle variant="text" :aria-label="$t('home.uiLib')">
-            <icon-mdi:brush-variant text-20px />
-          </c-button>
-        </c-tooltip>
-
-        <command-palette />
-
-        <locale-selector v-if="!styleStore.isSmallScreen" />
-
-        <div>
-          <NavbarButtons v-if="!styleStore.isSmallScreen" />
+          <router-link to="/" class="nav-brand-title-wrap">
+            <span class="page-title">{{ isHomePage ? '首页控制台' : 'Ateng-Tools' }}</span>
+          </router-link>
         </div>
 
-        <c-tooltip position="bottom" :tooltip="$t('home.support')">
-          <c-button
-            round
-            href="https://www.buymeacoffee.com/cthmsst"
-            rel="noopener"
-            target="_blank"
-            class="support-button"
-            :bordered="false"
-            @click="() => tracker.trackEvent({ eventName: 'Support button clicked' })"
-          >
-            {{ $t('home.buyMeACoffee') }}
-            <NIcon v-if="!styleStore.isSmallScreen" :component="Heart" ml-2 />
-          </c-button>
-        </c-tooltip>
-      </div>
+        <!-- 顶栏右侧：搜索栏 + 语言选择 + 模式切换 + GitHub Star 按钮 -->
+        <div class="nav-right">
+          <command-palette class="nav-search-bar" />
+
+          <locale-selector v-if="!styleStore.isSmallScreen" />
+
+          <NavbarButtons v-if="!styleStore.isSmallScreen" />
+        </div>
+      </header>
+
       <slot />
     </template>
   </MenuLayout>
 </template>
 
 <style lang="less" scoped>
-// ::v-deep(.n-layout-scroll-container) {
-//     @percent: 4%;
-//     @position: 25px;
-//     @size: 50px;
-//     @color: #eeeeee25;
-//     background-image: radial-gradient(@color @percent, transparent @percent),
-//         radial-gradient(@color @percent, transparent @percent);
-//     background-position: 0 0, @position @position;
-//     background-size: @size @size;
-// }
+.top-navbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding-bottom: 16px;
+  margin-bottom: 20px;
+  border-bottom: 1px solid v-bind('themeVars.borderColor');
 
-.support-button {
-  background: rgb(37, 99, 108);
-  background: linear-gradient(48deg, rgba(37, 99, 108, 1) 0%, rgba(59, 149, 111, 1) 60%, rgba(20, 160, 88, 1) 100%);
-  color: #fff !important;
-  transition: padding ease 0.2s !important;
+  .nav-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
 
-  &:hover {
-    color: #fff;
-    padding-left: 30px;
-    padding-right: 30px;
+    .hamburger-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 36px;
+      height: 36px;
+      border-radius: 8px;
+      border: 1px solid v-bind('themeVars.borderColor');
+      background-color: v-bind('themeVars.cardColor');
+      color: v-bind('themeVars.textColor1');
+      cursor: pointer;
+      transition: all 0.18s ease;
+
+      &:hover {
+        border-color: #2563eb;
+        color: #2563eb;
+        background-color: rgba(37, 99, 235, 0.05);
+      }
+    }
+
+    .nav-brand-title-wrap {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      text-decoration: none;
+
+      .page-title {
+        font-size: 15px;
+        font-weight: 700;
+        color: v-bind('themeVars.textColorBase');
+      }
+    }
   }
-}
 
-.footer {
-  text-align: center;
-  color: #838587;
-  margin-top: 20px;
-  padding: 20px 0;
+  .nav-right {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-shrink: 0;
+
+    .nav-search-bar {
+      width: 240px;
+      @media (max-width: 640px) {
+        width: 140px;
+      }
+    }
+  }
 }
 
 .sider-content {
-  padding-top: 160px;
-  padding-bottom: 200px;
+  padding-top: 72px;
+  padding-bottom: 40px;
 }
 
-.hero-wrapper {
+.brand-header {
   position: absolute;
-  display: block;
+  top: 0;
   left: 0;
   width: 100%;
+  height: 64px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 0 16px;
   z-index: 10;
-  overflow: hidden;
+  text-decoration: none;
+  border-bottom: 1px solid v-bind('themeVars.borderColor');
+  background-color: v-bind('themeVars.cardColor');
+  transition: all 0.2s ease;
+  user-select: none;
 
-  .gradient {
-    margin-top: -65px;
+  .brand-logo {
+    width: 38px;
+    height: 38px;
+    border-radius: 10px;
+    background: linear-gradient(135deg, #2563eb 0%, #3b82f6 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    box-shadow: 0 2px 6px rgba(37, 99, 235, 0.3);
+    flex-shrink: 0;
+
+    .brand-logo-icon {
+      width: 20px;
+      height: 20px;
+    }
   }
 
-  .text-wrapper {
-    position: absolute;
-    left: 0;
-    width: 100%;
-    text-align: center;
-    top: 16px;
-    color: #fff;
+  .brand-text {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
 
-    .title {
-      font-size: 25px;
-      font-weight: 600;
+    .brand-title-wrap {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+
+      .brand-title {
+        font-size: 16px;
+        font-weight: 700;
+        line-height: 1.2;
+        color: v-bind('themeVars.textColorBase');
+        letter-spacing: -0.01em;
+      }
+
+      .brand-badge {
+        font-size: 10px;
+        font-weight: 600;
+        line-height: 1;
+        padding: 2px 5px;
+        border-radius: 4px;
+        background-color: rgba(37, 99, 235, 0.1);
+        border: 1px solid rgba(37, 99, 235, 0.25);
+        color: #2563eb;
+      }
     }
 
-    .divider {
-      width: 50px;
-      height: 2px;
-      border-radius: 4px;
-      background-color: v-bind('themeVars.primaryColor');
-      margin: 0 auto 5px;
-    }
-
-    .subtitle {
-      font-size: 16px;
+    .brand-subtitle {
+      font-size: 11px;
+      color: v-bind('themeVars.textColor3');
+      margin-top: 2px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
   }
 }

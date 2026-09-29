@@ -6,6 +6,7 @@ test.describe('Tool - MAC address generator', () => {
   });
 
   test('Has correct title', async ({ page }) => {
-    await expect(page).toHaveTitle('MAC address generator - IT Tools');
+    await expect(page).toHaveTitle('MAC address generator - Ateng-Tools');
   });
 });
+

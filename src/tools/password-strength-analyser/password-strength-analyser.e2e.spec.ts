@@ -6,7 +6,7 @@ test.describe('Tool - Password strength analyser', () => {
   });
 
   test('Has correct title', async ({ page }) => {
-    await expect(page).toHaveTitle('Password strength analyser - IT Tools');
+    await expect(page).toHaveTitle('Password strength analyser - Ateng-Tools');
   });
 
   test('Computes the brute force attack time of a password', async ({ page }) => {
@@ -17,3 +17,4 @@ test.describe('Tool - Password strength analyser', () => {
     expect(crackDuration).toEqual('15,091 millennia, 3 centuries');
   });
 });
+

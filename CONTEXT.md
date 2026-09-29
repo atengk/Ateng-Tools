@@ -152,3 +152,22 @@ _避免使用 (Avoid)_: SQL Splitter, Group Insert, Chunk Writer
 对单元格数据执行类型推断（数字无引号、布尔值按规范、空值转 NULL、字符串转义单引号防注入）的安全格式化器。
 _避免使用 (Avoid)_: Value Cleaner, Quote Adder
 
+### Homepage & Tool Discovery
+
+**Tool Category Filter**:
+首页用于按领域分类（如开发运维、数据转换、安全加密、网络测量等）即时筛选工具集合的交互式标签组。
+_避免使用 (Avoid)_: Tool Selector, Type Switcher, Category Pill
+
+**Enhanced Tool Card**:
+首页与工具列表呈现具体小工具的基础卡片单元，包含领域图标、多语言本地化名称、简短功能描述、新功能徽标、所属分类胶囊与收藏开关。
+_避免使用 (Avoid)_: Tool Box, App Tile, Utility Item
+
+**Brand Attribution Banner**:
+用于规范声明本工具箱基于 IT-Tools 开源项目二次开发构建并致谢原作者的合规展示单元。
+_避免使用 (Avoid)_: Sponsor Banner, Promo Header
+
+**Collapsible Tool Menu**:
+左侧侧边栏中按领域分组的层级导航菜单，默认保持全折叠状态以呈现极简清爽视野，且具备在进入具体工具路由时智能感知并自动展开定位目标分类的能力。
+_避免使用 (Avoid)_: Tree Menu, Tool List, Category Accordion
+
+

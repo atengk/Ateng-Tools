@@ -1,4 +1,4 @@
-name: Deploy VitePress to GitHub Pages
+name: Deploy Ateng-Tools to GitHub Pages
 
 on:
   push:
@@ -11,7 +11,7 @@ permissions:
   id-token: write
 
 concurrency:
-  group: vitepress-pages
+  group: ateng-tools-pages
   cancel-in-progress: true
 
 jobs:
@@ -28,7 +28,7 @@ jobs:
       - name: Setup pnpm
         uses: pnpm/action-setup@v3
         with:
-          version: 8
+          version: 9
 
       # Node + pnpm缓存
       - name: Setup Node
@@ -45,7 +45,7 @@ jobs:
         run: pnpm install
 
       # 构建
-      - name: Build VitePress
+      - name: Build Ateng-Tools
         run: pnpm build
 
       - name: Upload artifact

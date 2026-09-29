@@ -6,7 +6,7 @@ test.describe('Tool - TOML to JSON', () => {
   });
 
   test('Has correct title', async ({ page }) => {
-    await expect(page).toHaveTitle('TOML to JSON - IT Tools');
+    await expect(page).toHaveTitle('TOML to JSON - Ateng-Tools');
   });
 
   test('TOML is parsed and outputs clean JSON', async ({ page }) => {
@@ -38,3 +38,4 @@ foo = "bar"
     );
   });
 });
+

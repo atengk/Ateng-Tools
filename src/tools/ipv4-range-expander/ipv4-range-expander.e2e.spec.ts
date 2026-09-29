@@ -6,7 +6,7 @@ test.describe('Tool - IPv4 range expander', () => {
   });
 
   test('Has correct title', async ({ page }) => {
-    await expect(page).toHaveTitle('IPv4 range expander - IT Tools');
+    await expect(page).toHaveTitle('IPv4 range expander - Ateng-Tools');
   });
 
   test('Calculates correct for valid input', async ({ page }) => {
@@ -44,3 +44,4 @@ test.describe('Tool - IPv4 range expander', () => {
     await expect(page.getByTestId('result')).not.toBeVisible();
   });
 });
+

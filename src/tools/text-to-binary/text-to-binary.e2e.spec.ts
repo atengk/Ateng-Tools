@@ -6,7 +6,7 @@ test.describe('Tool - Text to ASCII binary', () => {
   });
 
   test('Has correct title', async ({ page }) => {
-    await expect(page).toHaveTitle('Text to ASCII binary - IT Tools');
+    await expect(page).toHaveTitle('Text to ASCII binary - Ateng-Tools');
   });
 
   test('Text to binary conversion', async ({ page }) => {
@@ -23,3 +23,4 @@ test.describe('Tool - Text to ASCII binary', () => {
     expect(text).toEqual('it-tools');
   });
 });
+

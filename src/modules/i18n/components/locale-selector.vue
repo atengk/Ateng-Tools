@@ -1,24 +1,20 @@
 <script setup lang="ts">
 const { availableLocales, locale } = useI18n();
 
+const supportedLocales = ['zh', 'en'];
+
 const localesLong: Record<string, string> = {
+  zh: '简体中文',
   en: 'English',
-  de: 'Deutsch',
-  es: 'Español',
-  fr: 'Français',
-  no: 'Norwegian',
-  pt: 'Português',
-  ru: 'Русский',
-  uk: 'Українська',
-  zh: '中文',
-  vi: 'Tiếng Việt',
 };
 
 const localeOptions = computed(() =>
-  availableLocales.map(locale => ({
-    label: localesLong[locale] ?? locale,
-    value: locale,
-  })),
+  supportedLocales
+    .filter(loc => availableLocales.includes(loc))
+    .map(loc => ({
+      label: localesLong[loc] ?? loc,
+      value: loc,
+    })),
 );
 </script>
 

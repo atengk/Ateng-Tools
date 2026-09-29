@@ -3,39 +3,78 @@ import { useThemeVars } from 'naive-ui';
 import FavoriteButton from './FavoriteButton.vue';
 import type { Tool } from '@/tools/tools.types';
 
-const props = defineProps<{ tool: Tool & { category: string } }>();
+const props = defineProps<{ tool: Tool & { category?: string } }>();
 const { tool } = toRefs(props);
 const theme = useThemeVars();
 </script>
 
 <template>
-  <router-link :to="tool.path" class="decoration-none">
-    <c-card class="h-full transition transition-duration-0.5s !border-2px !hover:border-primary">
-      <div flex items-center justify-between>
-        <n-icon class="text-neutral-400 dark:text-neutral-600" size="40" :component="tool.icon" />
+  <router-link :to="tool.path" class="tool-card-link decoration-none">
+    <c-card class="tool-card h-full">
+      <div class="flex items-center justify-between mb-3">
+        <n-icon class="tool-icon" size="36" :component="tool.icon" />
 
-        <div flex items-center gap-8px>
-          <div
+        <div class="flex items-center gap-2">
+          <span
+            v-if="tool.category"
+            class="category-tag text-[11px] px-2 py-0.5 rounded-full font-medium"
+          >
+            {{ tool.category }}
+          </span>
+
+          <span
             v-if="tool.isNew"
-            class="rounded-full px-8px py-3px text-xs text-white dark:text-neutral-800"
-            :style="{
-              'background-color': theme.primaryColor,
-            }"
+            class="new-badge text-[10px] px-1.5 py-0.5 rounded-full font-bold text-white leading-none"
+            :style="{ backgroundColor: theme.primaryColor }"
           >
             {{ $t('toolCard.new') }}
-          </div>
+          </span>
 
           <FavoriteButton :tool="tool" />
         </div>
       </div>
 
-      <div class="truncat my-5px text-lg text-black dark:text-white">
+      <div class="tool-name text-base font-bold my-1 text-black dark:text-white">
         {{ tool.name }}
       </div>
 
-      <div class="line-clamp-2 text-neutral-500 dark:text-neutral-400">
+      <div class="tool-desc line-clamp-2 text-xs leading-relaxed text-neutral-500 dark:text-neutral-400">
         {{ tool.description }}
       </div>
     </c-card>
   </router-link>
 </template>
+
+<style scoped lang="less">
+.tool-card-link {
+  display: block;
+  height: 100%;
+
+  .tool-card {
+    border: 1px solid v-bind('theme.borderColor');
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05), 0 1px 2px -1px rgba(0, 0, 0, 0.05);
+    transition: all 0.22s cubic-bezier(0.4, 0, 0.2, 1);
+
+    &:hover {
+      transform: translateY(-3px);
+      border-color: v-bind('theme.primaryColor');
+      box-shadow: 0 12px 24px -6px rgba(37, 99, 235, 0.14), 0 4px 6px -4px rgba(0, 0, 0, 0.04);
+
+      .tool-name {
+        color: v-bind('theme.primaryColor');
+        transition: color 0.2s ease;
+      }
+    }
+  }
+
+  .tool-icon {
+    color: v-bind('theme.textColor2');
+    transition: color 0.2s ease;
+  }
+
+  .category-tag {
+    background-color: rgba(148, 163, 184, 0.12);
+    color: v-bind('theme.textColor3');
+  }
+}
+</style>

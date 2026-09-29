@@ -6,7 +6,7 @@ test.describe('Tool - Percentage calculator', () => {
   });
 
   test('Has correct title', async ({ page }) => {
-    await expect(page).toHaveTitle('Percentage calculator - IT Tools');
+    await expect(page).toHaveTitle('Percentage calculator - Ateng-Tools');
   });
 
   test('Correctly works out percentages', async ({ page }) => {
@@ -34,3 +34,4 @@ test.describe('Tool - Percentage calculator', () => {
     await expect(page.getByTestId('percentageIncreaseDecrease').locator('input')).toHaveValue('');
   });
 });
+

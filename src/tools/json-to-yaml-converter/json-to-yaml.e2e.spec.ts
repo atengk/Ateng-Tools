@@ -6,7 +6,7 @@ test.describe('Tool - json to yaml', () => {
   });
 
   test('Has correct title', async ({ page }) => {
-    await expect(page).toHaveTitle('JSON to YAML converter - IT Tools');
+    await expect(page).toHaveTitle('JSON to YAML converter - Ateng-Tools');
   });
 
   test('json is parsed and output clean yaml', async ({ page }) => {
@@ -17,3 +17,4 @@ test.describe('Tool - json to yaml', () => {
     expect(generatedJson.trim()).toEqual('foo: bar\nlist:\n  - item\n  - key: value'.trim());
   });
 });
+

@@ -6,7 +6,7 @@ test.describe('Date time converter - json to yaml', () => {
   });
 
   test('Has correct title', async ({ page }) => {
-    await expect(page).toHaveTitle('Date-time converter - IT Tools');
+    await expect(page).toHaveTitle('Date-time converter - Ateng-Tools');
   });
 
   test('Format is auto detected from a date and the date is correctly converted', async ({ page }) => {
@@ -32,3 +32,4 @@ test.describe('Date time converter - json to yaml', () => {
     expect((await page.getByTestId('Excel date/time').inputValue()).trim()).toEqual('45028.88222222222');
   });
 });
+

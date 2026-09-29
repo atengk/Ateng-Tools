@@ -1,3 +1,4 @@
+import fs from 'node:fs';
 import { resolve } from 'node:path';
 import { URL, fileURLToPath } from 'node:url';
 
@@ -16,11 +17,24 @@ import markdown from 'vite-plugin-vue-markdown';
 import svgLoader from 'vite-svg-loader';
 import { configDefaults } from 'vitest/config';
 
-const baseUrl = process.env.BASE_URL ?? '/Ateng-Tools';
-
 // https://vitejs.dev/config/
-export default defineConfig({
+export default defineConfig(({ command }) => {
+  const baseUrl = process.env.BASE_URL ?? (command === 'build' ? '/Ateng-Tools/' : '/');
+
+  return {
   plugins: [
+    {
+      name: 'copy-404-for-github-pages',
+      apply: 'build',
+      closeBundle() {
+        const distDir = resolve(__dirname, 'dist');
+        const indexPath = resolve(distDir, 'index.html');
+        const notFoundPath = resolve(distDir, '404.html');
+        if (fs.existsSync(indexPath)) {
+          fs.copyFileSync(indexPath, notFoundPath);
+        }
+      },
+    },
     VueI18n({
       runtimeOnly: true,
       jitCompilation: true,
@@ -57,14 +71,14 @@ export default defineConfig({
       registerType: 'autoUpdate',
       strategies: 'generateSW',
       manifest: {
-        name: 'IT Tools',
-        description: 'Aggregated set of useful tools for developers.',
+        name: 'Ateng-Tools',
+        description: '高效、私密、纯前端运行的现代化在线开发者工具箱。',
         display: 'standalone',
-        lang: 'fr-FR',
+        lang: 'zh-CN',
         start_url: `${baseUrl}?utm_source=pwa&utm_medium=pwa`,
         orientation: 'any',
-        theme_color: '#18a058',
-        background_color: '#f1f5f9',
+        theme_color: '#2563eb',
+        background_color: '#f8fafc',
         icons: [
           {
             src: '/favicon-16x16.png',
@@ -113,4 +127,5 @@ export default defineConfig({
   build: {
     target: 'esnext',
   },
+};
 });

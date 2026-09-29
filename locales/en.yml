@@ -1,49 +1,66 @@
 home:
+  brand: 'Ateng-Tools'
+  badge: 'v1.0'
+  subtitle: 'Handy online tools for developers'
+  hero:
+    badge: 'Ateng-Tools Developer Toolbox'
+    architecture: '100% Client-Side Safe Architecture'
+    title: 'Handy, private, client-side tools for developers'
+    description: 'All conversions, encryption, and formatting take place entirely in your browser sandbox memory. No data is sent to external servers. Handcrafted collection of 78+ developer tools.'
+    stats:
+      total: 'Tools included:'
+      new: 'Newly added:'
+      privacy: 'Privacy guaranteed:'
+      privacyValue: '100% Zero-Leak'
+  filter:
+    all: 'All Tools'
+    current: 'Current category:'
+    noFavorites: 'No favorite tools yet. Click "☆" on any tool card to add it here.'
+    noMatch: 'No matching tools found. Try clearing your search or switching categories.'
+    favoriteHint: 'Click the star icon to add or remove favorites'
+  attribution:
+    forkNotice: 'Built upon IT-Tools'
+    licenseNotice: '© 2026 Ateng · Licensed under GPLv3'
   categories:
     newestTools: Newest tools
     favoriteTools: 'Your favorite tools'
     allTools: 'All the tools'
     favoritesDndToolTip: 'Drag and drop to reorder favorites'
-  subtitle: 'Handy tools for developers'
   toggleMenu: 'Toggle menu'
   home: Home
+  breadcrumb:
+    home: 'Console'
   uiLib: 'UI Lib'
-  support: 'Support IT-Tools development'
-  buyMeACoffee: 'Buy me a coffee'
-  follow:
-    title: 'You like it-tools?'
-    p1: 'Give us a star on'
-    githubRepository: 'IT-Tools GitHub repository'
-    p2: 'or follow us on'
-    twitterXAccount: 'IT-Tools X account'
-    thankYou: 'Thank you!'
   nav:
     github: 'GitHub repository'
-    githubRepository: 'IT-Tools GitHub repository'
-    twitterX: 'X account'
-    twitterXAccount: 'IT Tools X account'
-    about: 'About  IT-Tools'
+    githubRepository: 'Ateng-Tools GitHub repository'
+    about: 'About Ateng-Tools'
     aboutLabel: 'About'
     darkMode: 'Dark mode'
     lightMode: 'Light mode'
     mode: 'Toggle dark/light mode'
 about:
   content: >
-    # About IT-Tools
+    # About Ateng-Tools
 
-    This wonderful website, made with ❤ by [Corentin Thomasset](https://corentin.tech?utm_source=it-tools&utm_medium=about) , aggregates useful tools for developer and people working in IT. If you find it useful, please feel free to share it to people you think may find it useful too and don't forget to bookmark it in your shortcut bar!
+    Ateng-Tools is a handy online toolbox for developers and IT professionals, built upon the open-source project [IT-Tools](https://github.com/CorentinTh/it-tools) by [Corentin Thomasset](https://corentin.tech), licensed under GNU GPL-3.0.
 
-    IT Tools is open-source (under the GPL-3.0 license) and free, and will always be, but it costs me money to host and renew the domain name. If you want to support my work, and encourage me to add more tools, please consider supporting by [sponsoring me](https://www.buymeacoffee.com/cthmsst).
+    All tools run 100% locally in your browser memory (Client-Side Only). Your sensitive data (code, logs, SQL, tokens, keys) is never uploaded to any remote server, guaranteeing complete privacy and zero data leaks.
+
+    ## Open Source & Attribution
+
+    - **Repository**: [atengk/Ateng-Tools](https://github.com/atengk/Ateng-Tools)
+    - **Upstream Project**: [CorentinTh/it-tools](https://github.com/CorentinTh/it-tools)
+    - **License**: GNU General Public License v3.0 (GPL-3.0)
 
     ## Technologies
 
-    IT Tools is made in Vue.js (Vue 3) with the the Naive UI component library and is hosted and continuously deployed by Vercel. Third-party open-source libraries are used in some tools, you may find the complete list in the [package.json](https://github.com/CorentinTh/it-tools/blob/main/package.json) file of the repository.
+    Ateng-Tools is built with Vue 3, TypeScript, Vite, Naive UI, and UnoCSS, deployed statically on GitHub Pages.
 
-    ## Found a bug? A tool is missing?
+    ## Found a bug or missing a tool?
 
-    If you need a tool that is currently not present here, and you think can be useful, you are welcome to submit a feature request in the [issues section](https://github.com/CorentinTh/it-tools/issues/new/choose) in the GitHub repository.
+    If you found a bug or have an idea for a useful developer tool, please feel free to open an issue or feature request in our [GitHub Issues](https://github.com/atengk/Ateng-Tools/issues).
 
-    And if you found a bug, or something doesn't work as expected, please file a bug report in the [issues section](https://github.com/CorentinTh/it-tools/issues/new/choose) in the GitHub repository.
 
 404:
   notFound: '404 Not Found'
@@ -57,6 +74,7 @@ toolCard:
   new: New
 search:
   label: Search
+  placeholder: 'Type to search a tool or a command...'
 tools:
   categories:
     favorite-tools: 'Your favorite tools'

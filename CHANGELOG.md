@@ -2,6 +2,28 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## Version 1.0.0 (2026-09-29 Ateng-Tools 首次正式发布)
+
+### 核心重构与功能特性 (Features & Redesign)
+- **品牌与外链治理**: 全局品牌重塑为 Ateng-Tools（阿腾工具箱），左上角采用现代精致 64px 矢量徽标；移除上游赞助外链，GitHub 导航切换至 `atengk/Ateng-Tools`，底栏彻底去冗余，侧边栏保持聚焦。
+- **科技极客蓝主题 (Tech Blue)**: 主色调全面升级为科技蓝（`#2563eb`），亮色模式适配微冷灰 Slate-50 底衬与纯白卡片，优化深色模式高对比度。
+- **深度中文化基建**: 默认语言设为简体中文（`zh`），语言选择器精简收敛为高水准【简体中文】与【English】；深度注入 Naive UI `zhCN` 与 `dateZhCN` 组件级本地化。
+- **首页高效聚合与分类导航**:
+  - 精致 Hero 愿景卡片（实时工具收录数、新增数与纯前端离线安全保障胶囊）。
+  - 保留常用收藏区（拖拽排序、空状态与琥珀金星标微动效）。
+  - 新增 `Tool Category Filter` 分类胶囊标签切换栏，移动端支持丝滑横向触摸滚动。
+- **左侧导航智能折叠**: 侧边栏各大分类默认全部闭合折叠，访问具体工具时智能感知自动展开定位所在分类。
+- **工具详情页体验增强**: 新增微型面包屑导航（`首页控制台 / 分类 / 工具名称`），支持一键返回首页控制台或联动分类筛选。
+- **404 页面架构重构**: 接入全局 BaseLayout，保持科技蓝视觉统一与便捷返回主页引导。
+- **PWA 与工程基建**:
+  - 生成 192x192、512x512 及苹果触摸高清科技蓝 PWA 图标套件。
+  - 构建阶段自动生成 `dist/404.html`，彻底解决 GitHub Pages SPA 刷新 404 痛点。
+  - GitHub Actions 流水线精准升级对齐 `pnpm@9`。
+
+### 质量与测试 (Testing & Quality)
+- **单元测试**: 新增 `src/tools/tools.store.test.ts`，44 个套件、267 个测试全部绿灯通过。
+- **类型与构建**: 全量通过 `vue-tsc` 严格类型检查与 Vite 生产环境打包构建。
+
 ## Version 2024.10.22-7ca5933
 
 ### Features
