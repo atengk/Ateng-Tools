@@ -187,6 +187,24 @@ tools:
     title: WebSocket & SSE 调试助手
     description: 纯客户端 WebSocket 全双工通信与 SSE 单向事件流调试，支持分帧时间轴、大模型流式聚合与心跳保活。
 
+  config-converter:
+    title: Spring 配置与环境变量互转
+    description: YAML、Properties、ENV 环境变量与 JSON 四合一互转，支持 Spring 宽松绑定规范与数组展开。
+    loadSample: 载入示例
+    paste: 粘贴
+    clear: 清空
+
+  cron-simulator:
+    title: Cron 表达式执行模拟器
+    description: 5/6/7 位 Cron 表达式自适应解析、中文自然语言直译、未来执行时间序列精准推演与下一次倒计时。
+
+  table-converter:
+    title: 表格与多格式数据互转
+    description: Excel/TSV/CSV/Markdown/JSON 多源互转，支持一键生成批量 SQL INSERT 语句与类型安全转义。
+    loadSample: 载入示例
+    paste: 粘贴
+    clear: 清空
+
 
   benchmark-builder:
     title: 基准生成器

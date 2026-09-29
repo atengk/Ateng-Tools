@@ -99,6 +99,56 @@ _避免使用 (Avoid)_: Handshake Auth, Initial Message, Connect Token
 **Frame Buffer**:
 具有固定容量上限的先进先出（FIFO）消息帧环形缓冲队列，用于高频推送下防止浏览器 DOM 与内存膨胀。
 _避免使用 (Avoid)_: History Array, Packet Cache, Message Queue
+### Spring Config Converter
 
+**Spring Config Converter**:
+Ateng-Tools 中用于纯客户端微服务与云原生配置四合一双向互转的开发者工具，支持 YAML、Properties、ENV 环境变量与 JSON 任意互转，兼容 Spring Boot 宽松绑定规范与数组展开。
+_避免使用 (Avoid)_: Yaml Converter, Env Generator, Properties Tool
 
+**Relaxed Binding Mapper**:
+遵循 Spring Boot 规范将点号路径与连字符配置映射为大写下划线环境变量（如 `spring.datasource.hikari.maximum-pool-size` ↔ `SPRING_DATASOURCE_HIKARI_MAXIMUM_POOL_SIZE`）的命名转换引擎。
+_避免使用 (Avoid)_: Case Transformer, String Upper, Name Rule
+
+**Path Tokenizer**:
+将复杂配置键（如 `servers[0].url`）拆分为属性字段与数组索引元组的词法分词器。
+_避免使用 (Avoid)_: Key Splitter, Dot Separator
+
+**Flat Entry**:
+配置树完全扁平化后的最小单位，由全限定点号路径键和标量值组成。
+_避免使用 (Avoid)_: Config Row, Line Item, Key Pair
+### Cron Simulator
+
+**Cron Simulator**:
+Ateng-Tools 中用于纯客户端定时任务表达式解析与执行模拟的开发者工具，支持 Linux 5 位、Spring 6 位与 Quartz 7 位自适应识别，提供中文自然语言直译与未来执行时间序列精准推演。
+_避免使用 (Avoid)_: Cron Generator, Crontab Tester, Cron Helper
+
+**Dialect Detector**:
+根据表达式空格分词段数（5、6、7 位）和特殊符号智能识别目标调度框架规范（Linux、Spring、Quartz）的自适应嗅探器。
+_避免使用 (Avoid)_: Cron Parser, Format Check
+
+**Execution Timeline Engine**:
+基于时间跳步状态机快速推演未来 N 次匹配执行时刻的无死锁时间计算引擎。
+_避免使用 (Avoid)_: Date Iterator, Cron Looper
+
+**Cron Field Tokenizer**:
+将表达式拆解为秒、分、时、日、月、周、年独立结构并提供取值范围校验的可视化分词器。
+_避免使用 (Avoid)_: Segment Splitter, Field Array
+
+### Tabular Data & SQL Converter
+
+**Tabular Data & SQL Converter**:
+Ateng-Tools 中用于纯客户端多源表格数据解析与批量 SQL/Markdown 导出的开发者工具，支持 TSV、CSV、Markdown 表格与 JSON 数组全矩阵双向互转，提供分批 Batch Size 切片与类型安全转义。
+_避免使用 (Avoid)_: Excel to SQL, Table Parser, CSV Converter
+
+**Table Intermediate Model**:
+表格数据在内存中的规范化中间结构，由表头数组、规整数据行矩阵与列类型推断描述符构成。
+_避免使用 (Avoid)_: Grid Object, Raw Matrix, Table DTO
+
+**Batch Slice Generator**:
+按照配置的 `batchSize` 阈值将大批量数据行切割为多条分组 `INSERT INTO table (...) VALUES (...), (...)` 语句的批处理生成器。
+_避免使用 (Avoid)_: SQL Splitter, Group Insert, Chunk Writer
+
+**SQL Cell Escaper**:
+对单元格数据执行类型推断（数字无引号、布尔值按规范、空值转 NULL、字符串转义单引号防注入）的安全格式化器。
+_避免使用 (Avoid)_: Value Cleaner, Quote Adder
 

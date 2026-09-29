@@ -189,6 +189,24 @@ tools:
     title: WebSocket & SSE Stream Client
     description: Client-side WebSocket full-duplex messaging and SSE stream debugger with frame timeline, LLM stream aggregation, and heartbeat keepalive.
 
+  config-converter:
+    title: Spring / Config Converter
+    description: Convert seamlessly between YAML, Properties, ENV, and JSON with Spring relaxed-binding support.
+    loadSample: Load Sample
+    paste: Paste
+    clear: Clear
+
+  cron-simulator:
+    title: Cron Expression Simulator
+    description: 5/6/7-field Cron adaptive parser with human explanation and next execution times timeline.
+
+  table-converter:
+    title: Tabular Data & SQL Converter
+    description: Convert between Excel/TSV, CSV, Markdown, and JSON with bulk SQL INSERT generation.
+    loadSample: Load Sample
+    paste: Paste
+    clear: Clear
+
 
   benchmark-builder:
     title: Benchmark builder

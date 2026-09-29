@@ -1367,7 +1367,7 @@ onBeforeUnmount(() => {
                   { label: '导出 TXT 纯文本日志', key: 'txt' },
                   ...(activeProtocol === 'sse' ? [{ label: '导出流式聚合正文', key: 'agg' }] : []),
                 ]"
-                @select="(key) => {
+                @select="(key: string | number) => {
                   if (key === 'json') handleExportJson();
                   else if (key === 'txt') handleExportTxt();
                   else if (key === 'agg') handleExportAggregateText();

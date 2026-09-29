@@ -93,6 +93,9 @@ import { tool as curlConverter } from './curl-converter';
 import { tool as jsonToEntity } from './json-to-entity';
 import { tool as sqlDdlToEntity } from './sql-ddl-to-entity';
 import { tool as websocketAndSseClient } from './websocket-and-sse-client';
+import { tool as configConverter } from './config-converter';
+import { tool as cronSimulator } from './cron-simulator';
+import { tool as tableConverter } from './table-converter';
 
 
 export const toolsByCategory: ToolCategory[] = [
@@ -173,6 +176,9 @@ export const toolsByCategory: ToolCategory[] = [
       jsonToEntity,
       sqlDdlToEntity,
       websocketAndSseClient,
+      configConverter,
+      cronSimulator,
+      tableConverter,
     ],
   },
   {
