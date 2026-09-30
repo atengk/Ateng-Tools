@@ -1,16 +1,17 @@
-# 02 — cURL Converter
+# 02 — cURL 转换器 (cURL Converter)
 
-**What to build:** An end-to-end cURL command parser, inspector, and code generator. Users paste bash `curl` commands (including multiline strings with line-continuation backslashes) to generate clean JavaScript Axios, modern Fetch, and Java 11/21 HttpClient snippets. In addition to code generation, a visual inspection panel extracts and tabulates URL components, Query Parameters, Headers, Request Body (with JSON auto-formatting), and Authentication details.
+**构建内容 (What to build):**
+实现端到端 cURL 命令解析、透视与代码生成工具。用户粘贴 Bash `curl` 命令（包括带续行反斜杠的多行命令），自动生成整洁的 JavaScript Axios、现代原生 Fetch 以及 Java 11/21 HttpClient 代码片段。除代码生成外，提供可视化请求透视面板，结构化展示 URL 组成、Query 参数表、Header 请求头表、Request Body（带 JSON 自动美化格式化）以及认证凭据详情。
 
-**Blocked by:** None — can start immediately
+**前置依赖 (Blocked by):** 无 —— 可立即启动
 
-**Status:** resolved
+**状态 (Status):** 已解决 (resolved)
 
-- [x] Robust lexical tokenization of cURL arguments (`-X`, `-H`, `-d`, `--data-raw`, `-u`, `--url`, multiline `\` and quotes).
-- [x] Code generation for JavaScript Axios (`axios.request({...})`).
-- [x] Code generation for JavaScript native `fetch(...)`.
-- [x] Code generation for Java 11/21 standard `java.net.http.HttpClient`.
-- [x] Visual inspection tab showing parsed Method, URL, Query table, Headers table, and Body viewer.
-- [x] "Load Sample" button providing a realistic multiline cURL example with headers and JSON body.
-- [x] Unit tests in `curl-converter.service.test.ts` pass and cover GET, POST JSON, form data, basic auth, bearer tokens, and multiline commands.
-- [x] Full UI implemented in Naive UI with tool registration and route `/curl-converter`.
+- [x] 对 cURL 参数进行健壮的词法分词（`-X`、`-H`、`-d`、`--data-raw`、`-u`、`--url`、多行 `\` 与引号嵌套）。
+- [x] 支持生成 JavaScript Axios 代码（`axios.request({...})`）。
+- [x] 支持生成 JavaScript 现代原生 `fetch(...)` 代码。
+- [x] 支持生成 Java 11/21 标准 `java.net.http.HttpClient` 代码。
+- [x] 提供可视化透视标签页，展示解析出的 Method、URL、Query 参数表、Headers 表与 Body 视窗。
+- [x] 提供“加载示例”按钮，预置带请求头和 JSON Body 的真实多行 cURL 样例。
+- [x] `curl-converter.service.test.ts` 中的单元测试全部通过，覆盖 GET、POST JSON、表单数据、Basic Auth、Bearer Token 与多行命令。
+- [x] 基于 Naive UI 实现完整 UI，完成工具注册与路由 `/curl-converter` 接入。

@@ -1,15 +1,15 @@
-# 02 — UI Component and Prettify Integration
+# 02 — UI 组件与 SQL 美化排版集成 (UI Component and Prettify Integration)
 
-**What to build:**
-A responsive Vue 3 interactive tool interface using Naive UI and UnoCSS. The left panel allows developers to paste logs, load a realistic MyBatis log sample, and clear input. The right panel includes a toolbar with a SQL Prettify toggle, dialect selector (MySQL, PostgreSQL, Oracle, etc.), boolean output format selector (`1/0` vs `TRUE/FALSE`), followed by rendered Restored SQL cards. Developers can copy the entire batch of restored SQL with a single click or copy individual statements. Any parameter mismatch warnings are visually highlighted.
+**构建内容 (What to build):**
+基于 Vue 3、Naive UI 和 UnoCSS 构建响应式交互界面。左侧面板允许粘贴日志、加载示例数据及清空输入；右侧面板提供顶部工具栏（SQL 美化开关、方言选择器、布尔输出格式），下方展示还原后的 SQL 卡片。支持一键复制全量 SQL 或单条分别复制，并对参数数量不一致的语句高亮展示告警徽标。
 
-**Blocked by:** 01 — Core Parser and Restoration Engine
+**前置依赖 (Blocked by):** 01 — 核心解析与还原引擎
 
-**Status:** resolved
+**状态 (Status):** 已解决 (resolved)
 
-- [x] Responsive two-column split layout (stacked on small mobile screens)
-- [x] Multiline input textarea with "Load Sample" and "Clear" helper actions
-- [x] Integration with sql-formatter supporting toggling prettification on/off and dialect selection
-- [x] Boolean format selector (`1/0` vs `TRUE/FALSE`) updating restored output in real time
-- [x] "Copy All" action combining all restored SQL statements with semicolons
-- [x] Individual statement cards with per-statement copy buttons and parameter count mismatch warning badges
+- [x] 响应式双栏分割布局（移动端自动折叠堆叠）
+- [x] 多行文本输入域，支持“加载示例”与“清空”快捷操作
+- [x] 集成 sql-formatter，支持美化开关与方言选择
+- [x] 布尔格式选择器（`1/0` 与 `TRUE/FALSE`）实时响应更新输出
+- [x] “复制全部”操作将所有还原后的 SQL 用分号拼接并写入剪贴板
+- [x] 独立语句卡片，配备单条复制按钮与参数数量不匹配告警标签

@@ -1,16 +1,16 @@
-# 01 — Core Parser and Restoration Engine
+# 01 — 核心解析与还原引擎 (Core Parser and Restoration Engine)
 
-**What to build:**
-A robust, pure client-side engine and service function that takes multiline raw console logs, filters out log noise (timestamps, log levels, thread names), identifies Preparing Statements and Parameter Tokens, performs balanced lexical parsing on parameters, safely escapes and quotes values according to their data types, injects them into the `?` placeholders, and handles edge cases such as zero-parameter queries and parameter count mismatches. Comprehensive Vitest unit tests verify the engine against various real-world MyBatis log scenarios.
+**构建内容 (What to build):**
+实现纯客户端 Service 服务函数，接收多行原始控制台日志，过滤杂质前缀（时间戳、日志级别、线程名），精准识别 Preparing Statement 模板与 Parameter Token，执行平衡分词，按数据类型安全转义并注入 `?` 占位符，健全处理无参查询与参数数量不匹配等边界用例。通过完善的 Vitest 单元测试覆盖各类真实 MyBatis 日志场景。
 
-**Blocked by:** None — can start immediately.
+**前置依赖 (Blocked by):** 无 —— 可立即启动。
 
-**Status:** resolved
+**状态 (Status):** 已解决 (resolved)
 
-- [x] Extract one or more Preparing Statements from dirty console logs with metadata prefixes
-- [x] Pair each statement with its corresponding Parameters line when present
-- [x] Correctly parse zero-parameter queries and leave them intact as valid SQL
-- [x] Tokenize parameters by commas only outside nested parentheses and quotes (handling complex types like JSON strings)
-- [x] Safely cast parameter types: String/Date/Timestamp/Time enclosed in single quotes with internal quotes escaped; Integer/Long/Double/BigDecimal unquoted; null/null(Null) replaced with SQL NULL; Boolean converted according to booleanFormat option
-- [x] Warn gracefully without throwing when placeholder count does not equal parameter count
-- [x] Comprehensive unit test suite with 100% passing tests in Vitest
+- [x] 从带有元数据前缀的控制台日志中提取一条或多条 Preparing Statement
+- [x] 将每条语句与其对应的 Parameters 行正确关联配对
+- [x] 正确识别并原样保留无参数查询为合法可执行 SQL
+- [x] 仅在非嵌套括号和引号之外按逗号分词（完美支持 JSON 字符串等复杂格式）
+- [x] 类型安全转换：String/Date/Timestamp/Time 包裹单引号并转义内部引号；Integer/Long/Double/BigDecimal 不加引号；null 映射为 SQL NULL；Boolean 按用户设置转换
+- [x] 占位符数量与参数个数不匹配时友好发出警告且不崩溃
+- [x] 完善的 Vitest 单元测试且 100% 通过

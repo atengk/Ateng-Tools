@@ -1,16 +1,17 @@
-# 01 — Snowflake ID Analyzer
+# 01 — 雪花 ID 分析器 (Snowflake ID Analyzer)
 
-**What to build:** A complete Snowflake ID analysis and generation tool. Users can input a 64-bit integer Snowflake ID to view its decomposed components (timestamp, formatted datetime, relative time, datacenter ID, worker ID, and sequence number) along with a segmented, color-coded 64-bit binary representation. Users can configure the epoch (Twitter default or custom) and switch bit allocations (5+5+12 vs 10+12). A batch parsing mode allows pasting multiple IDs to produce a detailed data table. A generator panel allows synthesizing mock IDs from specified parameters.
+**构建内容 (What to build):**
+实现一套完整的雪花 ID 分析与生成工具。用户可以输入 64 位长整数雪花 ID，查看其拆解后的各个组成部分（时间戳、格式化日期时间、相对时间、数据中心 ID、工作节点 ID 及自增序列号），并展示按颜色分段标注的 64 位二进制位图。用户可自由配置 Epoch 时间基准戳（默认 Twitter 或自定义）并切换分配位结构（5+5+12 或 10+12）。提供批量解析模式支持粘贴多行 ID 输出详尽数据表格，提供生成器面板允许指定参数合成 Mock ID。
 
-**Blocked by:** None — can start immediately
+**前置依赖 (Blocked by):** 无 —— 可立即启动
 
-**Status:** resolved
+**状态 (Status):** 已解决 (resolved)
 
-- [x] Single 64-bit Snowflake ID decomposition correctly extracts timestamp, datacenter ID, worker ID, and sequence without BigInt precision loss.
-- [x] Visual color-coded binary bit representation displays 64 bits partitioned into Sign, Timestamp, Datacenter, Worker, and Sequence chunks.
-- [x] Configurable base epoch timestamp (defaulting to Twitter epoch `1288834974657L`) and support for custom epochs.
-- [x] Support for both 5+5+12 (datacenter + worker) and 10+12 (worker only) bit layouts.
-- [x] Batch analysis mode parses multiline IDs into a sortable data table.
-- [x] ID generator synthesizes a valid 64-bit ID from user-specified timestamp, machine, and sequence values.
-- [x] Unit tests in `snowflake-id-analyzer.service.test.ts` pass and cover standard parsing, custom epochs, layout variations, batch runs, and error handling.
-- [x] Full UI implemented in Naive UI with tool registration and route `/snowflake-id-analyzer`.
+- [x] 单个 64 位雪花 ID 分解，精准提取时间戳、数据中心 ID、工作节点 ID 和序列号，无 BigInt 精度损失。
+- [x] 可视化分段着色的二进制位图，将 64 位划分为符号位、时间戳位、数据中心位、工作节点位和序列号块。
+- [x] 可配置基础 Epoch 时间戳（默认 Twitter 纪元 `1288834974657L`），支持自定义基准。
+- [x] 支持 5+5+12（数据中心 + 机器）与 10+12（仅机器）两种位结构分配。
+- [x] 批量分析模式将多行 ID 解析为可排序的数据表格。
+- [x] ID 生成器可根据用户指定的时间戳、机器号和序列值合成合法 64 位 ID。
+- [x] `snowflake-id-analyzer.service.test.ts` 中的单元测试全部通过，覆盖标准解析、自定义 Epoch、不同位结构、批量运行及错误防御。
+- [x] 基于 Naive UI 实现完整 UI，完成工具注册与路由 `/snowflake-id-analyzer` 接入。

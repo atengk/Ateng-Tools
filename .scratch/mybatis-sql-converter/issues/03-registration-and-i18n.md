@@ -1,13 +1,13 @@
-# 03 — Tool Registration, Routing, and Bilingual i18n Localization
+# 03 — 工具注册、路由接入与双语国际化 (Tool Registration, Routing, and Bilingual i18n Localization)
 
-**What to build:**
-Register the `mybatis-sql-converter` tool into the Ateng-Tools catalog under the `Development` category, define its route at `/mybatis-sql-converter`, select an appropriate icon, and add complete bilingual translations to both `locales/en.yml` and `locales/zh.yml`. Ensure the application builds and tests pass cleanly.
+**构建内容 (What to build):**
+将 `mybatis-sql-converter` 工具注册至 Ateng-Tools 的 `Development` 分类下，挂载路由 `/mybatis-sql-converter`，配置对应领域图标，并在 `locales/en.yml` 与 `locales/zh.yml` 中补齐完整的双语国际化翻译条目。确保项目测试与打包构建完全通过。
 
-**Blocked by:** 02 — UI Component and Prettify Integration
+**前置依赖 (Blocked by):** 02 — UI 组件与 SQL 美化排版集成
 
-**Status:** resolved
+**状态 (Status):** 已解决 (resolved)
 
-- [x] Export tool definition with name, route path `/mybatis-sql-converter`, icon, and keywords
-- [x] Register tool in `src/tools/index.ts` under the `Development` category
-- [x] Add bilingual translation entries in `locales/en.yml` and `locales/zh.yml` (title, description, input/output labels, controls, placeholders)
-- [x] Verify `pnpm test:unit` passes and `pnpm build` completes without errors
+- [x] 导出包含名称、路由 `/mybatis-sql-converter`、图标和关键词的 Tool 定义
+- [x] 在 `src/tools/index.ts` 中注册至 `Development` 分类
+- [x] 在 `locales/en.yml` 与 `locales/zh.yml` 中添加双语翻译键值（标题、描述、控制项、占位符）
+- [x] 验证 `pnpm test:unit` 测试全部通过且 `pnpm build` 打包无误
