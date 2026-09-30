@@ -236,3 +236,221 @@ export function rasterizeSvgText(svgText: string): Promise<HTMLImageElement> {
   const blob = new Blob([svgText], { type: 'image/svg+xml;charset=utf-8' });
   return loadImageFromBlobOrDataUrl(blob);
 }
+
+/**
+ * 将旋转角度规范化为 [0, 90, 180, 270] 标准象限角度
+ *
+ * @param angle 输入角度 (度)
+ * @returns 0, 90, 180 或 270
+ */
+export function normalizeRotationAngle(angle: number): number {
+  return ((Math.round(angle) % 360) + 360) % 360;
+}
+
+/**
+ * 根据旋转角度计算旋转后的实际画面宽高
+ *
+ * @param width 原始宽度
+ * @param height 原始高度
+ * @param rotation 旋转角度 (0, 90, 180, 270)
+ * @returns 变换后的画面像素宽高
+ */
+export function calculateTransformedDimensions(
+  width: number,
+  height: number,
+  rotation: number,
+): { width: number; height: number } {
+  const normalized = normalizeRotationAngle(rotation);
+  if (normalized === 90 || normalized === 270) {
+    return {
+      width: clampDimension(height),
+      height: clampDimension(width),
+    };
+  }
+  return {
+    width: clampDimension(width),
+    height: clampDimension(height),
+  };
+}
+
+/**
+ * 将裁剪选区约束在目标边界内部并确保不小于 1px
+ *
+ * @param crop 原始裁剪区域
+ * @param maxWidth 最大边界宽度
+ * @param maxHeight 最大边界高度
+ * @returns 安全受控的裁剪区域
+ */
+export function clampCropRegion(
+  crop: { x: number; y: number; width: number; height: number },
+  maxWidth: number,
+  maxHeight: number,
+): { x: number; y: number; width: number; height: number } {
+  const safeMaxWidth = Math.max(1, maxWidth);
+  const safeMaxHeight = Math.max(1, maxHeight);
+
+  const x = Math.max(0, Math.min(safeMaxWidth - 1, Math.round(crop.x)));
+  const y = Math.max(0, Math.min(safeMaxHeight - 1, Math.round(crop.y)));
+
+  const remainingW = safeMaxWidth - x;
+  const remainingH = safeMaxHeight - y;
+
+  const width = Math.max(1, Math.min(remainingW, Math.round(crop.width)));
+  const height = Math.max(1, Math.min(remainingH, Math.round(crop.height)));
+
+  return { x, y, width, height };
+}
+
+/**
+ * 解析裁剪比例预设为浮点数值
+ *
+ * @param ratio 预设比例枚举
+ * @returns 比例浮点数 (width / height)，若为 free 则返回 null
+ */
+export function getAspectRatioValue(ratio: string): number | null {
+  switch (ratio) {
+    case '1:1':
+      return 1.0;
+    case '16:9':
+      return 16 / 9;
+    case '4:3':
+      return 4 / 3;
+    case '3:2':
+      return 3 / 2;
+    case '2:1':
+      return 2.0;
+    default:
+      return null;
+  }
+}
+
+/**
+ * 综合非破坏性渲染管线：依次应用裁剪、旋转/镜像几何变换及目标尺寸缩放
+ *
+ * @param sourceImg 源图像实体 (HTMLImageElement / HTMLCanvasElement)
+ * @param options 综合渲染管线参数
+ * @returns 渲染生成的最终 Canvas 元素
+ */
+export function renderImagePipeline(
+  sourceImg: CanvasImageSource,
+  options: {
+    crop?: { x: number; y: number; width: number; height: number };
+    transform?: { rotation: number; flipHorizontal: boolean; flipVertical: boolean };
+    targetWidth?: number;
+    targetHeight?: number;
+  } = {},
+): HTMLCanvasElement {
+  if (typeof document === 'undefined' || !document.createElement) {
+    throw new Error('Canvas 仅在支持 DOM 的浏览器环境中可用');
+  }
+
+  // 1. 获取源图像真实像素尺寸
+  let srcW = 0;
+  let srcH = 0;
+  if ('naturalWidth' in sourceImg && typeof sourceImg.naturalWidth === 'number') {
+    srcW = sourceImg.naturalWidth || (sourceImg as any).width;
+    srcH = sourceImg.naturalHeight || (sourceImg as any).height;
+  }
+  else {
+    srcW = (sourceImg as any).width;
+    srcH = (sourceImg as any).height;
+  }
+
+  srcW = clampDimension(srcW);
+  srcH = clampDimension(srcH);
+
+  // 2. 阶段一：裁剪截取
+  let clippedCanvas: HTMLCanvasElement;
+  if (options.crop) {
+    const safeCrop = clampCropRegion(options.crop, srcW, srcH);
+    clippedCanvas = document.createElement('canvas');
+    clippedCanvas.width = safeCrop.width;
+    clippedCanvas.height = safeCrop.height;
+
+    const cropCtx = clippedCanvas.getContext('2d');
+    if (!cropCtx) {
+      throw new Error('裁剪画布初始化失败');
+    }
+
+    cropCtx.imageSmoothingEnabled = true;
+    cropCtx.imageSmoothingQuality = 'high';
+    cropCtx.drawImage(
+      sourceImg,
+      safeCrop.x,
+      safeCrop.y,
+      safeCrop.width,
+      safeCrop.height,
+      0,
+      0,
+      safeCrop.width,
+      safeCrop.height,
+    );
+  }
+  else {
+    clippedCanvas = document.createElement('canvas');
+    clippedCanvas.width = srcW;
+    clippedCanvas.height = srcH;
+    const ctx = clippedCanvas.getContext('2d');
+    ctx?.drawImage(sourceImg, 0, 0, srcW, srcH);
+  }
+
+  // 3. 阶段二：几何旋转与镜像变换
+  const rotation = normalizeRotationAngle(options.transform?.rotation ?? 0);
+  const flipH = Boolean(options.transform?.flipHorizontal);
+  const flipV = Boolean(options.transform?.flipVertical);
+
+  const transformedDims = calculateTransformedDimensions(
+    clippedCanvas.width,
+    clippedCanvas.height,
+    rotation,
+  );
+
+  const transformedCanvas = document.createElement('canvas');
+  transformedCanvas.width = transformedDims.width;
+  transformedCanvas.height = transformedDims.height;
+
+  const transCtx = transformedCanvas.getContext('2d');
+  if (!transCtx) {
+    throw new Error('几何变换画布初始化失败');
+  }
+
+  transCtx.imageSmoothingEnabled = true;
+  transCtx.imageSmoothingQuality = 'high';
+
+  transCtx.save();
+  transCtx.translate(transformedCanvas.width / 2, transformedCanvas.height / 2);
+  transCtx.rotate((rotation * Math.PI) / 180);
+  transCtx.scale(flipH ? -1 : 1, flipV ? -1 : 1);
+  transCtx.drawImage(
+    clippedCanvas,
+    -clippedCanvas.width / 2,
+    -clippedCanvas.height / 2,
+    clippedCanvas.width,
+    clippedCanvas.height,
+  );
+  transCtx.restore();
+
+  // 4. 阶段三：最终目标缩放
+  const finalW = options.targetWidth ? clampDimension(options.targetWidth) : transformedCanvas.width;
+  const finalH = options.targetHeight ? clampDimension(options.targetHeight) : transformedCanvas.height;
+
+  if (finalW === transformedCanvas.width && finalH === transformedCanvas.height) {
+    return transformedCanvas;
+  }
+
+  const finalCanvas = document.createElement('canvas');
+  finalCanvas.width = finalW;
+  finalCanvas.height = finalH;
+
+  const finalCtx = finalCanvas.getContext('2d');
+  if (!finalCtx) {
+    throw new Error('最终缩放画布初始化失败');
+  }
+
+  finalCtx.imageSmoothingEnabled = true;
+  finalCtx.imageSmoothingQuality = 'high';
+  finalCtx.drawImage(transformedCanvas, 0, 0, finalW, finalH);
+
+  return finalCanvas;
+}
+

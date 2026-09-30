@@ -9,9 +9,13 @@ import {
   calculateDimensionsByHeight,
   calculateDimensionsByPercentage,
   calculateDimensionsByWidth,
+  calculateTransformedDimensions,
+  clampCropRegion,
   clampDimension,
   generateExportFileName,
+  getAspectRatioValue,
   getFormatExtension,
+  normalizeRotationAngle,
 } from './image-studio.service';
 import { MAX_SAFE_IMAGE_DIMENSION, MIN_SAFE_IMAGE_DIMENSION } from './image-studio.types';
 
@@ -102,4 +106,70 @@ describe('image-studio.service', () => {
       expect(generateExportFileName('', 'image/png', 'output')).toBe('image_output.png');
     });
   });
+
+  describe('normalizeRotationAngle 与 calculateTransformedDimensions 几何旋转变换', () => {
+    it('正确规范化旋转角度至 0/90/180/270', () => {
+      expect(normalizeRotationAngle(0)).toBe(0);
+      expect(normalizeRotationAngle(90)).toBe(90);
+      expect(normalizeRotationAngle(360)).toBe(0);
+      expect(normalizeRotationAngle(450)).toBe(90);
+      expect(normalizeRotationAngle(-90)).toBe(270);
+      expect(normalizeRotationAngle(-180)).toBe(180);
+    });
+
+    it('0° 与 180° 保持原始画面宽高', () => {
+      const dim0 = calculateTransformedDimensions(1920, 1080, 0);
+      expect(dim0.width).toBe(1920);
+      expect(dim0.height).toBe(1080);
+
+      const dim180 = calculateTransformedDimensions(1920, 1080, 180);
+      expect(dim180.width).toBe(1920);
+      expect(dim180.height).toBe(1080);
+    });
+
+    it('90° 与 270° 正确对调宽高尺寸', () => {
+      const dim90 = calculateTransformedDimensions(1920, 1080, 90);
+      expect(dim90.width).toBe(1080);
+      expect(dim90.height).toBe(1920);
+
+      const dim270 = calculateTransformedDimensions(1920, 1080, 270);
+      expect(dim270.width).toBe(1080);
+      expect(dim270.height).toBe(1920);
+    });
+  });
+
+  describe('clampCropRegion 裁剪区域坐标安全约束', () => {
+    it('将正常裁剪选区保留在原边界内', () => {
+      const crop = clampCropRegion({ x: 50, y: 50, width: 400, height: 300 }, 1000, 800);
+      expect(crop).toEqual({ x: 50, y: 50, width: 400, height: 300 });
+    });
+
+    it('自动截断超出图片右侧与底部的选区', () => {
+      const crop = clampCropRegion({ x: 800, y: 600, width: 500, height: 400 }, 1000, 800);
+      expect(crop.x).toBe(800);
+      expect(crop.y).toBe(600);
+      expect(crop.width).toBe(200); // 1000 - 800
+      expect(crop.height).toBe(200); // 800 - 600
+    });
+
+    it('将负数起点归零', () => {
+      const crop = clampCropRegion({ x: -100, y: -50, width: 300, height: 200 }, 1000, 800);
+      expect(crop.x).toBe(0);
+      expect(crop.y).toBe(0);
+      expect(crop.width).toBe(300);
+      expect(crop.height).toBe(200);
+    });
+  });
+
+  describe('getAspectRatioValue 预设裁剪比例解析', () => {
+    it('准确返回各预设比例值', () => {
+      expect(getAspectRatioValue('free')).toBeNull();
+      expect(getAspectRatioValue('1:1')).toBe(1.0);
+      expect(getAspectRatioValue('16:9')).toBeCloseTo(1.777, 2);
+      expect(getAspectRatioValue('4:3')).toBeCloseTo(1.333, 2);
+      expect(getAspectRatioValue('3:2')).toBe(1.5);
+      expect(getAspectRatioValue('2:1')).toBe(2.0);
+    });
+  });
 });
+

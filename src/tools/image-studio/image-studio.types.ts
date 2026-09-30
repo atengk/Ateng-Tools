@@ -79,3 +79,49 @@ export interface ExportResult {
   /** 导出的完整文件名 */
   fileName: string;
 }
+
+/**
+ * 几何变换配置 (旋转与镜像)
+ */
+export interface TransformOptions {
+  /** 顺时针旋转角度 (0, 90, 180, 270) */
+  rotation: number;
+  /** 是否水平镜像翻转 */
+  flipHorizontal: boolean;
+  /** 是否垂直镜像翻转 */
+  flipVertical: boolean;
+}
+
+/**
+ * 矩形裁剪区域 (基于原图的像素坐标)
+ */
+export interface CropRegion {
+  /** 起始点 X 轴坐标 (像素) */
+  x: number;
+  /** 起始点 Y 轴坐标 (像素) */
+  y: number;
+  /** 裁剪宽度 (像素) */
+  width: number;
+  /** 裁剪高度 (像素) */
+  height: number;
+}
+
+/**
+ * 裁剪预设宽高比例
+ */
+export type CropAspectRatio = 'free' | '1:1' | '16:9' | '4:3' | '3:2' | '2:1';
+
+/**
+ * 综合渲染管线参数
+ */
+export interface RenderPipelineOptions {
+  /** 裁剪选区 (可选) */
+  crop?: CropRegion;
+  /** 几何变换 (可选) */
+  transform?: TransformOptions;
+  /** 最终目标宽度 (可选) */
+  targetWidth?: number;
+  /** 最终目标高度 (可选) */
+  targetHeight?: number;
+}
+

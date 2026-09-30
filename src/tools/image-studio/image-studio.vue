@@ -8,16 +8,25 @@
 import { useMessage } from 'naive-ui';
 import { computed, nextTick, onMounted, onUnmounted, ref, shallowRef, watch } from 'vue';
 import {
+  Check,
+  Columns,
+  Crop,
   Download,
   FileText,
+  FlipHorizontal,
+  FlipVertical,
   Focus,
+  History,
   InfoCircle,
   Link,
   Maximize,
   Photo,
   Refresh,
+  Rotate,
+  RotateClockwise,
   Scale,
   Unlink,
+  X,
   ZoomIn,
   ZoomOut,
 } from '@vicons/tabler';
@@ -25,17 +34,23 @@ import {
   calculateDimensionsByHeight,
   calculateDimensionsByPercentage,
   calculateDimensionsByWidth,
+  calculateTransformedDimensions,
+  clampCropRegion,
   clampDimension,
   exportCanvasToBlob,
   generateExportFileName,
+  getAspectRatioValue,
   loadImageFromBlobOrDataUrl,
   rasterizeSvgText,
-  renderToCanvas,
+  renderImagePipeline,
 } from './image-studio.service';
 import {
+  type CropAspectRatio,
+  type CropRegion,
   type ExportImageFormat,
   type ImageSourceInfo,
   MAX_SAFE_IMAGE_DIMENSION,
+  type TransformOptions,
 } from './image-studio.types';
 import { formatBytes } from '@/utils/convert';
 
@@ -46,6 +61,29 @@ const imageSource = ref<ImageSourceInfo | null>(null);
 // 解码后的原始 DOM Image 实体 (shallowRef 避免响应式代理开销)
 const rawImageElement = shallowRef<HTMLImageElement | null>(null);
 
+// 几何变换参数
+const transform = ref<TransformOptions>({
+  rotation: 0,
+  flipHorizontal: false,
+  flipVertical: false,
+});
+
+// 已生效应用的裁剪选区
+const appliedCrop = ref<CropRegion | null>(null);
+
+// 交互式裁剪状态
+const isCropping = ref(false);
+const cropRatio = ref<CropAspectRatio>('free');
+const cropSelection = ref<CropRegion>({ x: 0, y: 0, width: 100, height: 100 });
+const activeDragHandle = ref<'move' | 'nw' | 'ne' | 'se' | 'sw' | null>(null);
+let dragStartPointer = { x: 0, y: 0 };
+let initialCropState = { x: 0, y: 0, width: 0, height: 0 };
+
+// 差分双视窗滑块对比模式
+const isCompareMode = ref(false);
+const splitPosition = ref(50);
+const isSplitDragging = ref(false);
+
 // 缩放尺寸参数
 const targetWidth = ref(0);
 const targetHeight = ref(0);
@@ -54,6 +92,7 @@ const lockAspectRatio = ref(true);
 // 视口展示缩放级别 (10% - 500%)
 const viewportZoom = ref(1.0);
 const viewportContainerRef = ref<HTMLElement | null>(null);
+const imageWrapperRef = ref<HTMLElement | null>(null);
 
 // 导出与压缩配置
 const exportFormat = ref<ExportImageFormat>('image/webp');
@@ -61,12 +100,23 @@ const exportQuality = ref(90);
 const customExportName = ref('');
 const isExporting = ref(false);
 
-// 实时预估输出体积
+// 处理后的实时预览图 URL 与体积预估
+const processedPreviewUrl = ref<string>('');
 const estimatedOutputSize = ref<number | null>(null);
 let estimateDebounceTimer: ReturnType<typeof setTimeout> | null = null;
 
 // 隐藏的原生文件输入框
 const fileInputRef = ref<HTMLInputElement | null>(null);
+
+/**
+ * 当前画面基准物理尺寸 (考虑已应用裁剪与旋转 90/270 之后的尺寸)
+ */
+const baseVisualDimensions = computed(() => {
+  if (!imageSource.value) return { width: 0, height: 0 };
+  const w = appliedCrop.value ? appliedCrop.value.width : imageSource.value.originalWidth;
+  const h = appliedCrop.value ? appliedCrop.value.height : imageSource.value.originalHeight;
+  return calculateTransformedDimensions(w, h, transform.value.rotation);
+});
 
 /**
  * 是否超出 8192px 极限尺寸防御
@@ -122,6 +172,11 @@ async function loadFile(file: File) {
     };
 
     imageSource.value = sourceInfo;
+    transform.value = { rotation: 0, flipHorizontal: false, flipVertical: false };
+    appliedCrop.value = null;
+    isCropping.value = false;
+    isCompareMode.value = false;
+
     targetWidth.value = sourceInfo.originalWidth;
     targetHeight.value = sourceInfo.originalHeight;
 
@@ -130,7 +185,7 @@ async function loadFile(file: File) {
     // 默认自适应视口
     nextTick(() => {
       zoomToFit();
-      triggerEstimateSize();
+      updatePipelinePreview();
     });
   }
   catch (err: any) {
@@ -163,8 +218,9 @@ function onFileUpload(file: File) {
 function handleWidthInput(val: number | null) {
   if (val === null || val <= 0) return;
   targetWidth.value = clampDimension(val);
-  if (lockAspectRatio.value && imageSource.value) {
-    const { height } = calculateDimensionsByWidth(targetWidth.value, imageSource.value.aspectRatio);
+  if (lockAspectRatio.value && baseVisualDimensions.value.height > 0) {
+    const ratio = baseVisualDimensions.value.width / baseVisualDimensions.value.height;
+    const { height } = calculateDimensionsByWidth(targetWidth.value, ratio);
     targetHeight.value = height;
   }
 }
@@ -175,8 +231,9 @@ function handleWidthInput(val: number | null) {
 function handleHeightInput(val: number | null) {
   if (val === null || val <= 0) return;
   targetHeight.value = clampDimension(val);
-  if (lockAspectRatio.value && imageSource.value) {
-    const { width } = calculateDimensionsByHeight(targetHeight.value, imageSource.value.aspectRatio);
+  if (lockAspectRatio.value && baseVisualDimensions.value.height > 0) {
+    const ratio = baseVisualDimensions.value.width / baseVisualDimensions.value.height;
+    const { width } = calculateDimensionsByHeight(targetHeight.value, ratio);
     targetWidth.value = width;
   }
 }
@@ -185,14 +242,240 @@ function handleHeightInput(val: number | null) {
  * 快捷百分比缩放
  */
 function applyPercentageScale(percent: number) {
-  if (!imageSource.value) return;
+  if (!baseVisualDimensions.value.width) return;
   const { width, height } = calculateDimensionsByPercentage(
-    imageSource.value.originalWidth,
-    imageSource.value.originalHeight,
+    baseVisualDimensions.value.width,
+    baseVisualDimensions.value.height,
     percent,
   );
   targetWidth.value = width;
   targetHeight.value = height;
+}
+
+/**
+ * 几何顺时针旋转 90°
+ */
+function handleRotateClockwise() {
+  transform.value.rotation = (transform.value.rotation + 90) % 360;
+  // 尺寸对调
+  const temp = targetWidth.value;
+  targetWidth.value = targetHeight.value;
+  targetHeight.value = temp;
+}
+
+/**
+ * 几何逆时针旋转 90°
+ */
+function handleRotateCounterClockwise() {
+  transform.value.rotation = (transform.value.rotation + 270) % 360;
+  // 尺寸对调
+  const temp = targetWidth.value;
+  targetWidth.value = targetHeight.value;
+  targetHeight.value = temp;
+}
+
+/**
+ * 切换水平镜像翻转
+ */
+function handleToggleFlipH() {
+  transform.value.flipHorizontal = !transform.value.flipHorizontal;
+}
+
+/**
+ * 切换垂直镜像翻转
+ */
+function handleToggleFlipV() {
+  transform.value.flipVertical = !transform.value.flipVertical;
+}
+
+/**
+ * 重置几何变换
+ */
+function handleResetTransform() {
+  transform.value = { rotation: 0, flipHorizontal: false, flipVertical: false };
+  targetWidth.value = baseVisualDimensions.value.width;
+  targetHeight.value = baseVisualDimensions.value.height;
+  message.info('已重置所有旋转与镜像变换');
+}
+
+/**
+ * 开启交互式裁剪模式
+ */
+function startCropping() {
+  if (!imageSource.value) return;
+  isCompareMode.value = false;
+  isCropping.value = true;
+
+  // 初始化选区为当前整个原图或已有裁剪区
+  if (appliedCrop.value) {
+    cropSelection.value = { ...appliedCrop.value };
+  }
+  else {
+    const origW = imageSource.value.originalWidth;
+    const origH = imageSource.value.originalHeight;
+    cropSelection.value = {
+      x: Math.round(origW * 0.1),
+      y: Math.round(origH * 0.1),
+      width: Math.round(origW * 0.8),
+      height: Math.round(origH * 0.8),
+    };
+  }
+  applyRatioToSelection(cropRatio.value);
+}
+
+/**
+ * 切换裁剪预设比例
+ */
+function handleCropRatioChange(ratio: CropAspectRatio) {
+  cropRatio.value = ratio;
+  applyRatioToSelection(ratio);
+}
+
+function applyRatioToSelection(ratio: CropAspectRatio) {
+  if (!imageSource.value) return;
+  const ratioVal = getAspectRatioValue(ratio);
+  if (!ratioVal) return;
+
+  const currentW = cropSelection.value.width;
+  let newH = Math.round(currentW / ratioVal);
+  if (cropSelection.value.y + newH > imageSource.value.originalHeight) {
+    newH = imageSource.value.originalHeight - cropSelection.value.y;
+    cropSelection.value.width = Math.round(newH * ratioVal);
+  }
+  cropSelection.value.height = newH;
+}
+
+/**
+ * 确认应用裁剪
+ */
+function applyCrop() {
+  if (!imageSource.value) return;
+  const safeCrop = clampCropRegion(
+    cropSelection.value,
+    imageSource.value.originalWidth,
+    imageSource.value.originalHeight,
+  );
+  appliedCrop.value = safeCrop;
+  isCropping.value = false;
+
+  // 更新目标宽高等比同步
+  const dims = calculateTransformedDimensions(safeCrop.width, safeCrop.height, transform.value.rotation);
+  targetWidth.value = dims.width;
+  targetHeight.value = dims.height;
+
+  message.success(`已应用裁剪 (${safeCrop.width} × ${safeCrop.height} px)`);
+}
+
+/**
+ * 清除已应用的裁剪恢复原图
+ */
+function clearAppliedCrop() {
+  appliedCrop.value = null;
+  isCropping.value = false;
+  if (imageSource.value) {
+    const dims = calculateTransformedDimensions(
+      imageSource.value.originalWidth,
+      imageSource.value.originalHeight,
+      transform.value.rotation,
+    );
+    targetWidth.value = dims.width;
+    targetHeight.value = dims.height;
+  }
+  message.info('已恢复完整原图范围');
+}
+
+/**
+ * 取消当前裁剪编辑
+ */
+function cancelCrop() {
+  isCropping.value = false;
+}
+
+/**
+ * 裁剪手柄按下与拖拽事件
+ */
+function onCropHandleMouseDown(handle: 'move' | 'nw' | 'ne' | 'se' | 'sw', event: MouseEvent) {
+  event.stopPropagation();
+  event.preventDefault();
+  activeDragHandle.value = handle;
+  dragStartPointer = { x: event.clientX, y: event.clientY };
+  initialCropState = { ...cropSelection.value };
+
+  window.addEventListener('mousemove', onCropMouseMove);
+  window.addEventListener('mouseup', onCropMouseUp);
+}
+
+function onCropMouseMove(event: MouseEvent) {
+  if (!activeDragHandle.value || !imageSource.value) return;
+
+  // 转换为相对图片真实像素的位移变化量
+  const deltaX = (event.clientX - dragStartPointer.x) / viewportZoom.value;
+  const deltaY = (event.clientY - dragStartPointer.y) / viewportZoom.value;
+
+  const maxW = imageSource.value.originalWidth;
+  const maxH = imageSource.value.originalHeight;
+  const ratioVal = getAspectRatioValue(cropRatio.value);
+
+  if (activeDragHandle.value === 'move') {
+    const newX = Math.max(0, Math.min(maxW - initialCropState.width, initialCropState.x + deltaX));
+    const newY = Math.max(0, Math.min(maxH - initialCropState.height, initialCropState.y + deltaY));
+    cropSelection.value.x = Math.round(newX);
+    cropSelection.value.y = Math.round(newY);
+  }
+  else if (activeDragHandle.value === 'se') {
+    let newW = Math.max(20, Math.min(maxW - initialCropState.x, initialCropState.width + deltaX));
+    let newH = Math.max(20, Math.min(maxH - initialCropState.y, initialCropState.height + deltaY));
+    if (ratioVal) {
+      newH = Math.round(newW / ratioVal);
+      if (initialCropState.y + newH > maxH) {
+        newH = maxH - initialCropState.y;
+        newW = Math.round(newH * ratioVal);
+      }
+    }
+    cropSelection.value.width = Math.round(newW);
+    cropSelection.value.height = Math.round(newH);
+  }
+  else if (activeDragHandle.value === 'nw') {
+    const newX = Math.max(0, Math.min(initialCropState.x + initialCropState.width - 20, initialCropState.x + deltaX));
+    const newY = Math.max(0, Math.min(initialCropState.y + initialCropState.height - 20, initialCropState.y + deltaY));
+    const newW = initialCropState.width + (initialCropState.x - newX);
+    const newH = initialCropState.height + (initialCropState.y - newY);
+    cropSelection.value.x = Math.round(newX);
+    cropSelection.value.y = Math.round(newY);
+    cropSelection.value.width = Math.round(newW);
+    cropSelection.value.height = Math.round(newH);
+  }
+}
+
+function onCropMouseUp() {
+  activeDragHandle.value = null;
+  window.removeEventListener('mousemove', onCropMouseMove);
+  window.removeEventListener('mouseup', onCropMouseUp);
+}
+
+/**
+ * 差分对比分割条拖拽事件
+ */
+function onSplitDividerMouseDown(event: MouseEvent) {
+  event.stopPropagation();
+  event.preventDefault();
+  isSplitDragging.value = true;
+  window.addEventListener('mousemove', onSplitMouseMove);
+  window.addEventListener('mouseup', onSplitMouseUp);
+}
+
+function onSplitMouseMove(event: MouseEvent) {
+  if (!isSplitDragging.value || !imageWrapperRef.value) return;
+  const rect = imageWrapperRef.value.getBoundingClientRect();
+  const posX = event.clientX - rect.left;
+  const percent = (posX / rect.width) * 100;
+  splitPosition.value = Math.max(0, Math.min(100, Math.round(percent)));
+}
+
+function onSplitMouseUp() {
+  isSplitDragging.value = false;
+  window.removeEventListener('mousemove', onSplitMouseMove);
+  window.removeEventListener('mouseup', onSplitMouseUp);
 }
 
 /**
@@ -208,7 +491,7 @@ function onCanvasWheel(event: WheelEvent) {
  * 视口适应窗口
  */
 function zoomToFit() {
-  if (!viewportContainerRef.value || !imageSource.value) {
+  if (!viewportContainerRef.value || !baseVisualDimensions.value.width) {
     viewportZoom.value = 1.0;
     return;
   }
@@ -217,8 +500,8 @@ function zoomToFit() {
   const containerH = viewportContainerRef.value.clientHeight - 48;
   if (containerW <= 0 || containerH <= 0) return;
 
-  const scaleW = containerW / imageSource.value.originalWidth;
-  const scaleH = containerH / imageSource.value.originalHeight;
+  const scaleW = containerW / baseVisualDimensions.value.width;
+  const scaleH = containerH / baseVisualDimensions.value.height;
   const fitScale = Math.min(scaleW, scaleH, 1.0);
 
   viewportZoom.value = Math.max(0.1, Math.round(fitScale * 100) / 100);
@@ -275,9 +558,9 @@ function handlePaste(event: ClipboardEvent) {
 }
 
 /**
- * 防抖预估导出体积
+ * 执行非破坏性渲染管线：更新实时预览与体积预估
  */
-function triggerEstimateSize() {
+function updatePipelinePreview() {
   if (estimateDebounceTimer) {
     clearTimeout(estimateDebounceTimer);
   }
@@ -288,23 +571,43 @@ function triggerEstimateSize() {
     }
 
     try {
-      const canvas = renderToCanvas(rawImageElement.value, targetWidth.value, targetHeight.value);
+      const canvas = renderImagePipeline(rawImageElement.value, {
+        crop: appliedCrop.value || undefined,
+        transform: transform.value,
+        targetWidth: targetWidth.value,
+        targetHeight: targetHeight.value,
+      });
+
       const quality = exportFormat.value === 'image/png' ? 1.0 : exportQuality.value / 100;
       const blob = await exportCanvasToBlob(canvas, exportFormat.value, quality);
+
+      if (processedPreviewUrl.value) {
+        URL.revokeObjectURL(processedPreviewUrl.value);
+      }
+      processedPreviewUrl.value = URL.createObjectURL(blob);
       estimatedOutputSize.value = blob.size;
     }
     catch {
       estimatedOutputSize.value = null;
     }
-  }, 200);
+  }, 180);
 }
 
-// 监听参数变化重新预估体积
+// 监听参数变化重新执行渲染管线
 watch(
-  [targetWidth, targetHeight, exportFormat, exportQuality],
+  [
+    targetWidth,
+    targetHeight,
+    exportFormat,
+    exportQuality,
+    appliedCrop,
+    () => transform.value.rotation,
+    () => transform.value.flipHorizontal,
+    () => transform.value.flipVertical,
+  ],
   () => {
     if (imageSource.value) {
-      triggerEstimateSize();
+      updatePipelinePreview();
     }
   },
 );
@@ -325,7 +628,13 @@ async function handleExportDownload() {
 
   isExporting.value = true;
   try {
-    const canvas = renderToCanvas(rawImageElement.value, targetWidth.value, targetHeight.value);
+    const canvas = renderImagePipeline(rawImageElement.value, {
+      crop: appliedCrop.value || undefined,
+      transform: transform.value,
+      targetWidth: targetWidth.value,
+      targetHeight: targetHeight.value,
+    });
+
     const quality = exportFormat.value === 'image/png' ? 1.0 : exportQuality.value / 100;
     const blob = await exportCanvasToBlob(canvas, exportFormat.value, quality);
 
@@ -359,8 +668,15 @@ function handleResetAll() {
   if (imageSource.value?.dataUrl && imageSource.value.dataUrl.startsWith('blob:')) {
     URL.revokeObjectURL(imageSource.value.dataUrl);
   }
+  if (processedPreviewUrl.value) {
+    URL.revokeObjectURL(processedPreviewUrl.value);
+  }
   imageSource.value = null;
   rawImageElement.value = null;
+  transform.value = { rotation: 0, flipHorizontal: false, flipVertical: false };
+  appliedCrop.value = null;
+  isCropping.value = false;
+  isCompareMode.value = false;
   targetWidth.value = 0;
   targetHeight.value = 0;
   viewportZoom.value = 1.0;
@@ -445,6 +761,37 @@ onUnmounted(() => {
 
             <div class="toolbar-divider" />
 
+            <!-- 裁剪工具入口 -->
+            <n-button
+              size="tiny"
+              secondary
+              :type="isCropping ? 'warning' : 'default'"
+              @click="isCropping ? cancelCrop() : startCropping()"
+              title="交互式矩形裁剪"
+            >
+              <template #icon>
+                <n-icon :component="Crop" />
+              </template>
+              {{ isCropping ? '退出裁剪' : (appliedCrop ? '编辑裁剪' : '裁剪') }}
+            </n-button>
+
+            <!-- 差分比对开关 -->
+            <n-button
+              size="tiny"
+              secondary
+              :disabled="isCropping"
+              :type="isCompareMode ? 'primary' : 'default'"
+              @click="isCompareMode = !isCompareMode"
+              title="左右滑动分割比对原图与压缩画质"
+            >
+              <template #icon>
+                <n-icon :component="Columns" />
+              </template>
+              {{ isCompareMode ? '关闭对比' : '差分对比' }}
+            </n-button>
+
+            <div class="toolbar-divider" />
+
             <n-button size="tiny" secondary type="primary" @click="triggerFileInput" title="更换新图片">
               <template #icon>
                 <n-icon :component="Refresh" />
@@ -462,18 +809,154 @@ onUnmounted(() => {
           @dragover="onDragOver"
           @drop="onDrop"
         >
+          <!-- 图像渲染容器 (带平滑缩放) -->
           <div
+            ref="imageWrapperRef"
             class="viewport-image-wrapper"
             :style="{
               transform: `scale(${viewportZoom})`,
               transformOrigin: 'center center',
             }"
           >
-            <img
-              :src="imageSource.dataUrl"
-              :alt="imageSource.name"
-              class="viewport-image"
+            <!-- 模式 1：交互式裁剪编辑覆盖层 -->
+            <div v-if="isCropping" class="cropper-container">
+              <!-- 原图底图 -->
+              <img
+                :src="imageSource.dataUrl"
+                :alt="imageSource.name"
+                class="cropper-base-image"
+              >
+
+              <!-- 裁剪半透明深色遮罩 -->
+              <div class="crop-backdrop" />
+
+              <!-- 可交互高亮裁剪矩形框 -->
+              <div
+                class="crop-selection-box"
+                :style="{
+                  left: `${(cropSelection.x / imageSource.originalWidth) * 100}%`,
+                  top: `${(cropSelection.y / imageSource.originalHeight) * 100}%`,
+                  width: `${(cropSelection.width / imageSource.originalWidth) * 100}%`,
+                  height: `${(cropSelection.height / imageSource.originalHeight) * 100}%`,
+                }"
+                @mousedown="onCropHandleMouseDown('move', $event)"
+              >
+                <!-- 尺寸标签 -->
+                <div class="crop-dim-badge">
+                  {{ cropSelection.width }} × {{ cropSelection.height }}
+                </div>
+
+                <!-- 四个角交互拉伸把手 -->
+                <div class="crop-handle nw" @mousedown="onCropHandleMouseDown('nw', $event)" />
+                <div class="crop-handle ne" @mousedown="onCropHandleMouseDown('ne', $event)" />
+                <div class="crop-handle se" @mousedown="onCropHandleMouseDown('se', $event)" />
+                <div class="crop-handle sw" @mousedown="onCropHandleMouseDown('sw', $event)" />
+              </div>
+            </div>
+
+            <!-- 模式 2：差分双视窗滑块对比模式 (Before-After Split View) -->
+            <div v-else-if="isCompareMode" class="compare-container">
+              <!-- 底层：处理后压缩图 (After) -->
+              <img
+                :src="processedPreviewUrl || imageSource.dataUrl"
+                alt="after"
+                class="compare-image after-image"
+              >
+              <div class="compare-tag after-tag">
+                处理后 (After)
+              </div>
+
+              <!-- 顶层：原图 (Before)，使用 clip-path 切割 -->
+              <div
+                class="compare-before-layer"
+                :style="{ clipPath: `polygon(0 0, ${splitPosition}% 0, ${splitPosition}% 100%, 0 100%)` }"
+              >
+                <img
+                  :src="imageSource.dataUrl"
+                  alt="before"
+                  class="compare-image before-image"
+                  :style="{
+                    transform: `rotate(${transform.rotation}deg) scale(${transform.flipHorizontal ? -1 : 1}, ${transform.flipVertical ? -1 : 1})`,
+                  }"
+                >
+                <div class="compare-tag before-tag">
+                  原始图 (Before)
+                </div>
+              </div>
+
+              <!-- 垂直拖拽分割线与居中手柄 -->
+              <div
+                class="split-divider"
+                :style="{ left: `${splitPosition}%` }"
+                @mousedown="onSplitDividerMouseDown"
+              >
+                <div class="split-handle" title="按住左右拖动对比画质细节">
+                  <div class="split-handle-line" />
+                </div>
+              </div>
+            </div>
+
+            <!-- 模式 3：标准预览模式 (经过非破坏性渲染管线) -->
+            <div
+              v-else
+              class="standard-preview-container"
+              :style="{
+                transform: `rotate(${transform.rotation}deg) scale(${transform.flipHorizontal ? -1 : 1}, ${transform.flipVertical ? -1 : 1})`,
+              }"
             >
+              <img
+                :src="processedPreviewUrl || imageSource.dataUrl"
+                :alt="imageSource.name"
+                class="viewport-image"
+              >
+            </div>
+          </div>
+        </div>
+
+        <!-- 裁剪模式专属底部操作栏 (严格水平居中) -->
+        <div v-if="isCropping" class="cropper-toolbar">
+          <div flex flex-wrap items-center justify-center gap-2>
+            <span text-xs font-bold class="text-gray-500">裁剪比例：</span>
+            <n-radio-group
+              :value="cropRatio"
+              size="tiny"
+              @update:value="handleCropRatioChange"
+            >
+              <n-radio-button value="free">
+                自由
+              </n-radio-button>
+              <n-radio-button value="1:1">
+                1:1 (头像)
+              </n-radio-button>
+              <n-radio-button value="16:9">
+                16:9 (横屏)
+              </n-radio-button>
+              <n-radio-button value="4:3">
+                4:3
+              </n-radio-button>
+              <n-radio-button value="3:2">
+                3:2
+              </n-radio-button>
+              <n-radio-button value="2:1">
+                2:1 (横幅)
+              </n-radio-button>
+            </n-radio-group>
+
+            <div class="toolbar-divider" />
+
+            <n-button size="tiny" type="primary" @click="applyCrop">
+              <template #icon>
+                <n-icon :component="Check" />
+              </template>
+              应用裁剪
+            </n-button>
+
+            <n-button size="tiny" secondary @click="cancelCrop">
+              <template #icon>
+                <n-icon :component="X" />
+              </template>
+              取消
+            </n-button>
           </div>
         </div>
       </div>
@@ -483,9 +966,20 @@ onUnmounted(() => {
         <!-- 卡片 1：原图基础信息 -->
         <n-card size="small" :bordered="true">
           <template #header>
-            <div flex items-center gap-2 text-sm>
-              <n-icon size="18" class="text-primary" :component="Photo" />
-              <span>原图基本信息</span>
+            <div flex items-center justify-between text-sm>
+              <div flex items-center gap-2>
+                <n-icon size="18" class="text-primary" :component="Photo" />
+                <span>原图与裁剪信息</span>
+              </div>
+              <n-button
+                v-if="appliedCrop"
+                size="tiny"
+                quaternary
+                type="warning"
+                @click="clearAppliedCrop"
+              >
+                还原全图
+              </n-button>
             </div>
           </template>
 
@@ -498,6 +992,12 @@ onUnmounted(() => {
               <span class="text-gray-500">原始分辨率：</span>
               <span font-mono font-bold>{{ imageSource.originalWidth }} × {{ imageSource.originalHeight }} px</span>
             </div>
+            <div v-if="appliedCrop" flex items-center justify-between>
+              <span class="text-gray-500">裁剪有效区：</span>
+              <n-tag size="tiny" type="warning" :bordered="false" round>
+                {{ appliedCrop.width }} × {{ appliedCrop.height }} px
+              </n-tag>
+            </div>
             <div flex items-center justify-between>
               <span class="text-gray-500">原始体积：</span>
               <n-tag size="tiny" type="info" :bordered="false" round>
@@ -505,13 +1005,82 @@ onUnmounted(() => {
               </n-tag>
             </div>
             <div flex items-center justify-between>
-              <span class="text-gray-500">宽高比率：</span>
-              <span font-mono>{{ imageSource.aspectRatio.toFixed(2) }} ({{ Math.round(imageSource.aspectRatio * 100) / 100 }}:1)</span>
+              <span class="text-gray-500">当前基准尺寸：</span>
+              <span font-mono font-bold class="text-primary">
+                {{ baseVisualDimensions.width }} × {{ baseVisualDimensions.height }} px
+              </span>
             </div>
           </div>
         </n-card>
 
-        <!-- 卡片 2：尺寸缩放调节 -->
+        <!-- 卡片 2：几何旋转与镜像变换 -->
+        <n-card size="small" :bordered="true">
+          <template #header>
+            <div flex items-center justify-between text-sm>
+              <div flex items-center gap-2>
+                <n-icon size="18" class="text-primary" :component="Rotate" />
+                <span>几何旋转与镜像</span>
+              </div>
+              <n-button
+                v-if="transform.rotation !== 0 || transform.flipHorizontal || transform.flipVertical"
+                size="tiny"
+                quaternary
+                type="info"
+                @click="handleResetTransform"
+                title="恢复初始方向"
+              >
+                重置
+              </n-button>
+            </div>
+          </template>
+
+          <div flex flex-col gap-2.5>
+            <!-- 几何变换按钮组 (严格水平居中) -->
+            <div flex items-center justify-center gap-2 flex-wrap>
+              <n-button size="small" secondary @click="handleRotateCounterClockwise" title="逆时针旋转 90°">
+                <template #icon>
+                  <n-icon :component="Rotate" />
+                </template>
+                逆转 90°
+              </n-button>
+
+              <n-button size="small" secondary @click="handleRotateClockwise" title="顺时针旋转 90°">
+                <template #icon>
+                  <n-icon :component="RotateClockwise" />
+                </template>
+                顺转 90°
+              </n-button>
+
+              <n-button
+                size="small"
+                secondary
+                :type="transform.flipHorizontal ? 'primary' : 'default'"
+                @click="handleToggleFlipH"
+                title="水平镜像翻转"
+              >
+                <template #icon>
+                  <n-icon :component="FlipHorizontal" />
+                </template>
+                水平翻转
+              </n-button>
+
+              <n-button
+                size="small"
+                secondary
+                :type="transform.flipVertical ? 'primary' : 'default'"
+                @click="handleToggleFlipV"
+                title="垂直镜像翻转"
+              >
+                <template #icon>
+                  <n-icon :component="FlipVertical" />
+                </template>
+                垂直翻转
+              </n-button>
+            </div>
+          </div>
+        </n-card>
+
+        <!-- 卡片 3：尺寸缩放调节 -->
         <n-card size="small" :bordered="true">
           <template #header>
             <div flex items-center justify-between text-sm>
@@ -542,7 +1111,7 @@ onUnmounted(() => {
                 :key="p"
                 size="tiny"
                 secondary
-                :type="targetWidth === Math.round(imageSource.originalWidth * p / 100) ? 'primary' : 'default'"
+                :type="targetWidth === Math.round(baseVisualDimensions.width * p / 100) ? 'primary' : 'default'"
                 @click="applyPercentageScale(p)"
               >
                 {{ p }}%
@@ -584,7 +1153,7 @@ onUnmounted(() => {
           </div>
         </n-card>
 
-        <!-- 卡片 3：格式压缩与导出下载 -->
+        <!-- 卡片 4：格式压缩与导出下载 -->
         <n-card size="small" :bordered="true">
           <template #header>
             <div flex items-center gap-2 text-sm>
@@ -722,7 +1291,17 @@ onUnmounted(() => {
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 10;
+  z-index: 20;
+}
+
+.cropper-toolbar {
+  padding: 8px 12px;
+  border-top: 1px solid var(--n-border-color);
+  background-color: var(--n-color-embedded);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 20;
 }
 
 .toolbar-divider {
@@ -747,6 +1326,7 @@ onUnmounted(() => {
 }
 
 .viewport-image-wrapper {
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -759,6 +1339,151 @@ onUnmounted(() => {
   border-radius: 4px;
   user-select: none;
   pointer-events: none;
+}
+
+.standard-preview-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* 交互式裁剪样式 */
+.cropper-container {
+  position: relative;
+  display: inline-block;
+  user-select: none;
+}
+
+.cropper-base-image {
+  display: block;
+  max-width: none;
+  pointer-events: none;
+}
+
+.crop-backdrop {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.55);
+  pointer-events: none;
+}
+
+.crop-selection-box {
+  position: absolute;
+  box-sizing: border-box;
+  border: 2px solid #ffffff;
+  box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.55);
+  cursor: move;
+  z-index: 10;
+}
+
+.crop-dim-badge {
+  position: absolute;
+  top: -24px;
+  left: 0;
+  background-color: rgba(0, 0, 0, 0.75);
+  color: #ffffff;
+  font-size: 10px;
+  font-family: monospace;
+  padding: 2px 6px;
+  border-radius: 2px;
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+.crop-handle {
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  background-color: var(--n-primary-color);
+  border: 2px solid #ffffff;
+  box-sizing: border-box;
+  border-radius: 50%;
+  z-index: 15;
+}
+
+.crop-handle.nw { top: -6px; left: -6px; cursor: nwse-resize; }
+.crop-handle.ne { top: -6px; right: -6px; cursor: nesw-resize; }
+.crop-handle.se { bottom: -6px; right: -6px; cursor: nwse-resize; }
+.crop-handle.sw { bottom: -6px; left: -6px; cursor: nesw-resize; }
+
+/* 差分双视窗滑块比对 (Before-After Split View) */
+.compare-container {
+  position: relative;
+  display: inline-block;
+  overflow: hidden;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  border-radius: 4px;
+  user-select: none;
+}
+
+.compare-image {
+  display: block;
+  max-width: none;
+  pointer-events: none;
+}
+
+.compare-before-layer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+.compare-tag {
+  position: absolute;
+  top: 10px;
+  font-size: 11px;
+  font-weight: bold;
+  padding: 3px 8px;
+  border-radius: 4px;
+  background-color: rgba(0, 0, 0, 0.65);
+  color: #ffffff;
+  pointer-events: none;
+  z-index: 10;
+}
+
+.before-tag { left: 10px; }
+.after-tag { right: 10px; }
+
+.split-divider {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background-color: #ffffff;
+  box-shadow: 0 0 6px rgba(0, 0, 0, 0.4);
+  cursor: ew-resize;
+  z-index: 15;
+  transform: translateX(-50%);
+}
+
+.split-handle {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background-color: #ffffff;
+  border: 2px solid var(--n-primary-color);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.split-handle-line {
+  width: 4px;
+  height: 14px;
+  border-left: 2px solid #94a3b8;
+  border-right: 2px solid #94a3b8;
 }
 
 /* 经典透明棋盘格纹理底色 */
