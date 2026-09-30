@@ -244,6 +244,20 @@ tools:
   encryption:
     title: 加密/解密文本
     description: 使用加密算法（如AES、TripleDES、Rabbit或RC4）加密和解密文本明文。
+    encryptTitle: 文本加密
+    encryptInputLabel: 待加密文本：
+    encryptInputPlaceholder: 输入待加密的明文...
+    secretKeyLabel: 密钥 / 密码：
+    algorithmLabel: 加密算法：
+    encryptedOutputLabel: 加密密文结果：
+    encryptedOutputPlaceholder: 密文结果将显示于此处...
+    decryptTitle: 文本解密
+    decryptInputLabel: 待解密密文：
+    decryptInputPlaceholder: 输入待解密的密文字符串...
+    decryptErrorTitle: 解密失败
+    decryptErrorDefault: 无法解密该密文（密钥错误或密文损坏）
+    decryptedOutputLabel: 解密还原明文：
+    decryptedOutputPlaceholder: 解密后的明文将显示于此处...
 
   random-port-generator:
     title: 随机端口生成
@@ -272,6 +286,20 @@ tools:
   base64-file-converter:
     title: Base64 文件转换器
     description: 将字符串、文件或图像转换为其 Base64 表示形式。
+    base64ToFileTitle: Base64 转文件
+    fileNameLabel: 导出文件名
+    fileNamePlaceholder: 导出文件名
+    extensionLabel: 拓展名
+    extensionPlaceholder: 后缀格式 (如 png, pdf)
+    base64InputPlaceholder: 在此处输入文件的 Base64 编码字符串...
+    previewImage: 预览图片
+    downloadFile: 下载还原文件
+    fileToBase64Title: 文件转 Base64
+    uploadTitle: 将文件拖拽至此处，或点击浏览选择
+    fileBase64Placeholder: 文件的 Base64 编码结果将在此处显示
+    copyBase64: 复制 Base64
+    copiedBase64: Base64 字符串已成功复制至剪贴板
+    invalidBase64: 无效的 Base64 编码格式
   list-converter:
     title: List 转换器
     description: 该工具可以处理基于数组的数据，并将各种更改（转置、添加前缀和后缀、反向列表、排序列表、小写值、截断值）应用于每一行。
@@ -328,6 +356,23 @@ tools:
   case-converter:
     title: 大小写转换
     description: 更改字符串的大小写并在不同格式之间进行选择
+    inputLabel: 待转换文本：
+    inputPlaceholder: 输入待转换大小写格式的文本...
+    formats:
+      lowercase: '小写 (lowercase):'
+      uppercase: '大写 (UPPERCASE):'
+      camelcase: '小驼峰 (camelCase):'
+      capitalcase: '首字母大写 (Capital Case):'
+      constantcase: '常量大写 (CONSTANT_CASE):'
+      dotcase: '点分隔 (dot.case):'
+      headercase: '请求头格式 (Header-Case):'
+      nocase: '纯小写空格分隔 (no case):'
+      paramcase: '短横线/烤串 (kebab-case):'
+      pascalcase: '大驼峰 (PascalCase):'
+      pathcase: '路径格式 (path/case):'
+      sentencecase: '句首大写 (Sentence case):'
+      snakecase: '下划线/蛇形 (snake_case):'
+      mockingcase: '波浪大小写 (mOcKiNgCaSe):'
 
   html-entities:
     title: 转义html实体
@@ -441,6 +486,14 @@ tools:
   hash-text:
     title: Hash 文本
     description: '使用所需的函数哈希文本字符串：MD5、SHA1、SHA256、SHA224、SHA512、SHA384、SHA3或RIPEMD160'
+    inputTextLabel: '待计算哈希的明文：'
+    inputPlaceholder: '输入待计算哈希的文本...'
+    digestEncoding: '摘要编码格式 (Digest encoding)'
+    encodings:
+      bin: '二进制 (Base 2)'
+      hex: '十六进制 (Base 16)'
+      base64: 'Base64 编码'
+      base64url: 'URL 安全 Base64 编码 (Base64url)'
 
   json-to-toml:
     title: JSON 转 TOML
@@ -501,6 +554,9 @@ tools:
     description: 现代化可视化 PDF 页面编排工作台，支持自由拖拽重排、顺逆时针旋转、逻辑删减与无损重新编译导出。
     uploadTitle: 将 PDF 文档拖拽至此处，开启可视化编排工作台
     browseFiles: 浏览选择 PDF 文档
+    appendPdf: 追加合并 PDF
+    splitRange: 范围拆分
+    watermarkStamp: 水印印章
 
   json-minify:
     title: JSON 压缩
@@ -525,6 +581,16 @@ tools:
   uuid-generator:
     title: UUIDs 生成器
     description: 通用唯一标识符（UUID）是一个128位数字，用于标识计算机系统中的信息。可能的UUID数量为16^32，即2^128或约3.4x10^38（这是一个很大的数字！）。
+    versionLabel: 'UUID 版本'
+    quantityLabel: '生成数量'
+    quantityPlaceholder: '生成数量 (1-50)'
+    namespace: '命名空间 (Namespace)'
+    name: '名称 (Name)'
+    placeholder: '生成的 UUID 结果将显示在此处...'
+    copy: '复制结果'
+    refresh: '重新生成'
+    copied: 'UUID 已成功复制至剪贴板'
+    invalidUuid: '无效的 UUID 格式'
 
   ipv4-address-converter:
     title: Ipv4地址转换器

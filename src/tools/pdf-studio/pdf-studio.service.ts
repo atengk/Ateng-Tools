@@ -5,7 +5,13 @@
  * @since 2026-09-30
  */
 import { PDFDocument, degrees } from '@cantoo/pdf-lib';
-import type { ExportPdfOptions, ExportPdfResult, SourceDocumentItem, VirtualPageItem } from './pdf-studio.types';
+import type {
+  ExportPdfOptions,
+  ExportPdfResult,
+  SourceDocumentItem,
+  VirtualPageItem,
+  WatermarkConfig,
+} from './pdf-studio.types';
 
 let pdfjsPromise: Promise<any> | null = null;
 
@@ -37,6 +43,27 @@ export function normalizeAngle(angle: number): number {
 }
 
 /**
+ * 为单个来源文档生成虚拟页面列表
+ *
+ * @param doc 来源文档信息
+ * @returns 该文档对应的虚拟页面列表
+ */
+export function createVirtualDeckForDoc(doc: SourceDocumentItem): VirtualPageItem[] {
+  const pages: VirtualPageItem[] = [];
+  for (let i = 0; i < doc.pageCount; i++) {
+    pages.push({
+      id: `page_${doc.id}_${i}`,
+      sourceDocId: doc.id,
+      sourceDocName: doc.name,
+      originalPageIndex: i,
+      rotation: 0,
+      isDeleted: false,
+    });
+  }
+  return pages;
+}
+
+/**
  * 根据注册的来源文档构建虚拟页面甲板 (Virtual Page Deck)
  *
  * @param sourceDocs 来源文档列表
@@ -46,18 +73,61 @@ export function createVirtualDeck(sourceDocs: SourceDocumentItem[]): VirtualPage
   const deck: VirtualPageItem[] = [];
 
   for (const doc of sourceDocs) {
-    for (let i = 0; i < doc.pageCount; i++) {
-      deck.push({
-        id: `page_${doc.id}_${i}`,
-        sourceDocId: doc.id,
-        originalPageIndex: i,
-        rotation: 0,
-        isDeleted: false,
-      });
-    }
+    deck.push(...createVirtualDeckForDoc(doc));
   }
 
   return deck;
+}
+
+/**
+ * 解析页面范围表达式字符串 (例如 "1-3, 5, 8-10")
+ *
+ * @param rangeStr 用户输入的表达式
+ * @param totalPages 当前页面总数上限
+ * @returns 去重并按升序排列的有效页码列表 (1-indexed)
+ */
+export function parsePageRange(rangeStr: string, totalPages: number): number[] {
+  if (!rangeStr || totalPages <= 0) {
+    return [];
+  }
+
+  // 1. 标准化分隔符：支持中文逗号、分号、波浪线
+  const normalized = rangeStr
+    .replace(/[，；;]/g, ',')
+    .replace(/[~～]/g, '-')
+    .trim();
+
+  if (!normalized) {
+    return [];
+  }
+
+  const tokens = normalized.split(',').map(s => s.trim()).filter(Boolean);
+  const matchedPages = new Set<number>();
+
+  for (const token of tokens) {
+    if (token.includes('-')) {
+      const parts = token.split('-').map(s => s.trim());
+      if (parts.length === 2) {
+        const start = parseInt(parts[0], 10);
+        const end = parseInt(parts[1], 10);
+        if (!isNaN(start) && !isNaN(end)) {
+          const min = Math.max(1, Math.min(start, end));
+          const max = Math.min(totalPages, Math.max(start, end));
+          for (let p = min; p <= max; p++) {
+            matchedPages.add(p);
+          }
+        }
+      }
+    }
+    else {
+      const pageNum = parseInt(token, 10);
+      if (!isNaN(pageNum) && pageNum >= 1 && pageNum <= totalPages) {
+        matchedPages.add(pageNum);
+      }
+    }
+  }
+
+  return Array.from(matchedPages).sort((a, b) => a - b);
 }
 
 /**
@@ -179,15 +249,20 @@ export async function exportPdfFromDeck(
 
   for (const srcId of usedSourceIds) {
     const bytes = docsByteMap.get(srcId);
-    if (!bytes) {
-      throw new Error(`未找到来源文档数据 (ID: ${srcId})`);
+    if (!bytes || bytes.length === 0) {
+      throw new Error(`未找到来源文档数据或文件字节已被分离清空 (ID: ${srcId})`);
     }
-    const pdfDoc = await PDFDocument.load(bytes);
+    const pdfDoc = await PDFDocument.load(bytes.slice());
     loadedPdfMap.set(srcId, pdfDoc);
   }
 
   // 4. 创建目标文档并逐页拷贝编排
   const targetDoc = await PDFDocument.create();
+  const watermarkConfig = options?.watermark;
+  const isWatermarkActive = watermarkConfig && watermarkConfig.type !== 'none'
+    && ((watermarkConfig.type === 'text' && Boolean(watermarkConfig.text?.trim()))
+      || (watermarkConfig.type === 'image' && Boolean(watermarkConfig.imageDataUrl)));
+  const watermarkImageCache = new Map<string, any>();
 
   for (const item of activePages) {
     const srcDoc = loadedPdfMap.get(item.sourceDocId);
@@ -201,6 +276,38 @@ export async function exportPdfFromDeck(
     const originalRotation = copiedPage.getRotation().angle;
     const finalRotation = normalizeAngle(originalRotation + item.rotation);
     copiedPage.setRotation(degrees(finalRotation));
+
+    // 嵌入水印图章 (若配置了有效水印)
+    if (isWatermarkActive) {
+      const pageWidth = copiedPage.getWidth();
+      const pageHeight = copiedPage.getHeight();
+      const cacheKey = `${Math.round(pageWidth)}_${Math.round(pageHeight)}`;
+
+      let watermarkImage = watermarkImageCache.get(cacheKey);
+      if (!watermarkImage) {
+        try {
+          const stampCanvas = await renderWatermarkCanvas(pageWidth, pageHeight, watermarkConfig);
+          if (stampCanvas) {
+            const pngBytes = await canvasToPngBytes(stampCanvas);
+            watermarkImage = await targetDoc.embedPng(pngBytes);
+            watermarkImageCache.set(cacheKey, watermarkImage);
+          }
+        }
+        catch (err) {
+          // 水印光栅化异常降级
+          console.warn('水印光栅化嵌入失败，已自动降级：', err);
+        }
+      }
+
+      if (watermarkImage) {
+        copiedPage.drawImage(watermarkImage, {
+          x: 0,
+          y: 0,
+          width: pageWidth,
+          height: pageHeight,
+        });
+      }
+    }
 
     targetDoc.addPage(copiedPage);
   }
@@ -219,6 +326,138 @@ export async function exportPdfFromDeck(
     pageCount,
     fileSize: resultBytes.length,
   };
+}
+
+/**
+ * 离屏渲染透明中文字印与图片水印画布 (2x 超采样高清抗锯齿)
+ *
+ * @param width 目标页面逻辑宽度 (pt)
+ * @param height 目标页面逻辑高度 (pt)
+ * @param config 水印配置项
+ * @returns 离屏 HTMLCanvasElement，若无可用 Canvas 环境则返回 null
+ */
+export async function renderWatermarkCanvas(
+  width: number,
+  height: number,
+  config: WatermarkConfig,
+): Promise<HTMLCanvasElement | null> {
+  if (typeof document === 'undefined' || !document.createElement) {
+    return null;
+  }
+
+  const canvas = document.createElement('canvas');
+  const dpr = 2.0; // 2x 超采样确保文字和图形边缘绝对清晰
+  canvas.width = Math.max(1, Math.round(width * dpr));
+  canvas.height = Math.max(1, Math.round(height * dpr));
+
+  const ctx = canvas.getContext('2d');
+  if (!ctx) {
+    return null;
+  }
+
+  // 100% 透明背景
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  const opacity = Math.max(0.01, Math.min(1.0, config.opacity ?? 0.3));
+  const rotationDeg = config.rotation ?? -30;
+  const rotationRad = (rotationDeg * Math.PI) / 180;
+  const layout = config.layout || 'center';
+
+  if (config.type === 'text') {
+    const text = config.text?.trim();
+    if (!text) {
+      return null;
+    }
+
+    const fontSize = (config.fontSize || 36) * dpr;
+    ctx.save();
+    ctx.font = `bold ${fontSize}px "PingFang SC", "Microsoft YaHei", "Noto Sans SC", sans-serif`;
+    ctx.fillStyle = config.color || '#999999';
+    ctx.globalAlpha = opacity;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+
+    if (layout === 'center') {
+      ctx.translate(canvas.width / 2, canvas.height / 2);
+      ctx.rotate(rotationRad);
+      ctx.fillText(text, 0, 0);
+    }
+    else {
+      // 全页网格对角平铺
+      const gap = Math.max(60, config.tileGap || 140) * dpr;
+      const bound = Math.max(canvas.width, canvas.height) * 1.5;
+      for (let y = -bound; y < canvas.height + bound; y += gap) {
+        for (let x = -bound; x < canvas.width + bound; x += gap * 1.5) {
+          ctx.save();
+          ctx.translate(x, y);
+          ctx.rotate(rotationRad);
+          ctx.fillText(text, 0, 0);
+          ctx.restore();
+        }
+      }
+    }
+    ctx.restore();
+  }
+  else if (config.type === 'image' && config.imageDataUrl) {
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+    await new Promise<void>((resolve, reject) => {
+      img.onload = () => resolve();
+      img.onerror = () => reject(new Error('水印图片载入失败'));
+      img.src = config.imageDataUrl!;
+    });
+
+    const scale = (config.imageScale ?? 0.5) * dpr;
+    const imgW = img.width * scale;
+    const imgH = img.height * scale;
+
+    ctx.save();
+    ctx.globalAlpha = opacity;
+
+    if (layout === 'center') {
+      ctx.translate(canvas.width / 2, canvas.height / 2);
+      ctx.rotate(rotationRad);
+      ctx.drawImage(img, -imgW / 2, -imgH / 2, imgW, imgH);
+    }
+    else {
+      const gap = Math.max(80, config.tileGap || 160) * dpr;
+      const bound = Math.max(canvas.width, canvas.height) * 1.5;
+      for (let y = -bound; y < canvas.height + bound; y += gap) {
+        for (let x = -bound; x < canvas.width + bound; x += gap * 1.5) {
+          ctx.save();
+          ctx.translate(x, y);
+          ctx.rotate(rotationRad);
+          ctx.drawImage(img, -imgW / 2, -imgH / 2, imgW, imgH);
+          ctx.restore();
+        }
+      }
+    }
+    ctx.restore();
+  }
+  else {
+    return null;
+  }
+
+  return canvas;
+}
+
+/**
+ * 将 Canvas 画布内容导出为 PNG 二进制字节流
+ */
+export async function canvasToPngBytes(canvas: HTMLCanvasElement): Promise<Uint8Array> {
+  const blob: Blob = await new Promise((resolve, reject) => {
+    canvas.toBlob((b) => {
+      if (b) {
+        resolve(b);
+      }
+      else {
+        reject(new Error('Canvas 导出 PNG 失败'));
+      }
+    }, 'image/png');
+  });
+
+  const arrayBuffer = await blob.arrayBuffer();
+  return new Uint8Array(arrayBuffer);
 }
 
 /**
@@ -274,3 +513,55 @@ export async function renderThumbnailCanvas(
     blob,
   };
 }
+
+/**
+ * 高分辨率页面光栅化预览
+ *
+ * @param pdfDocProxy PDF.js 文档代理
+ * @param pageNumber 原始页码 (从 1 开始)
+ * @param targetCanvas 离屏或目标 Canvas
+ * @param scale 放大系数 (默认 1.8)
+ */
+export async function renderPageHighResCanvas(
+  pdfDocProxy: any,
+  pageNumber: number,
+  targetCanvas: HTMLCanvasElement,
+  scale = 1.8,
+): Promise<{ width: number; height: number; blob: Blob }> {
+  const page = await pdfDocProxy.getPage(pageNumber);
+  const viewport = page.getViewport({ scale });
+
+  targetCanvas.width = Math.floor(viewport.width);
+  targetCanvas.height = Math.floor(viewport.height);
+
+  const context = targetCanvas.getContext('2d');
+  if (!context) {
+    throw new Error('Canvas 渲染环境初始化失败');
+  }
+
+  context.fillStyle = '#ffffff';
+  context.fillRect(0, 0, targetCanvas.width, targetCanvas.height);
+
+  await page.render({
+    canvasContext: context,
+    viewport,
+  }).promise;
+
+  const blob: Blob = await new Promise((resolve, reject) => {
+    targetCanvas.toBlob((b) => {
+      if (b) {
+        resolve(b);
+      }
+      else {
+        reject(new Error('高分辨率页面渲染导出失败'));
+      }
+    }, 'image/jpeg', 0.92);
+  });
+
+  return {
+    width: targetCanvas.width,
+    height: targetCanvas.height,
+    blob,
+  };
+}
+

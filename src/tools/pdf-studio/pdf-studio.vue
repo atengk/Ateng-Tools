@@ -7,28 +7,44 @@
  */
 import { useMessage } from 'naive-ui';
 import Draggable from 'vuedraggable';
-import { markRaw, shallowRef, toRaw } from 'vue';
+import { computed, markRaw, nextTick, onMounted, onUnmounted, ref, shallowRef, toRaw, watch } from 'vue';
 import {
+  ArrowLeft,
+  ArrowRight,
+  Certificate,
   Download,
+  FilePlus,
   FileText,
   GripVertical,
   History,
+  Photo,
   Refresh,
   Rotate,
   RotateClockwise,
+  Scissors,
   Trash,
+  ZoomIn,
 } from '@vicons/tabler';
 import {
   createVirtualDeck,
+  createVirtualDeckForDoc,
   exportPdfFromDeck,
   getPdfjs,
+  parsePageRange,
   recoverAllDeletedPages,
+  renderPageHighResCanvas,
   renderThumbnailCanvas,
+  renderWatermarkCanvas,
   rotateAllPages,
   rotatePage,
   toggleDeletePage,
 } from './pdf-studio.service';
-import type { SourceDocumentItem, VirtualPageItem } from './pdf-studio.types';
+import type {
+  ExportPdfResult,
+  SourceDocumentItem,
+  VirtualPageItem,
+  WatermarkConfig,
+} from './pdf-studio.types';
 import { formatBytes } from '@/utils/convert';
 
 const message = useMessage();
@@ -44,10 +60,65 @@ const pageDeck = ref<VirtualPageItem[]>([]);
 const isInitialLoading = ref(false);
 const isExporting = ref(false);
 const customExportName = ref('');
+const appendFileInputRef = ref<HTMLInputElement | null>(null);
+const logoFileInputRef = ref<HTMLInputElement | null>(null);
 
 // 视口观察器集合
 let intersectionObserver: IntersectionObserver | null = null;
 const cardElementRefs = new Map<string, HTMLElement>();
+
+/**
+ * 范围拆分模态框状态
+ */
+const showRangeModal = ref(false);
+const rangeExpression = ref('');
+const parsedRangePages = computed(() => {
+  return parsePageRange(rangeExpression.value, pageDeck.value.length);
+});
+
+/**
+ * 水印与印章模态框状态
+ */
+const showWatermarkModal = ref(false);
+const watermarkConfig = ref<WatermarkConfig>({
+  type: 'none',
+  text: '内部保密 · 绝密文件',
+  fontSize: 32,
+  color: '#999999',
+  opacity: 0.3,
+  rotation: -30,
+  layout: 'tile',
+  tileGap: 140,
+  imageDataUrl: '',
+  imageScale: 0.4,
+});
+
+const isWatermarkActive = computed(() => {
+  return watermarkConfig.value.type !== 'none'
+    && ((watermarkConfig.value.type === 'text' && Boolean(watermarkConfig.value.text?.trim()))
+      || (watermarkConfig.value.type === 'image' && Boolean(watermarkConfig.value.imageDataUrl)));
+});
+
+// 水印微缩预览画布
+const watermarkPreviewCanvasRef = ref<HTMLCanvasElement | null>(null);
+
+/**
+ * 高分辨率模态预览状态
+ */
+const showPreviewModal = ref(false);
+const previewPageIndex = ref(0);
+const isPreviewLoading = ref(false);
+const previewCanvasRef = ref<HTMLCanvasElement | null>(null);
+
+const currentPreviewPage = computed<VirtualPageItem | undefined>(() => {
+  return pageDeck.value[previewPageIndex.value];
+});
+
+const previewModalTitle = computed(() => {
+  if (!currentPreviewPage.value) return '页面高精度全屏预览';
+  const page = currentPreviewPage.value;
+  return `页面预览 · 当前编排第 ${previewPageIndex.value + 1} 页 / 共 ${pageDeck.value.length} 页（原第 ${page.originalPageIndex + 1} 页 · ${page.sourceDocName || '原始文档'}）`;
+});
 
 /**
  * 有效页面数与删除页面数计算
@@ -107,7 +178,7 @@ function setupIntersectionObserver() {
 }
 
 /**
- * 光栅化渲染单张缩略图
+ * 光栅化渲染单张微缩缩略图
  */
 async function renderPageThumbnail(page: VirtualPageItem) {
   const docProxy = pdfDocProxies.value.get(page.sourceDocId);
@@ -148,7 +219,7 @@ function revokeAllThumbnails() {
 }
 
 /**
- * 文件上传解析流程
+ * 首次主文档上传解析流程
  */
 async function onFileUpload(uploadedFile: File) {
   isInitialLoading.value = true;
@@ -160,9 +231,11 @@ async function onFileUpload(uploadedFile: File) {
   try {
     const pdfjs = await getPdfjs();
     const buffer = await uploadedFile.arrayBuffer();
+    // 创建独立克隆字节，防止 pdf.js worker transfer 转移导致主线程 ArrayBuffer 被分离 (detached) 为 0 字节
     const bytes = new Uint8Array(buffer);
+    const pdfjsData = bytes.slice();
 
-    const loadingTask = pdfjs.getDocument({ data: bytes });
+    const loadingTask = pdfjs.getDocument({ data: pdfjsData });
     const docProxy = await loadingTask.promise;
 
     const docId = `doc_${Date.now()}`;
@@ -170,7 +243,7 @@ async function onFileUpload(uploadedFile: File) {
       id: docId,
       name: uploadedFile.name,
       size: uploadedFile.size,
-      bytes,
+      bytes: bytes.slice(),
       pageCount: docProxy.numPages,
     };
 
@@ -188,6 +261,77 @@ async function onFileUpload(uploadedFile: File) {
     message.error(`PDF 文档解析失败：${err?.message || '文件损坏或格式不受支持'}`);
   }
   finally {
+    isInitialLoading.value = false;
+  }
+}
+
+/**
+ * 触发追加文件选择
+ */
+function triggerAppendFileInput() {
+  appendFileInputRef.value?.click();
+}
+
+/**
+ * 追加多个 PDF 文档并合并至当前甲板
+ */
+async function onAppendFilesSelected(event: Event) {
+  const input = event.target as HTMLInputElement;
+  const files = input.files;
+  if (!files || files.length === 0) {
+    return;
+  }
+
+  isInitialLoading.value = true;
+  try {
+    const pdfjs = await getPdfjs();
+    let addedPagesCount = 0;
+    let addedDocsCount = 0;
+
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i];
+      if (!file.name.toLowerCase().endsWith('.pdf')) {
+        continue;
+      }
+
+      try {
+        const buffer = await file.arrayBuffer();
+        const bytes = new Uint8Array(buffer);
+        const pdfjsData = bytes.slice();
+
+        const loadingTask = pdfjs.getDocument({ data: pdfjsData });
+        const docProxy = await loadingTask.promise;
+
+        const docId = `doc_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
+        const newDocItem: SourceDocumentItem = {
+          id: docId,
+          name: file.name,
+          size: file.size,
+          bytes: bytes.slice(),
+          pageCount: docProxy.numPages,
+        };
+
+        sourceDocs.value = [...sourceDocs.value, newDocItem];
+        pdfDocProxies.value.set(docId, markRaw(docProxy));
+
+        const newPages = createVirtualDeckForDoc(newDocItem);
+        pageDeck.value = [...pageDeck.value, ...newPages];
+
+        addedPagesCount += newPages.length;
+        addedDocsCount++;
+      }
+      catch (fileErr: any) {
+        message.error(`追加 “${file.name}” 失败：${fileErr?.message || '解析错误'}`);
+      }
+    }
+
+    if (addedDocsCount > 0) {
+      message.success(`成功追加 ${addedDocsCount} 个 PDF 文档，新增 ${addedPagesCount} 页`);
+      setupIntersectionObserver();
+    }
+  }
+  finally {
+    input.value = '';
     isInitialLoading.value = false;
   }
 }
@@ -223,6 +367,19 @@ function handleRecoverAll() {
 }
 
 /**
+ * 触发结果下载
+ */
+function downloadPdfResult(result: ExportPdfResult) {
+  const blob = new Blob([result.bytes], { type: 'application/pdf' });
+  const url = URL.createObjectURL(blob);
+  const anchor = document.createElement('a');
+  anchor.href = url;
+  anchor.download = result.fileName;
+  anchor.click();
+  URL.revokeObjectURL(url);
+}
+
+/**
  * 导出编排后的 PDF 并触发下载
  */
 async function handleExportPdf() {
@@ -235,16 +392,10 @@ async function handleExportPdf() {
   try {
     const result = await exportPdfFromDeck(pageDeck.value, sourceDocs.value, {
       customFileName: customExportName.value.trim() || undefined,
+      watermark: isWatermarkActive.value ? watermarkConfig.value : undefined,
     });
 
-    const blob = new Blob([result.bytes], { type: 'application/pdf' });
-    const url = URL.createObjectURL(blob);
-    const anchor = document.createElement('a');
-    anchor.href = url;
-    anchor.download = result.fileName;
-    anchor.click();
-    URL.revokeObjectURL(url);
-
+    downloadPdfResult(result);
     message.success(`PDF 导出成功！共导出 ${result.pageCount} 页无损编排文档`);
   }
   catch (err: any) {
@@ -254,6 +405,222 @@ async function handleExportPdf() {
     isExporting.value = false;
   }
 }
+
+/**
+ * 范围拆分动作 1：仅保留选定页
+ */
+function handleApplyRangeSelection() {
+  if (parsedRangePages.value.length === 0) {
+    message.warning('请输入有效的页码范围（例如 1-3, 5）');
+    return;
+  }
+
+  const targetSet = new Set(parsedRangePages.value);
+  pageDeck.value = pageDeck.value.map((page, idx) => {
+    const pageNum = idx + 1; // 1-indexed
+    return {
+      ...page,
+      isDeleted: !targetSet.has(pageNum),
+    };
+  });
+
+  showRangeModal.value = false;
+  message.success(`已应用范围筛选：保留 ${targetSet.size} 页，其余已标记删除`);
+}
+
+/**
+ * 范围拆分动作 2：直接导出选定范围
+ */
+async function handleExportRangePdf() {
+  if (parsedRangePages.value.length === 0) {
+    message.warning('请输入有效的页码范围（例如 1-3, 5）');
+    return;
+  }
+
+  const targetSet = new Set(parsedRangePages.value);
+  const rangePages = pageDeck.value
+    .filter((_, idx) => targetSet.has(idx + 1))
+    .map(p => ({ ...p, isDeleted: false }));
+
+  if (rangePages.length === 0) {
+    message.warning('当前范围内无有效页面可供导出');
+    return;
+  }
+
+  isExporting.value = true;
+  try {
+    const safeExpr = rangeExpression.value.replace(/[^0-9,-]/g, '');
+    const defaultName = `范围拆分_${safeExpr || '选定页'}`;
+    const result = await exportPdfFromDeck(rangePages, sourceDocs.value, {
+      customFileName: customExportName.value.trim() || defaultName,
+      watermark: isWatermarkActive.value ? watermarkConfig.value : undefined,
+    });
+
+    downloadPdfResult(result);
+    showRangeModal.value = false;
+    message.success(`范围拆分导出成功！已提取 ${result.pageCount} 页独立文档`);
+  }
+  catch (err: any) {
+    message.error(err?.message || '范围拆分导出失败');
+  }
+  finally {
+    isExporting.value = false;
+  }
+}
+
+/**
+ * 水印图片选择
+ */
+function triggerLogoFileInput() {
+  logoFileInputRef.value?.click();
+}
+
+function onLogoFileChange(event: Event) {
+  const input = event.target as HTMLInputElement;
+  const file = input.files?.[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    watermarkConfig.value.imageDataUrl = e.target?.result as string;
+    message.success(`已载入图片水印 “${file.name}”`);
+    renderWatermarkPreview();
+  };
+  reader.readAsDataURL(file);
+  input.value = '';
+}
+
+/**
+ * 刷新水印微缩预览效果
+ */
+async function renderWatermarkPreview() {
+  await nextTick();
+  const canvas = watermarkPreviewCanvasRef.value;
+  if (!canvas) return;
+
+  const ctx = canvas.getContext('2d');
+  if (!ctx) return;
+
+  canvas.width = 320;
+  canvas.height = 180;
+
+  // 绘制模拟文档纸张白色底底色
+  ctx.fillStyle = '#f8fafc';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  ctx.strokeStyle = '#e2e8f0';
+  ctx.strokeRect(0, 0, canvas.width, canvas.height);
+
+  // 模拟几行灰色文字示意原文档内容
+  ctx.fillStyle = '#cbd5e1';
+  for (let i = 24; i < 160; i += 20) {
+    ctx.fillRect(20, i, 280, 8);
+  }
+
+  if (!isWatermarkActive.value) {
+    return;
+  }
+
+  try {
+    const stampCanvas = await renderWatermarkCanvas(canvas.width, canvas.height, watermarkConfig.value);
+    if (stampCanvas) {
+      ctx.drawImage(stampCanvas, 0, 0, canvas.width, canvas.height);
+    }
+  }
+  catch {
+    // 预览异常静默
+  }
+}
+
+watch(
+  () => [
+    watermarkConfig.value.type,
+    watermarkConfig.value.text,
+    watermarkConfig.value.fontSize,
+    watermarkConfig.value.color,
+    watermarkConfig.value.opacity,
+    watermarkConfig.value.rotation,
+    watermarkConfig.value.layout,
+    watermarkConfig.value.tileGap,
+    watermarkConfig.value.imageDataUrl,
+    watermarkConfig.value.imageScale,
+  ],
+  () => {
+    if (showWatermarkModal.value) {
+      renderWatermarkPreview();
+    }
+  },
+);
+
+/**
+ * 开启高分辨率模态预览
+ */
+async function openHighResPreview(index: number) {
+  previewPageIndex.value = index;
+  showPreviewModal.value = true;
+  await nextTick();
+  renderCurrentPreviewPage();
+}
+
+/**
+ * 渲染当前全屏大图预览
+ */
+async function renderCurrentPreviewPage() {
+  const page = currentPreviewPage.value;
+  if (!page || !previewCanvasRef.value) return;
+
+  const docProxy = pdfDocProxies.value.get(page.sourceDocId);
+  if (!docProxy) return;
+
+  isPreviewLoading.value = true;
+  try {
+    const rawDoc = toRaw(docProxy);
+    await renderPageHighResCanvas(
+      rawDoc,
+      page.originalPageIndex + 1,
+      previewCanvasRef.value,
+      1.8,
+    );
+  }
+  catch (err: any) {
+    message.error(`高分辨率页面渲染出错：${err?.message || '未知错误'}`);
+  }
+  finally {
+    isPreviewLoading.value = false;
+  }
+}
+
+function handlePrevPreview() {
+  if (previewPageIndex.value > 0) {
+    previewPageIndex.value--;
+    renderCurrentPreviewPage();
+  }
+}
+
+function handleNextPreview() {
+  if (previewPageIndex.value < pageDeck.value.length - 1) {
+    previewPageIndex.value++;
+    renderCurrentPreviewPage();
+  }
+}
+
+/**
+ * 键盘快捷键监听
+ */
+function handleKeyDown(event: KeyboardEvent) {
+  if (!showPreviewModal.value) return;
+  if (event.key === 'ArrowLeft') {
+    handlePrevPreview();
+  }
+  else if (event.key === 'ArrowRight') {
+    handleNextPreview();
+  }
+}
+
+onMounted(() => {
+  if (typeof window !== 'undefined') {
+    window.addEventListener('keydown', handleKeyDown);
+  }
+});
 
 /**
  * 重置工作台
@@ -271,12 +638,32 @@ function handleResetAll() {
 }
 
 onUnmounted(() => {
+  if (typeof window !== 'undefined') {
+    window.removeEventListener('keydown', handleKeyDown);
+  }
   handleResetAll();
 });
 </script>
 
 <template>
   <div style="flex: 0 0 100%" class="pdf-studio-wrapper" flex flex-col gap-4>
+    <!-- 隐藏的文件选择输入框（用于多文档追加与水印 Logo） -->
+    <input
+      ref="appendFileInputRef"
+      type="file"
+      multiple
+      accept=".pdf"
+      style="display: none"
+      @change="onAppendFilesSelected"
+    >
+    <input
+      ref="logoFileInputRef"
+      type="file"
+      accept="image/png,image/jpeg,image/svg+xml"
+      style="display: none"
+      @change="onLogoFileChange"
+    >
+
     <!-- 上传区域 -->
     <div v-if="sourceDocs.length === 0 && !isInitialLoading" mx-auto w-full max-w-650px py-2>
       <c-file-upload
@@ -289,7 +676,7 @@ onUnmounted(() => {
 
     <!-- 加载中遮罩 -->
     <div v-if="isInitialLoading" py-12 text-center>
-      <n-spin size="large" description="正在载入 PDF 文档并构建虚拟页面甲板，请稍候..." />
+      <n-spin size="large" description="正在载入并解析 PDF 文档，构建虚拟页面甲板，请稍候..." />
     </div>
 
     <!-- 工作台操作区域 -->
@@ -301,7 +688,9 @@ onUnmounted(() => {
           <div flex flex-wrap items-center justify-center gap-2.5 text-center>
             <div flex items-center gap-1.5 overflow-hidden>
               <n-icon size="18" class="text-primary flex-shrink-0" :component="FileText" />
-              <span font-bold text-sm truncate max-w-320px>{{ sourceDocs[0]?.name }}</span>
+              <span font-bold text-sm truncate max-w-320px>
+                {{ sourceDocs.length === 1 ? sourceDocs[0]?.name : `已合并 ${sourceDocs.length} 个来源文档` }}
+              </span>
             </div>
 
             <div flex items-center gap-2 flex-shrink-0>
@@ -314,8 +703,11 @@ onUnmounted(() => {
               <n-tag v-if="deletedPageCount > 0" size="small" type="error" round :bordered="false">
                 已删 {{ deletedPageCount }} 页
               </n-tag>
+              <n-tag v-if="isWatermarkActive" size="small" type="warning" round :bordered="false">
+                已启用印章水印
+              </n-tag>
               <n-tag size="small" round :bordered="false">
-                {{ formatBytes(sourceDocs[0]?.size || 0) }}
+                {{ formatBytes(sourceDocs.reduce((acc, d) => acc + d.size, 0)) }}
               </n-tag>
             </div>
           </div>
@@ -333,6 +725,42 @@ onUnmounted(() => {
                 <n-icon :component="Download" />
               </template>
               导出编排后的 PDF
+            </n-button>
+
+            <n-button
+              secondary
+              type="primary"
+              title="追加额外的 PDF 文档合并到当前工作台"
+              @click="triggerAppendFileInput"
+            >
+              <template #icon>
+                <n-icon :component="FilePlus" />
+              </template>
+              追加合并 PDF
+            </n-button>
+
+            <n-button
+              secondary
+              type="info"
+              title="通过页码范围表达式筛选或快速拆分"
+              @click="showRangeModal = true"
+            >
+              <template #icon>
+                <n-icon :component="Scissors" />
+              </template>
+              范围拆分
+            </n-button>
+
+            <n-button
+              secondary
+              :type="isWatermarkActive ? 'warning' : 'default'"
+              title="配置免字库透明中文字印与图片水印"
+              @click="showWatermarkModal = true; renderWatermarkPreview()"
+            >
+              <template #icon>
+                <n-icon :component="Certificate" />
+              </template>
+              {{ isWatermarkActive ? '水印印章 (已开启)' : '水印印章' }}
             </n-button>
 
             <n-button
@@ -385,7 +813,7 @@ onUnmounted(() => {
 
       <!-- 导出选项卡片 (紧凑) -->
       <n-card size="small" :bordered="true">
-        <div flex items-center justify-center gap-3>
+        <div flex flex-wrap items-center justify-center gap-3>
           <span text-xs class="text-gray-500 whitespace-nowrap">自定义导出文件名：</span>
           <n-input
             v-model:value="customExportName"
@@ -398,7 +826,7 @@ onUnmounted(() => {
               <n-icon :component="FileText" class="text-gray-400" />
             </template>
           </n-input>
-          <span text-xs class="text-gray-400">（支持自由拖拽卡片调整页面先后顺序）</span>
+          <span text-xs class="text-gray-400">（按住卡片左上角手柄拖拽可任意调整页面先后次序，点击卡片可高精全屏预览）</span>
         </div>
       </n-card>
 
@@ -419,17 +847,20 @@ onUnmounted(() => {
           >
             <!-- 卡片顶栏：页码与拖拽手柄 -->
             <div class="card-header">
-              <div flex items-center gap-1.5>
+              <div flex items-center gap-1.5 overflow-hidden>
                 <div class="drag-handle" title="按住拖拽以重新排序">
                   <n-icon size="16" :component="GripVertical" />
                 </div>
-                <span font-bold text-xs>第 {{ index + 1 }} 页</span>
+                <span font-bold text-xs flex-shrink-0>第 {{ index + 1 }} 页</span>
+                <span v-if="sourceDocs.length > 1 && page.sourceDocName" text-10px class="text-primary truncate max-w-110px">
+                  ({{ page.sourceDocName }})
+                </span>
               </div>
-              <span text-11px class="text-gray-400">原第 {{ page.originalPageIndex + 1 }} 页</span>
+              <span text-11px class="text-gray-400 flex-shrink-0">原第 {{ page.originalPageIndex + 1 }} 页</span>
             </div>
 
-            <!-- 缩略图容器 (支持 CSS 顺滑旋转) -->
-            <div class="card-thumb-container">
+            <!-- 缩略图容器 (支持 CSS 顺滑旋转与点击高精大图模态预览) -->
+            <div class="card-thumb-container" @click="openHighResPreview(index)">
               <div
                 class="thumb-rotator"
                 :style="{ transform: `rotate(${page.rotation}deg)` }"
@@ -446,8 +877,17 @@ onUnmounted(() => {
                 </div>
               </div>
 
+              <!-- 悬浮快速全屏预览按钮 -->
+              <div class="preview-btn-overlay" title="高精度全屏大图预览">
+                <n-icon size="18" :component="ZoomIn" />
+              </div>
+
               <!-- 逻辑删除遮罩覆盖 -->
-              <div v-if="page.isDeleted" class="deleted-overlay" @click="handleToggleDelete(page.id)">
+              <div
+                v-if="page.isDeleted"
+                class="deleted-overlay"
+                @click.stop="handleToggleDelete(page.id)"
+              >
                 <div flex flex-col items-center gap-1>
                   <n-icon size="24" :component="History" />
                   <span text-xs font-bold>已标记删除</span>
@@ -501,6 +941,331 @@ onUnmounted(() => {
         </template>
       </Draggable>
     </div>
+
+    <!-- 模态框 1：页面范围拆分与提取 (Page Range Splitting) -->
+    <n-modal
+      v-model:show="showRangeModal"
+      preset="card"
+      title="页面范围拆分与提取"
+      style="width: 520px; max-width: 95vw"
+    >
+      <div flex flex-col gap-3.5>
+        <div text-xs class="text-gray-500">
+          支持使用连续区间和离散页码表达式（例如：<code>1-3, 5, 8-10</code> 或 <code>1~5</code>）。页码基于当前编排后的先后顺序（共 {{ pageDeck.length }} 页）。
+        </div>
+
+        <div>
+          <n-input
+            v-model:value="rangeExpression"
+            placeholder="例如：1-3, 5, 8-12"
+            clearable
+          >
+            <template #prefix>
+              <n-icon :component="Scissors" class="text-gray-400" />
+            </template>
+          </n-input>
+        </div>
+
+        <!-- 匹配提示 -->
+        <div class="bg-gray-50 dark:bg-gray-800 p-2.5 rounded text-xs flex flex-col gap-1">
+          <div flex items-center justify-between>
+            <span font-medium>已识别选定页面：</span>
+            <span class="text-primary font-bold">{{ parsedRangePages.length }} 页</span>
+          </div>
+          <div class="text-gray-400 truncate max-w-full">
+            {{ parsedRangePages.length > 0 ? parsedRangePages.join(', ') : '暂无匹配的有效页码' }}
+          </div>
+        </div>
+
+        <div flex items-center justify-center gap-3 pt-2>
+          <n-button
+            secondary
+            type="info"
+            :disabled="parsedRangePages.length === 0"
+            @click="handleApplyRangeSelection"
+          >
+            仅保留选定页 (其余标记删除)
+          </n-button>
+
+          <n-button
+            type="primary"
+            :loading="isExporting"
+            :disabled="parsedRangePages.length === 0"
+            @click="handleExportRangePdf"
+          >
+            <template #icon>
+              <n-icon :component="Download" />
+            </template>
+            导出选定范围 PDF
+          </n-button>
+        </div>
+      </div>
+    </n-modal>
+
+    <!-- 模态框 2：免字库透明中文字印与图片水印 (Transparent Stamp Rasterizer) -->
+    <n-modal
+      v-model:show="showWatermarkModal"
+      preset="card"
+      title="免字库透明中文字印与图片水印设置"
+      style="width: 620px; max-width: 95vw"
+    >
+      <div flex flex-col gap-4>
+        <!-- 核心说明 -->
+        <div text-xs class="text-gray-500">
+          基于浏览器原生高精度 Canvas 离屏光栅化，100% 离线运行，无需下载昂贵的外部字体库，即可完美呈现任意汉字、标点与 Emoji 水印。
+        </div>
+
+        <!-- 水印类型选择 -->
+        <div flex items-center gap-3>
+          <span text-xs font-bold class="text-gray-600 dark:text-gray-300">水印模式：</span>
+          <n-radio-group v-model:value="watermarkConfig.type" name="watermarkTypeGroup">
+            <n-radio-button value="none">
+              不添加水印
+            </n-radio-button>
+            <n-radio-button value="text">
+              中文字印 (文本)
+            </n-radio-button>
+            <n-radio-button value="image">
+              图片印章 (LOGO)
+            </n-radio-button>
+          </n-radio-group>
+        </div>
+
+        <!-- 文本水印设置项 -->
+        <div v-if="watermarkConfig.type === 'text'" flex flex-col gap-3>
+          <n-form-item label="水印文字内容：" :show-feedback="false">
+            <n-input
+              v-model:value="watermarkConfig.text"
+              placeholder="输入印章水印文本（支持汉字、英文、Emoji）"
+              clearable
+            />
+          </n-form-item>
+
+          <div grid grid-cols-2 gap-3>
+            <n-form-item label="字体大小 (pt)：" :show-feedback="false">
+              <n-input-number
+                v-model:value="watermarkConfig.fontSize"
+                :min="12"
+                :max="96"
+                :step="2"
+                w-full
+              />
+            </n-form-item>
+
+            <n-form-item label="文字颜色：" :show-feedback="false">
+              <n-color-picker
+                v-model:value="watermarkConfig.color"
+                :show-alpha="false"
+                w-full
+              />
+            </n-form-item>
+          </div>
+
+          <div grid grid-cols-2 gap-3>
+            <n-form-item :label="`不透明度：${Math.round((watermarkConfig.opacity || 0.3) * 100)}%`" :show-feedback="false">
+              <n-slider
+                v-model:value="watermarkConfig.opacity"
+                :min="0.05"
+                :max="1.0"
+                :step="0.05"
+              />
+            </n-form-item>
+
+            <n-form-item :label="`倾斜角度：${watermarkConfig.rotation || 0}°`" :show-feedback="false">
+              <n-slider
+                v-model:value="watermarkConfig.rotation"
+                :min="-90"
+                :max="90"
+                :step="5"
+              />
+            </n-form-item>
+          </div>
+
+          <div grid grid-cols-2 gap-3 items-center>
+            <n-form-item label="平铺布局方式：" :show-feedback="false">
+              <n-radio-group v-model:value="watermarkConfig.layout">
+                <n-radio value="center">
+                  居中单印
+                </n-radio>
+                <n-radio value="tile">
+                  全页网格平铺
+                </n-radio>
+              </n-radio-group>
+            </n-form-item>
+
+            <n-form-item
+              v-if="watermarkConfig.layout === 'tile'"
+              :label="`平铺网格间距：${watermarkConfig.tileGap || 140} pt`"
+              :show-feedback="false"
+            >
+              <n-slider
+                v-model:value="watermarkConfig.tileGap"
+                :min="80"
+                :max="240"
+                :step="10"
+              />
+            </n-form-item>
+          </div>
+        </div>
+
+        <!-- 图片水印设置项 -->
+        <div v-if="watermarkConfig.type === 'image'" flex flex-col gap-3>
+          <div flex items-center gap-3>
+            <n-button secondary type="primary" @click="triggerLogoFileInput">
+              <template #icon>
+                <n-icon :component="Photo" />
+              </template>
+              {{ watermarkConfig.imageDataUrl ? '更换图片文件' : '选择图片/LOGO (PNG/JPG)' }}
+            </n-button>
+            <span v-if="watermarkConfig.imageDataUrl" text-xs class="text-green-600">已载入印章图片</span>
+            <span v-else text-xs class="text-gray-400">建议使用透明背景 PNG 图</span>
+          </div>
+
+          <div grid grid-cols-2 gap-3>
+            <n-form-item :label="`缩放比例：${Math.round((watermarkConfig.imageScale || 0.4) * 100)}%`" :show-feedback="false">
+              <n-slider
+                v-model:value="watermarkConfig.imageScale"
+                :min="0.1"
+                :max="1.5"
+                :step="0.05"
+              />
+            </n-form-item>
+
+            <n-form-item :label="`不透明度：${Math.round((watermarkConfig.opacity || 0.3) * 100)}%`" :show-feedback="false">
+              <n-slider
+                v-model:value="watermarkConfig.opacity"
+                :min="0.05"
+                :max="1.0"
+                :step="0.05"
+              />
+            </n-form-item>
+          </div>
+
+          <div grid grid-cols-2 gap-3 items-center>
+            <n-form-item label="布局方式：" :show-feedback="false">
+              <n-radio-group v-model:value="watermarkConfig.layout">
+                <n-radio value="center">
+                  居中印章
+                </n-radio>
+                <n-radio value="tile">
+                  全页网格平铺
+                </n-radio>
+              </n-radio-group>
+            </n-form-item>
+
+            <n-form-item :label="`倾斜角度：${watermarkConfig.rotation || 0}°`" :show-feedback="false">
+              <n-slider
+                v-model:value="watermarkConfig.rotation"
+                :min="-90"
+                :max="90"
+                :step="5"
+              />
+            </n-form-item>
+          </div>
+        </div>
+
+        <!-- 实时印章效果微缩示意画布 -->
+        <div v-if="watermarkConfig.type !== 'none'" flex flex-col items-center gap-1.5 pt-1>
+          <span text-11px class="text-gray-400">印章覆盖效果实时模拟：</span>
+          <div class="watermark-preview-box">
+            <canvas ref="watermarkPreviewCanvasRef" class="watermark-canvas" />
+          </div>
+        </div>
+
+        <div flex items-center justify-center pt-2>
+          <n-button type="primary" @click="showWatermarkModal = false">
+            完成印章配置并应用
+          </n-button>
+        </div>
+      </div>
+    </n-modal>
+
+    <!-- 模态框 3：高分辨率全屏大图预览 (High-Resolution Modal Preview) -->
+    <n-modal
+      v-model:show="showPreviewModal"
+      preset="card"
+      :title="previewModalTitle"
+      style="width: 86vw; max-width: 920px"
+    >
+      <div flex flex-col items-center gap-3>
+        <!-- 核心预览视口 -->
+        <div class="modal-preview-viewport">
+          <div v-if="isPreviewLoading" class="preview-spinner-overlay">
+            <n-spin size="large" description="正在高分辨率光栅化渲染页面..." />
+          </div>
+
+          <div
+            class="modal-preview-rotator"
+            :style="{ transform: `rotate(${currentPreviewPage?.rotation || 0}deg)` }"
+          >
+            <canvas ref="previewCanvasRef" class="high-res-canvas" />
+          </div>
+        </div>
+
+        <!-- 快捷翻页与旋转删减工具栏 (严格水平居中) -->
+        <div flex flex-wrap items-center justify-center gap-2.5 pt-2>
+          <n-button
+            secondary
+            size="small"
+            :disabled="previewPageIndex <= 0"
+            @click="handlePrevPreview"
+          >
+            <template #icon>
+              <n-icon :component="ArrowLeft" />
+            </template>
+            上一页 (←)
+          </n-button>
+
+          <n-button
+            secondary
+            size="small"
+            type="info"
+            @click="handlePreviewRotate(-90)"
+          >
+            <template #icon>
+              <n-icon :component="Rotate" />
+            </template>
+            逆时针 90°
+          </n-button>
+
+          <n-button
+            secondary
+            size="small"
+            type="info"
+            @click="handlePreviewRotate(90)"
+          >
+            <template #icon>
+              <n-icon :component="RotateClockwise" />
+            </template>
+            顺时针 90°
+          </n-button>
+
+          <n-button
+            secondary
+            size="small"
+            :type="currentPreviewPage?.isDeleted ? 'primary' : 'error'"
+            @click="handlePreviewToggleDelete"
+          >
+            <template #icon>
+              <n-icon :component="currentPreviewPage?.isDeleted ? History : Trash" />
+            </template>
+            {{ currentPreviewPage?.isDeleted ? '恢复此页' : '删除此页' }}
+          </n-button>
+
+          <n-button
+            secondary
+            size="small"
+            :disabled="previewPageIndex >= pageDeck.length - 1"
+            @click="handleNextPreview"
+          >
+            下一页 (→)
+            <template #icon>
+              <n-icon :component="ArrowRight" />
+            </template>
+          </n-button>
+        </div>
+      </div>
+    </n-modal>
   </div>
 </template>
 
@@ -573,6 +1338,7 @@ onUnmounted(() => {
   overflow: hidden;
   padding: 8px;
   box-sizing: border-box;
+  cursor: pointer;
 }
 
 .thumb-rotator {
@@ -597,6 +1363,28 @@ onUnmounted(() => {
   flex-direction: column;
   align-items: center;
   justify-content: center;
+}
+
+.preview-btn-overlay {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background-color: rgba(0, 0, 0, 0.55);
+  color: #ffffff;
+  border-radius: 50%;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.2s, transform 0.2s;
+  pointer-events: none;
+}
+
+.card-thumb-container:hover .preview-btn-overlay {
+  opacity: 1;
+  transform: scale(1.05);
 }
 
 .deleted-overlay {
@@ -627,5 +1415,60 @@ onUnmounted(() => {
   padding: 6px 8px;
   border-top: 1px solid var(--n-border-color);
   background-color: var(--n-color);
+}
+
+.modal-preview-viewport {
+  position: relative;
+  width: 100%;
+  max-height: 65vh;
+  min-height: 380px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--n-color-embedded);
+  border-radius: 6px;
+  overflow: auto;
+  padding: 16px;
+}
+
+.preview-spinner-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(255, 255, 255, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+}
+
+.modal-preview-rotator {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.25s ease;
+}
+
+.high-res-canvas {
+  max-width: 100%;
+  max-height: 60vh;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+  border-radius: 4px;
+}
+
+.watermark-preview-box {
+  width: 320px;
+  height: 180px;
+  border-radius: 4px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.watermark-canvas {
+  width: 100%;
+  height: 100%;
+  display: block;
 }
 </style>

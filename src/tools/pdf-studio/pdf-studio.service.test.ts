@@ -8,8 +8,10 @@ import { describe, expect, it } from 'vitest';
 import { PDFDocument } from '@cantoo/pdf-lib';
 import {
   createVirtualDeck,
+  createVirtualDeckForDoc,
   exportPdfFromDeck,
   normalizeAngle,
+  parsePageRange,
   recoverAllDeletedPages,
   rotateAllPages,
   rotatePage,
@@ -43,6 +45,36 @@ describe('pdf-studio.service', () => {
     });
   });
 
+  describe('parsePageRange 页面范围表达式解析', () => {
+    it('正确解析离散单页表达式', () => {
+      expect(parsePageRange('1, 3, 5', 10)).toEqual([1, 3, 5]);
+      expect(parsePageRange('4', 5)).toEqual([4]);
+    });
+
+    it('正确解析连续区间表达式 (例如 1-3, 5, 8-10)', () => {
+      expect(parsePageRange('1-3, 5, 8-10', 12)).toEqual([1, 2, 3, 5, 8, 9, 10]);
+    });
+
+    it('支持反向区间、波浪线、中文逗号与分号混合输入', () => {
+      expect(parsePageRange('5-3，1～2；7~8', 10)).toEqual([1, 2, 3, 4, 5, 7, 8]);
+    });
+
+    it('自动去重并按升序排列', () => {
+      expect(parsePageRange('5, 3-6, 1, 2, 4', 10)).toEqual([1, 2, 3, 4, 5, 6]);
+    });
+
+    it('严格过滤超出页码上限与小于等于0的非法值', () => {
+      expect(parsePageRange('0, -2, 3, 8-15, abc', 10)).toEqual([3, 8, 9, 10]);
+    });
+
+    it('面对空输入或非法格式返回空数组', () => {
+      expect(parsePageRange('', 10)).toEqual([]);
+      expect(parsePageRange('   ', 10)).toEqual([]);
+      expect(parsePageRange('invalid-tokens', 10)).toEqual([]);
+      expect(parsePageRange('1-3', 0)).toEqual([]);
+    });
+  });
+
   describe('Virtual Page Deck 甲板基础状态操作', () => {
     const sourceDocs: SourceDocumentItem[] = [
       {
@@ -54,13 +86,18 @@ describe('pdf-studio.service', () => {
       },
     ];
 
-    it('createVirtualDeck 能够正确初始化页面列表', () => {
+    it('createVirtualDeck 与 createVirtualDeckForDoc 能够正确初始化页面列表并关联来源名', () => {
       const deck = createVirtualDeck(sourceDocs);
       expect(deck.length).toBe(3);
       expect(deck[0].id).toBe('page_doc_1_0');
+      expect(deck[0].sourceDocName).toBe('合同.pdf');
       expect(deck[0].originalPageIndex).toBe(0);
       expect(deck[0].rotation).toBe(0);
       expect(deck[0].isDeleted).toBe(false);
+
+      const singleDocPages = createVirtualDeckForDoc(sourceDocs[0]);
+      expect(singleDocPages.length).toBe(3);
+      expect(singleDocPages[1].sourceDocName).toBe('合同.pdf');
     });
 
     it('rotatePage 单独旋转目标页面', () => {
@@ -104,7 +141,7 @@ describe('pdf-studio.service', () => {
     });
   });
 
-  describe('exportPdfFromDeck 导出编译', () => {
+  describe('exportPdfFromDeck 导出编译与增强特性', () => {
     it('当所有页面均被删除时抛出拦截异常', async () => {
       const mockBytes = await createMockPdf(2);
       const docs: SourceDocumentItem[] = [
@@ -158,5 +195,75 @@ describe('pdf-studio.service', () => {
       // 第 2 页对应原第 1 页 (旋转 90°)
       expect(loaded.getPage(1).getRotation().angle).toBe(90);
     });
+
+    it('多文档追加合并导出：跨多个文档自由编排合并为一个 PDF', async () => {
+      const bytesDoc1 = await createMockPdf(2, '文档1');
+      const bytesDoc2 = await createMockPdf(3, '文档2');
+
+      const docs: SourceDocumentItem[] = [
+        {
+          id: 'doc_1',
+          name: '文档1.pdf',
+          size: bytesDoc1.length,
+          bytes: bytesDoc1,
+          pageCount: 2,
+        },
+        {
+          id: 'doc_2',
+          name: '文档2.pdf',
+          size: bytesDoc2.length,
+          bytes: bytesDoc2,
+          pageCount: 3,
+        },
+      ];
+
+      // 初始合并 2 + 3 = 5 页
+      const deck = createVirtualDeck(docs);
+      expect(deck.length).toBe(5);
+
+      // 交错重排：文档2的第1页, 文档1的第1页, 文档2的第2页
+      const reorderedDeck = [deck[2], deck[0], deck[3]];
+      const result = await exportPdfFromDeck(reorderedDeck, docs, {
+        customFileName: '多文档合并成果',
+      });
+
+      expect(result.pageCount).toBe(3);
+      expect(result.fileName).toBe('多文档合并成果.pdf');
+
+      const loaded = await PDFDocument.load(result.bytes);
+      expect(loaded.getPageCount()).toBe(3);
+    });
+
+    it('支持传递水印配置选项并平稳导出', async () => {
+      const mockBytes = await createMockPdf(2, '测试水印');
+      const docs: SourceDocumentItem[] = [
+        {
+          id: 'doc_w',
+          name: '测试水印.pdf',
+          size: mockBytes.length,
+          bytes: mockBytes,
+          pageCount: 2,
+        },
+      ];
+      const deck = createVirtualDeck(docs);
+
+      const result = await exportPdfFromDeck(deck, docs, {
+        customFileName: '带水印导出',
+        watermark: {
+          type: 'text',
+          text: '内部保密 · 绝密文件 🈲',
+          fontSize: 32,
+          color: '#ff0000',
+          opacity: 0.3,
+          rotation: -45,
+          layout: 'tile',
+        },
+      });
+
+      expect(result.pageCount).toBe(2);
+      expect(result.fileName).toBe('带水印导出.pdf');
+      expect(result.bytes.length).toBeGreaterThan(0);
+    });
   });
 });
+
