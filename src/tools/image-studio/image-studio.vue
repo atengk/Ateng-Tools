@@ -8,6 +8,7 @@
 import { useMessage } from 'naive-ui';
 import { computed, nextTick, onMounted, onUnmounted, ref, shallowRef, watch } from 'vue';
 import {
+  Certificate,
   Check,
   Columns,
   Crop,
@@ -16,8 +17,10 @@ import {
   FlipHorizontal,
   FlipVertical,
   Focus,
+  GridDots,
   History,
   InfoCircle,
+  LayoutGrid,
   Link,
   Maximize,
   Photo,
@@ -25,7 +28,9 @@ import {
   Rotate,
   RotateClockwise,
   Scale,
+  Typography,
   Unlink,
+  Upload,
   X,
   ZoomIn,
   ZoomOut,
@@ -50,7 +55,9 @@ import {
   type ExportImageFormat,
   type ImageSourceInfo,
   MAX_SAFE_IMAGE_DIMENSION,
+  type StudioWatermarkConfig,
   type TransformOptions,
+  type WatermarkAnchor,
 } from './image-studio.types';
 import { formatBytes } from '@/utils/convert';
 
@@ -94,6 +101,36 @@ const viewportZoom = ref(1.0);
 const viewportContainerRef = ref<HTMLElement | null>(null);
 const imageWrapperRef = ref<HTMLElement | null>(null);
 
+// 图文双模水印与全屏防盗阵列
+const watermarkConfig = ref<StudioWatermarkConfig>({
+  enabled: false,
+  mode: 'text',
+  text: {
+    text: '内部资料 严禁外传',
+    fontSize: 28,
+    color: '#999999',
+    opacity: 0.35,
+    rotation: -45,
+    isTiled: true,
+    tileGapX: 120,
+    tileGapY: 100,
+    anchor: 'bottom-right',
+    margin: 20,
+  },
+  image: {
+    imageDataUrl: '',
+    scale: 0.3,
+    opacity: 0.5,
+    anchor: 'bottom-right',
+    margin: 20,
+    rotation: 0,
+    isTiled: false,
+    tileGap: 140,
+  },
+});
+const loadedLogoImage = shallowRef<HTMLImageElement | null>(null);
+const logoInputRef = ref<HTMLInputElement | null>(null);
+
 // 导出与压缩配置
 const exportFormat = ref<ExportImageFormat>('image/webp');
 const exportQuality = ref(90);
@@ -107,6 +144,21 @@ let estimateDebounceTimer: ReturnType<typeof setTimeout> | null = null;
 
 // 隐藏的原生文件输入框
 const fileInputRef = ref<HTMLInputElement | null>(null);
+
+/**
+ * 九宫格锚点选项定义
+ */
+const anchorGridList: WatermarkAnchor[] = [
+  'top-left',
+  'top-center',
+  'top-right',
+  'middle-left',
+  'center',
+  'middle-right',
+  'bottom-left',
+  'bottom-center',
+  'bottom-right',
+];
 
 /**
  * 当前画面基准物理尺寸 (考虑已应用裁剪与旋转 90/270 之后的尺寸)
@@ -135,10 +187,41 @@ const sizeChangeRate = computed(() => {
 });
 
 /**
- * 触发文件选择
+ * 触发主图像文件选择
  */
 function triggerFileInput() {
   fileInputRef.value?.click();
+}
+
+/**
+ * 触发 Logo 图片文件选择
+ */
+function triggerLogoInput() {
+  logoInputRef.value?.click();
+}
+
+/**
+ * 处理 Logo 文件上传
+ */
+async function onLogoFileChange(event: Event) {
+  const input = event.target as HTMLInputElement;
+  const file = input.files?.[0];
+  if (!file) return;
+
+  try {
+    const img = await loadImageFromBlobOrDataUrl(file);
+    loadedLogoImage.value = img;
+    watermarkConfig.value.image.imageDataUrl = URL.createObjectURL(file);
+    watermarkConfig.value.mode = 'image';
+    message.success(`已载入水印 LOGO “${file.name}”`);
+    updatePipelinePreview();
+  }
+  catch {
+    message.error('水印 Logo 图片解析失败');
+  }
+  finally {
+    input.value = '';
+  }
 }
 
 /**
@@ -576,6 +659,8 @@ function updatePipelinePreview() {
         transform: transform.value,
         targetWidth: targetWidth.value,
         targetHeight: targetHeight.value,
+        watermark: watermarkConfig.value,
+        loadedLogoImage: loadedLogoImage.value,
       });
 
       const quality = exportFormat.value === 'image/png' ? 1.0 : exportQuality.value / 100;
@@ -604,6 +689,20 @@ watch(
     () => transform.value.rotation,
     () => transform.value.flipHorizontal,
     () => transform.value.flipVertical,
+    () => watermarkConfig.value.enabled,
+    () => watermarkConfig.value.mode,
+    () => watermarkConfig.value.text.text,
+    () => watermarkConfig.value.text.fontSize,
+    () => watermarkConfig.value.text.color,
+    () => watermarkConfig.value.text.opacity,
+    () => watermarkConfig.value.text.rotation,
+    () => watermarkConfig.value.text.isTiled,
+    () => watermarkConfig.value.text.anchor,
+    () => watermarkConfig.value.text.margin,
+    () => watermarkConfig.value.image.scale,
+    () => watermarkConfig.value.image.opacity,
+    () => watermarkConfig.value.image.anchor,
+    () => watermarkConfig.value.image.isTiled,
   ],
   () => {
     if (imageSource.value) {
@@ -633,6 +732,8 @@ async function handleExportDownload() {
       transform: transform.value,
       targetWidth: targetWidth.value,
       targetHeight: targetHeight.value,
+      watermark: watermarkConfig.value,
+      loadedLogoImage: loadedLogoImage.value,
     });
 
     const quality = exportFormat.value === 'image/png' ? 1.0 : exportQuality.value / 100;
@@ -707,6 +808,13 @@ onUnmounted(() => {
       accept="image/png,image/jpeg,image/webp,image/svg+xml,image/bmp,image/gif"
       style="display: none"
       @change="onNativeFileChange"
+    >
+    <input
+      ref="logoInputRef"
+      type="file"
+      accept="image/png,image/jpeg,image/svg+xml"
+      style="display: none"
+      @change="onLogoFileChange"
     >
 
     <!-- 初始上传区域 (无图片时展示) -->
@@ -896,7 +1004,7 @@ onUnmounted(() => {
               </div>
             </div>
 
-            <!-- 模式 3：标准预览模式 (经过非破坏性渲染管线) -->
+            <!-- 模式 3：标准预览模式 (经过非破坏性渲染管线与水印) -->
             <div
               v-else
               class="standard-preview-container"
@@ -1080,7 +1188,187 @@ onUnmounted(() => {
           </div>
         </n-card>
 
-        <!-- 卡片 3：尺寸缩放调节 -->
+        <!-- 卡片 3：图文双模水印与全屏防盗阵列 -->
+        <n-card size="small" :bordered="true">
+          <template #header>
+            <div flex items-center justify-between text-sm>
+              <div flex items-center gap-2>
+                <n-icon size="18" class="text-primary" :component="Certificate" />
+                <span>图文水印与防盗阵列</span>
+              </div>
+              <!-- 全局启用开关 -->
+              <div flex items-center gap-1.5>
+                <n-switch v-model:value="watermarkConfig.enabled" size="small" />
+                <span text-11px class="text-gray-400">{{ watermarkConfig.enabled ? '已启用' : '未启用' }}</span>
+              </div>
+            </div>
+          </template>
+
+          <div v-if="watermarkConfig.enabled" flex flex-col gap-3.5>
+            <!-- 水印模式切换 -->
+            <div flex items-center justify-center>
+              <n-radio-group v-model:value="watermarkConfig.mode" size="small">
+                <n-radio-button value="text">
+                  <div flex items-center gap-1>
+                    <n-icon size="14" :component="Typography" />
+                    <span>文字水印</span>
+                  </div>
+                </n-radio-button>
+                <n-radio-button value="image">
+                  <div flex items-center gap-1>
+                    <n-icon size="14" :component="Photo" />
+                    <span>Logo 图片</span>
+                  </div>
+                </n-radio-button>
+              </n-radio-group>
+            </div>
+
+            <!-- 文字水印专属配置 -->
+            <div v-if="watermarkConfig.mode === 'text'" flex flex-col gap-2.5>
+              <div>
+                <span text-11px class="text-gray-500 mb-1 block">水印文本：</span>
+                <n-input
+                  v-model:value="watermarkConfig.text.text"
+                  placeholder="输入水印文字内容"
+                  size="small"
+                  clearable
+                />
+              </div>
+
+              <div grid grid-cols-2 gap-2.5>
+                <div>
+                  <span text-11px class="text-gray-500 mb-1 block">字号 ({{ watermarkConfig.text.fontSize }}px)：</span>
+                  <n-slider
+                    v-model:value="watermarkConfig.text.fontSize"
+                    :min="12"
+                    :max="100"
+                    :step="2"
+                  />
+                </div>
+
+                <div>
+                  <span text-11px class="text-gray-500 mb-1 block">文字颜色：</span>
+                  <n-color-picker
+                    v-model:value="watermarkConfig.text.color"
+                    :show-alpha="false"
+                    size="small"
+                  />
+                </div>
+              </div>
+
+              <div grid grid-cols-2 gap-2.5>
+                <div>
+                  <span text-11px class="text-gray-500 mb-1 block">不透明度 ({{ Math.round(watermarkConfig.text.opacity * 100) }}%)：</span>
+                  <n-slider
+                    v-model:value="watermarkConfig.text.opacity"
+                    :min="0.05"
+                    :max="1.0"
+                    :step="0.05"
+                  />
+                </div>
+
+                <div>
+                  <span text-11px class="text-gray-500 mb-1 block">旋转角度 ({{ watermarkConfig.text.rotation }}°)：</span>
+                  <n-slider
+                    v-model:value="watermarkConfig.text.rotation"
+                    :min="-90"
+                    :max="90"
+                    :step="5"
+                  />
+                </div>
+              </div>
+
+              <!-- 全屏对角平铺开关 -->
+              <div flex items-center justify-between pt-1>
+                <div flex items-center gap-1.5>
+                  <n-icon size="16" class="text-primary" :component="GridDots" />
+                  <span text-xs font-medium>全屏对角平铺阵列 (防盗)</span>
+                </div>
+                <n-switch v-model:value="watermarkConfig.text.isTiled" size="small" />
+              </div>
+
+              <!-- 非平铺模式：九宫格锚点选择 -->
+              <div v-if="!watermarkConfig.text.isTiled" flex flex-col gap-1.5 pt-1>
+                <span text-11px class="text-gray-500">九宫格停靠定位：</span>
+                <div class="anchor-grid-wrapper">
+                  <div
+                    v-for="anchor in anchorGridList"
+                    :key="anchor"
+                    class="anchor-grid-cell"
+                    :class="{ active: watermarkConfig.text.anchor === anchor }"
+                    :title="anchor"
+                    @click="watermarkConfig.text.anchor = anchor"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <!-- 图片 Logo 水印专属配置 -->
+            <div v-if="watermarkConfig.mode === 'image'" flex flex-col gap-2.5>
+              <div>
+                <n-button size="small" block secondary type="primary" @click="triggerLogoInput">
+                  <template #icon>
+                    <n-icon :component="Upload" />
+                  </template>
+                  {{ watermarkConfig.image.imageDataUrl ? '更换水印 LOGO' : '上传水印 LOGO (PNG)' }}
+                </n-button>
+              </div>
+
+              <div v-if="watermarkConfig.image.imageDataUrl" flex flex-col gap-2.5>
+                <div grid grid-cols-2 gap-2.5>
+                  <div>
+                    <span text-11px class="text-gray-500 mb-1 block">Logo 缩放 ({{ Math.round(watermarkConfig.image.scale * 100) }}%)：</span>
+                    <n-slider
+                      v-model:value="watermarkConfig.image.scale"
+                      :min="0.05"
+                      :max="1.0"
+                      :step="0.05"
+                    />
+                  </div>
+
+                  <div>
+                    <span text-11px class="text-gray-500 mb-1 block">不透明度 ({{ Math.round(watermarkConfig.image.opacity * 100) }}%)：</span>
+                    <n-slider
+                      v-model:value="watermarkConfig.image.opacity"
+                      :min="0.05"
+                      :max="1.0"
+                      :step="0.05"
+                    />
+                  </div>
+                </div>
+
+                <!-- 图片全屏平铺开关 -->
+                <div flex items-center justify-between pt-1>
+                  <div flex items-center gap-1.5>
+                    <n-icon size="16" class="text-primary" :component="GridDots" />
+                    <span text-xs font-medium>全屏对角平铺阵列</span>
+                  </div>
+                  <n-switch v-model:value="watermarkConfig.image.isTiled" size="small" />
+                </div>
+
+                <!-- 非平铺模式：九宫格锚点选择 -->
+                <div v-if="!watermarkConfig.image.isTiled" flex flex-col gap-1.5 pt-1>
+                  <span text-11px class="text-gray-500">九宫格停靠定位：</span>
+                  <div class="anchor-grid-wrapper">
+                    <div
+                      v-for="anchor in anchorGridList"
+                      :key="anchor"
+                      class="anchor-grid-cell"
+                      :class="{ active: watermarkConfig.image.anchor === anchor }"
+                      :title="anchor"
+                      @click="watermarkConfig.image.anchor = anchor"
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div v-else text-11px class="text-gray-400 py-1 text-center">
+            点击上方开关开启防盗文字或 LOGO 水印
+          </div>
+        </n-card>
+
+        <!-- 卡片 4：尺寸缩放调节 -->
         <n-card size="small" :bordered="true">
           <template #header>
             <div flex items-center justify-between text-sm>
@@ -1153,7 +1441,7 @@ onUnmounted(() => {
           </div>
         </n-card>
 
-        <!-- 卡片 4：格式压缩与导出下载 -->
+        <!-- 卡片 5：格式压缩与导出下载 -->
         <n-card size="small" :bordered="true">
           <template #header>
             <div flex items-center gap-2 text-sm>
@@ -1484,6 +1772,39 @@ onUnmounted(() => {
   height: 14px;
   border-left: 2px solid #94a3b8;
   border-right: 2px solid #94a3b8;
+}
+
+/* 九宫格锚点选择器小组件 */
+.anchor-grid-wrapper {
+  display: grid;
+  grid-template-columns: repeat(3, 28px);
+  gap: 4px;
+  width: fit-content;
+  background-color: var(--n-color-embedded);
+  padding: 4px;
+  border-radius: 4px;
+  border: 1px solid var(--n-border-color);
+}
+
+.anchor-grid-cell {
+  width: 28px;
+  height: 28px;
+  border-radius: 3px;
+  background-color: var(--n-color);
+  border: 1px solid var(--n-border-color);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.anchor-grid-cell:hover {
+  border-color: var(--n-primary-color);
+  transform: scale(1.05);
+}
+
+.anchor-grid-cell.active {
+  background-color: var(--n-primary-color);
+  border-color: var(--n-primary-color);
+  box-shadow: 0 0 0 1px var(--n-primary-color);
 }
 
 /* 经典透明棋盘格纹理底色 */

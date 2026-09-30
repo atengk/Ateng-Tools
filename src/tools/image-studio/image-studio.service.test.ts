@@ -6,6 +6,7 @@
  */
 import { describe, expect, it } from 'vitest';
 import {
+  calculateAnchorPosition,
   calculateDimensionsByHeight,
   calculateDimensionsByPercentage,
   calculateDimensionsByWidth,
@@ -171,5 +172,59 @@ describe('image-studio.service', () => {
       expect(getAspectRatioValue('2:1')).toBe(2.0);
     });
   });
+
+  describe('calculateAnchorPosition 九宫格锚点坐标定位算法', () => {
+    const canvasW = 1000;
+    const canvasH = 800;
+    const itemW = 200;
+    const itemH = 100;
+    const margin = 20;
+
+    it('正确计算顶部 3 个锚点 (top-left, top-center, top-right)', () => {
+      expect(calculateAnchorPosition(canvasW, canvasH, itemW, itemH, 'top-left', margin)).toEqual({
+        x: 20,
+        y: 20,
+      });
+      expect(calculateAnchorPosition(canvasW, canvasH, itemW, itemH, 'top-center', margin)).toEqual({
+        x: 400, // (1000 - 200) / 2
+        y: 20,
+      });
+      expect(calculateAnchorPosition(canvasW, canvasH, itemW, itemH, 'top-right', margin)).toEqual({
+        x: 780, // 1000 - 200 - 20
+        y: 20,
+      });
+    });
+
+    it('正确计算中部 3 个锚点 (middle-left, center, middle-right)', () => {
+      expect(calculateAnchorPosition(canvasW, canvasH, itemW, itemH, 'middle-left', margin)).toEqual({
+        x: 20,
+        y: 350, // (800 - 100) / 2
+      });
+      expect(calculateAnchorPosition(canvasW, canvasH, itemW, itemH, 'center', margin)).toEqual({
+        x: 400,
+        y: 350,
+      });
+      expect(calculateAnchorPosition(canvasW, canvasH, itemW, itemH, 'middle-right', margin)).toEqual({
+        x: 780,
+        y: 350,
+      });
+    });
+
+    it('正确计算底部 3 个锚点 (bottom-left, bottom-center, bottom-right)', () => {
+      expect(calculateAnchorPosition(canvasW, canvasH, itemW, itemH, 'bottom-left', margin)).toEqual({
+        x: 20,
+        y: 680, // 800 - 100 - 20
+      });
+      expect(calculateAnchorPosition(canvasW, canvasH, itemW, itemH, 'bottom-center', margin)).toEqual({
+        x: 400,
+        y: 680,
+      });
+      expect(calculateAnchorPosition(canvasW, canvasH, itemW, itemH, 'bottom-right', margin)).toEqual({
+        x: 780,
+        y: 680,
+      });
+    });
+  });
 });
+
 

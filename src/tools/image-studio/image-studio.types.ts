@@ -112,6 +112,87 @@ export interface CropRegion {
 export type CropAspectRatio = 'free' | '1:1' | '16:9' | '4:3' | '3:2' | '2:1';
 
 /**
+ * 水印模式
+ */
+export type WatermarkMode = 'none' | 'text' | 'image';
+
+/**
+ * 九宫格对齐锚点
+ */
+export type WatermarkAnchor =
+  | 'top-left'
+  | 'top-center'
+  | 'top-right'
+  | 'middle-left'
+  | 'center'
+  | 'middle-right'
+  | 'bottom-left'
+  | 'bottom-center'
+  | 'bottom-right';
+
+/**
+ * 文本水印配置
+ */
+export interface TextWatermarkConfig {
+  /** 文本内容 */
+  text: string;
+  /** 字号 (px) */
+  fontSize: number;
+  /** 文字颜色 (十六进制) */
+  color: string;
+  /** 不透明度 (0.01 - 1.0) */
+  opacity: number;
+  /** 倾斜角度 (度) */
+  rotation: number;
+  /** 是否开启全屏倾斜平铺防盗阵列 */
+  isTiled: boolean;
+  /** 平铺水平间距 (px) */
+  tileGapX: number;
+  /** 平铺垂直间距 (px) */
+  tileGapY: number;
+  /** 九宫格停靠锚点 (非平铺模式下生效) */
+  anchor: WatermarkAnchor;
+  /** 边距 (px) */
+  margin: number;
+}
+
+/**
+ * 图片 Logo 水印配置
+ */
+export interface ImageWatermarkConfig {
+  /** 图片 DataURL 或 Blob URL */
+  imageDataUrl: string;
+  /** 缩放比例 (0.05 - 1.0) */
+  scale: number;
+  /** 不透明度 (0.01 - 1.0) */
+  opacity: number;
+  /** 九宫格停靠锚点 */
+  anchor: WatermarkAnchor;
+  /** 边距 (px) */
+  margin: number;
+  /** 倾斜旋转角度 (度) */
+  rotation: number;
+  /** 是否全屏平铺 */
+  isTiled: boolean;
+  /** 平铺间距 */
+  tileGap: number;
+}
+
+/**
+ * 综合水印设置
+ */
+export interface StudioWatermarkConfig {
+  /** 是否全局开启水印 */
+  enabled: boolean;
+  /** 水印模式 (text 或 image) */
+  mode: WatermarkMode;
+  /** 文字水印配置 */
+  text: TextWatermarkConfig;
+  /** 图片水印配置 */
+  image: ImageWatermarkConfig;
+}
+
+/**
  * 综合渲染管线参数
  */
 export interface RenderPipelineOptions {
@@ -123,5 +204,8 @@ export interface RenderPipelineOptions {
   targetWidth?: number;
   /** 最终目标高度 (可选) */
   targetHeight?: number;
+  /** 水印配置 (可选) */
+  watermark?: StudioWatermarkConfig;
 }
+
 

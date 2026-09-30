@@ -8,6 +8,8 @@ import {
   type ExportImageFormat,
   MAX_SAFE_IMAGE_DIMENSION,
   MIN_SAFE_IMAGE_DIMENSION,
+  type StudioWatermarkConfig,
+  type WatermarkAnchor,
 } from './image-studio.types';
 
 /**
@@ -434,23 +436,217 @@ export function renderImagePipeline(
   const finalW = options.targetWidth ? clampDimension(options.targetWidth) : transformedCanvas.width;
   const finalH = options.targetHeight ? clampDimension(options.targetHeight) : transformedCanvas.height;
 
+  let finalCanvas: HTMLCanvasElement;
   if (finalW === transformedCanvas.width && finalH === transformedCanvas.height) {
-    return transformedCanvas;
+    finalCanvas = transformedCanvas;
+  }
+  else {
+    finalCanvas = document.createElement('canvas');
+    finalCanvas.width = finalW;
+    finalCanvas.height = finalH;
+
+    const finalCtx = finalCanvas.getContext('2d');
+    if (!finalCtx) {
+      throw new Error('最终缩放画布初始化失败');
+    }
+
+    finalCtx.imageSmoothingEnabled = true;
+    finalCtx.imageSmoothingQuality = 'high';
+    finalCtx.drawImage(transformedCanvas, 0, 0, finalW, finalH);
   }
 
-  const finalCanvas = document.createElement('canvas');
-  finalCanvas.width = finalW;
-  finalCanvas.height = finalH;
-
-  const finalCtx = finalCanvas.getContext('2d');
-  if (!finalCtx) {
-    throw new Error('最终缩放画布初始化失败');
+  // 5. 阶段四：叠加图文水印
+  if (options.watermark && options.watermark.enabled) {
+    applyWatermarkToCanvas(finalCanvas, options.watermark, options.loadedLogoImage);
   }
-
-  finalCtx.imageSmoothingEnabled = true;
-  finalCtx.imageSmoothingQuality = 'high';
-  finalCtx.drawImage(transformedCanvas, 0, 0, finalW, finalH);
 
   return finalCanvas;
 }
+
+/**
+ * 根据九宫格锚点计算水印元素左上角 (x, y) 目标坐标
+ *
+ * @param canvasW 画布宽度
+ * @param canvasH 画布高度
+ * @param itemW 水印内容宽度
+ * @param itemH 水印内容高度
+ * @param anchor 九宫格锚点位置
+ * @param margin 距离画布边缘的最小安全边距 (默认 20px)
+ * @returns 水印左上角坐标 { x, y }
+ */
+export function calculateAnchorPosition(
+  canvasW: number,
+  canvasH: number,
+  itemW: number,
+  itemH: number,
+  anchor: WatermarkAnchor,
+  margin = 20,
+): { x: number; y: number } {
+  const safeMargin = Math.max(0, margin);
+
+  let x = 0;
+  let y = 0;
+
+  // 1. 水平 X 轴锚点计算
+  if (anchor === 'top-left' || anchor === 'middle-left' || anchor === 'bottom-left') {
+    x = safeMargin;
+  }
+  else if (anchor === 'top-center' || anchor === 'center' || anchor === 'bottom-center') {
+    x = Math.round((canvasW - itemW) / 2);
+  }
+  else {
+    // right
+    x = Math.round(canvasW - itemW - safeMargin);
+  }
+
+  // 2. 垂直 Y 轴锚点计算
+  if (anchor === 'top-left' || anchor === 'top-center' || anchor === 'top-right') {
+    y = safeMargin;
+  }
+  else if (anchor === 'middle-left' || anchor === 'center' || anchor === 'middle-right') {
+    y = Math.round((canvasH - itemH) / 2);
+  }
+  else {
+    // bottom
+    y = Math.round(canvasH - itemH - safeMargin);
+  }
+
+  return { x, y };
+}
+
+/**
+ * 在目标 Canvas 画布上叠加绘制图文水印
+ *
+ * @param canvas 目标绘制画布
+ * @param watermark 水印配置项
+ * @param loadedLogoImg 预先加载好的图片水印 DOM 元素 (可选)
+ */
+export function applyWatermarkToCanvas(
+  canvas: HTMLCanvasElement,
+  watermark: StudioWatermarkConfig,
+  loadedLogoImg?: HTMLImageElement | null,
+): void {
+  if (!watermark.enabled || watermark.mode === 'none') {
+    return;
+  }
+
+  const ctx = canvas.getContext('2d');
+  if (!ctx) return;
+
+  const canvasW = canvas.width;
+  const canvasH = canvas.height;
+
+  if (watermark.mode === 'text') {
+    const cfg = watermark.text;
+    const text = cfg.text?.trim();
+    if (!text) return;
+
+    const fontSize = Math.max(10, cfg.fontSize || 28);
+    const opacity = Math.max(0.01, Math.min(1.0, cfg.opacity ?? 0.3));
+    const rotationRad = ((cfg.rotation ?? -45) * Math.PI) / 180;
+    const color = cfg.color || '#999999';
+
+    ctx.save();
+    ctx.font = `bold ${fontSize}px "PingFang SC", "Microsoft YaHei", "Noto Sans SC", sans-serif`;
+    ctx.fillStyle = color;
+    ctx.globalAlpha = opacity;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+
+    if (cfg.isTiled) {
+      // 全屏倾斜平铺防盗阵列
+      const textMetrics = ctx.measureText(text);
+      const textW = textMetrics.width;
+      const stepX = Math.max(80, textW + (cfg.tileGapX || 120));
+      const stepY = Math.max(60, fontSize + (cfg.tileGapY || 100));
+
+      const bound = Math.max(canvasW, canvasH) * 1.5;
+      let rowIndex = 0;
+
+      for (let y = -bound; y < canvasH + bound; y += stepY) {
+        const rowOffsetX = (rowIndex % 2 === 1) ? stepX / 2 : 0;
+        for (let x = -bound + rowOffsetX; x < canvasW + bound; x += stepX) {
+          ctx.save();
+          ctx.translate(x, y);
+          ctx.rotate(rotationRad);
+          ctx.fillText(text, 0, 0);
+          ctx.restore();
+        }
+        rowIndex++;
+      }
+    }
+    else {
+      // 九宫格单点停靠
+      const textMetrics = ctx.measureText(text);
+      const textW = textMetrics.width;
+      const textH = fontSize;
+
+      const pos = calculateAnchorPosition(
+        canvasW,
+        canvasH,
+        textW,
+        textH,
+        cfg.anchor || 'bottom-right',
+        cfg.margin ?? 24,
+      );
+
+      ctx.save();
+      // 平移到文本中心
+      ctx.translate(pos.x + textW / 2, pos.y + textH / 2);
+      ctx.rotate(rotationRad);
+      ctx.fillText(text, 0, 0);
+      ctx.restore();
+    }
+    ctx.restore();
+  }
+  else if (watermark.mode === 'image' && loadedLogoImg) {
+    const cfg = watermark.image;
+    const logoW = loadedLogoImg.naturalWidth || loadedLogoImg.width;
+    const logoH = loadedLogoImg.naturalHeight || loadedLogoImg.height;
+    if (logoW <= 0 || logoH <= 0) return;
+
+    const scale = Math.max(0.02, Math.min(2.0, cfg.scale || 0.3));
+    const targetLogoW = Math.round(logoW * scale);
+    const targetLogoH = Math.round(logoH * scale);
+    const opacity = Math.max(0.01, Math.min(1.0, cfg.opacity ?? 0.5));
+    const rotationRad = ((cfg.rotation ?? 0) * Math.PI) / 180;
+
+    ctx.save();
+    ctx.globalAlpha = opacity;
+
+    if (cfg.isTiled) {
+      const stepX = Math.max(60, targetLogoW + (cfg.tileGap || 140));
+      const stepY = Math.max(60, targetLogoH + (cfg.tileGap || 140));
+      const bound = Math.max(canvasW, canvasH) * 1.5;
+
+      for (let y = -bound; y < canvasH + bound; y += stepY) {
+        for (let x = -bound; x < canvasW + bound; x += stepX) {
+          ctx.save();
+          ctx.translate(x + targetLogoW / 2, y + targetLogoH / 2);
+          ctx.rotate(rotationRad);
+          ctx.drawImage(loadedLogoImg, -targetLogoW / 2, -targetLogoH / 2, targetLogoW, targetLogoH);
+          ctx.restore();
+        }
+      }
+    }
+    else {
+      const pos = calculateAnchorPosition(
+        canvasW,
+        canvasH,
+        targetLogoW,
+        targetLogoH,
+        cfg.anchor || 'bottom-right',
+        cfg.margin ?? 24,
+      );
+
+      ctx.save();
+      ctx.translate(pos.x + targetLogoW / 2, pos.y + targetLogoH / 2);
+      ctx.rotate(rotationRad);
+      ctx.drawImage(loadedLogoImg, -targetLogoW / 2, -targetLogoH / 2, targetLogoW, targetLogoH);
+      ctx.restore();
+    }
+    ctx.restore();
+  }
+}
+
 
