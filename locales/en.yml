@@ -455,6 +455,10 @@ tools:
     uploadDecryptTitle: Drag and drop a password-protected PDF here or browse
     browseDecryptFiles: Browse Encrypted PDF
 
+  image-to-pdf:
+    title: Image to PDF
+    description: Convert and combine multiple images (JPG, PNG, WebP) into a clean, custom-formatted PDF document.
+
   json-minify:
     title: JSON minify
     description: Minify and compress your JSON by removing unnecessary whitespace.
