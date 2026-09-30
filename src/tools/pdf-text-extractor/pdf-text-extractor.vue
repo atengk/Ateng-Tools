@@ -6,6 +6,15 @@
  * @since 2026-09-30
  */
 import { useMessage } from 'naive-ui';
+import {
+  ChevronDown,
+  ChevronUp,
+  Copy,
+  Download,
+  FileText,
+  Refresh,
+  Search,
+} from '@vicons/tabler';
 import { useCopy } from '@/composable/copy';
 import { extractPdfTextAndMetadata } from './pdf-text-extractor.service';
 import type { PdfExtractResult, PdfPageTextItem } from './pdf-text-extractor.types';
@@ -145,9 +154,7 @@ const activePageItem = computed(() => {
           <!-- 第一行：文件名与统计标签，水平居中对齐 -->
           <div flex flex-wrap items-center justify-center gap-2.5>
             <div flex items-center gap-1.5 overflow-hidden>
-              <n-icon size="18" class="text-primary flex-shrink-0">
-                <span class="i-mdi-file-document-outline block" />
-              </n-icon>
+              <n-icon size="18" class="text-primary flex-shrink-0" :component="FileText" />
               <span font-bold text-sm truncate max-w-320px>{{ file?.name }}</span>
             </div>
 
@@ -168,27 +175,25 @@ const activePageItem = computed(() => {
           <div flex flex-wrap items-center justify-center gap-2 pt-1 class="action-buttons-bar">
             <n-button size="small" secondary @click="showMetadata = !showMetadata">
               <template #icon>
-                <n-icon>
-                  <span :class="showMetadata ? 'i-mdi-chevron-up' : 'i-mdi-chevron-down'" class="block" />
-                </n-icon>
+                <n-icon :component="showMetadata ? ChevronUp : ChevronDown" />
               </template>
               {{ showMetadata ? '收起文档元数据' : '展开文档元数据' }}
             </n-button>
             <n-button size="small" type="primary" secondary @click="copyAllText">
               <template #icon>
-                <n-icon><span class="i-mdi-content-copy block" /></n-icon>
+                <n-icon :component="Copy" />
               </template>
               复制全文
             </n-button>
             <n-button size="small" type="info" secondary @click="downloadTextFile">
               <template #icon>
-                <n-icon><span class="i-mdi-download block" /></n-icon>
+                <n-icon :component="Download" />
               </template>
               导出纯文本
             </n-button>
             <n-button size="small" secondary type="error" @click="onClear">
               <template #icon>
-                <n-icon><span class="i-mdi-refresh block" /></n-icon>
+                <n-icon :component="Refresh" />
               </template>
               重新选择
             </n-button>
@@ -295,7 +300,7 @@ const activePageItem = computed(() => {
               size="small"
             >
               <template #prefix>
-                <span class="i-mdi-magnify text-gray-400" />
+                <n-icon :component="Search" class="text-gray-400" />
               </template>
             </n-input>
             <span v-if="searchQuery" class="text-xs text-gray-500 whitespace-nowrap">
@@ -328,7 +333,7 @@ const activePageItem = computed(() => {
           />
           <n-button size="small" secondary type="primary" @click="copyPageText(activePageItem)">
             <template #icon>
-              <n-icon><span class="i-mdi-content-copy block" /></n-icon>
+              <n-icon :component="Copy" />
             </template>
             复制本页文本 (第 {{ activePageItem.pageNumber }} 页)
           </n-button>
@@ -361,7 +366,7 @@ const activePageItem = computed(() => {
                   <span text-xs text-gray-400>{{ page.charCount }} 字符 · {{ page.wordCount }} 词</span>
                   <n-button size="tiny" secondary type="primary" @click="copyPageText(page)">
                     <template #icon>
-                      <n-icon><span class="i-mdi-content-copy block" /></n-icon>
+                      <n-icon :component="Copy" />
                     </template>
                     复制此页
                   </n-button>
@@ -382,7 +387,7 @@ const activePageItem = computed(() => {
 
       <!-- 无搜索匹配结果 -->
       <div v-if="filteredPages.length === 0" py-12 text-center text-gray-400>
-        <div class="i-mdi-text-box-search-outline mx-auto mb-2 text-4xl" />
+        <n-icon size="48" class="mx-auto mb-2 text-gray-400" :component="Search" />
         <div>未找到包含 “{{ searchQuery }}” 的页面内容</div>
       </div>
     </div>
