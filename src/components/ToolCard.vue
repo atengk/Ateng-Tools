@@ -2,10 +2,12 @@
 import { useThemeVars } from 'naive-ui';
 import FavoriteButton from './FavoriteButton.vue';
 import type { Tool } from '@/tools/tools.types';
+import { useCategory } from '@/composable/category';
 
 const props = defineProps<{ tool: Tool & { category?: string } }>();
 const { tool } = toRefs(props);
 const theme = useThemeVars();
+const { getCategoryTitle } = useCategory();
 </script>
 
 <template>
@@ -19,7 +21,7 @@ const theme = useThemeVars();
             v-if="tool.category"
             class="category-tag text-[11px] px-2 py-0.5 rounded-full font-medium"
           >
-            {{ tool.category }}
+            {{ getCategoryTitle(tool.category) }}
           </span>
 
           <span

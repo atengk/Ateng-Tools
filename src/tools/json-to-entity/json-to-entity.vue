@@ -94,7 +94,7 @@ async function pasteInput() {
           </div>
 
           <div flex items-center gap-2>
-            <span text-13px font-semibold>生成目标:</span>
+            <span text-13px font-semibold>{{ t('tools.json-to-entity.targetLanguage', '生成目标:') }}</span>
             <n-radio-group v-model:value="options.targetLanguage" size="small">
               <n-radio-button value="java">Java (Lombok/Jackson)</n-radio-button>
               <n-radio-button value="typescript">TypeScript Interface</n-radio-button>
@@ -105,7 +105,7 @@ async function pasteInput() {
         <!-- 第二行：Java 特定选项与命名 -->
         <div flex flex-wrap items-center gap-4 pt-2 border-t border-gray-100 dark:border-zinc-700>
           <div flex items-center gap-2>
-            <span text-12px text-gray-500>根类名:</span>
+            <span text-12px text-gray-500>{{ t('tools.json-to-entity.rootClassName', '根类名:') }}</span>
             <n-input
               v-model:value="options.rootClassName"
               size="small"
@@ -115,7 +115,7 @@ async function pasteInput() {
           </div>
 
           <div v-if="options.targetLanguage === 'java'" flex items-center gap-2>
-            <span text-12px text-gray-500>包名:</span>
+            <span text-12px text-gray-500>{{ t('tools.json-to-entity.packageName', '包名:') }}</span>
             <n-input
               v-model:value="options.packageName"
               size="small"
@@ -126,18 +126,18 @@ async function pasteInput() {
 
           <div flex items-center gap-4 text-12px>
             <n-checkbox v-model:checked="options.autoCamelCase">
-              下划线转驼峰
+              {{ t('tools.json-to-entity.autoCamelCase', '下划线转驼峰') }}
             </n-checkbox>
 
             <template v-if="options.targetLanguage === 'java'">
               <n-checkbox v-model:checked="options.useLombok">
-                Lombok 注解
+                {{ t('tools.json-to-entity.useLombok', 'Lombok 注解') }}
               </n-checkbox>
               <n-checkbox v-model:checked="options.useJackson">
-                Jackson @JsonProperty
+                {{ t('tools.json-to-entity.useJackson', 'Jackson @JsonProperty') }}
               </n-checkbox>
               <n-checkbox v-model:checked="options.innerClassMode">
-                静态内部类
+                {{ t('tools.json-to-entity.innerClassMode', '静态内部类') }}
               </n-checkbox>
             </template>
           </div>
@@ -148,18 +148,18 @@ async function pasteInput() {
     <!-- 左右分栏对照 -->
     <div grid grid-cols-1 lg:grid-cols-2 gap-4>
       <!-- 左侧：JSON 输入 -->
-      <c-card title="JSON 数据源输入 (JSON Source)">
+      <c-card :title="t('tools.json-to-entity.inputCardTitle', 'JSON 数据源输入 (JSON Source)')">
         <n-input
           v-model:value="rawJsonInput"
           type="textarea"
           :rows="20"
-          placeholder="在此粘贴任意 JSON 对象或数组..."
+          :placeholder="t('tools.json-to-entity.inputPlaceholder', '在此粘贴任意 JSON 对象或数组...')"
           font-mono
         />
       </c-card>
 
       <!-- 右侧：生成代码预览 -->
-      <c-card :title="options.targetLanguage === 'java' ? 'Java 实体类输出 (Java Class)' : 'TypeScript 接口输出 (TS Interface)'">
+      <c-card :title="options.targetLanguage === 'java' ? t('tools.json-to-entity.outputTitleJava', 'Java 实体类输出 (Java Class)') : t('tools.json-to-entity.outputTitleTs', 'TypeScript 接口输出 (TS Interface)')">
         <TextareaCopyable
           :value="generatedCode"
           :language="options.targetLanguage === 'java' ? 'java' : 'typescript'"

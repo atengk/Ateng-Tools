@@ -121,12 +121,14 @@ function onDateInputChanged(value: string) {
   }
 }
 
+const { t } = useI18n();
+
 const validation = useValidation({
   source: inputDate,
   watch: [formatIndex],
   rules: [
     {
-      message: 'This date is invalid for this format',
+      message: t('tools.date-converter.invalidDate', '该日期在此格式下无效'),
       validator: value =>
         withDefaultOnError(() => {
           if (value === '') {
@@ -155,7 +157,7 @@ function formatDateUsingFormatter(formatter: (date: Date) => string, date?: Date
       <c-input-text
         v-model:value="inputDate"
         autofocus
-        placeholder="Put your date string here..."
+        :placeholder="t('tools.date-converter.inputPlaceholder', '在此输入日期时间字符串...')"
         clearable
         test-id="date-time-converter-input"
         :validation="validation"
@@ -180,7 +182,7 @@ function formatDateUsingFormatter(formatter: (date: Date) => string, date?: Date
       label-position="left"
       label-align="right"
       :value="formatDateUsingFormatter(fromDate, normalizedDate)"
-      placeholder="Invalid date..."
+      :placeholder="t('tools.date-converter.invalidDatePlaceholder', '无效的日期格式...')"
       :test-id="name"
       readonly
       mt-2

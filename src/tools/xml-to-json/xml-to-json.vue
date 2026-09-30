@@ -4,6 +4,8 @@ import { isValidXML } from '../xml-formatter/xml-formatter.service';
 import { withDefaultOnError } from '@/utils/defaults';
 import type { UseValidationRule } from '@/composable/validation';
 
+const { t } = useI18n();
+
 const defaultValue = '<a x="1.234" y="It\'s"/>';
 function transformer(value: string) {
   return withDefaultOnError(() => {
@@ -11,20 +13,20 @@ function transformer(value: string) {
   }, '');
 }
 
-const rules: UseValidationRule<string>[] = [
+const rules = computed<UseValidationRule<string>[]>(() => [
   {
     validator: isValidXML,
-    message: 'Provided XML is not valid.',
+    message: t('tools.xml-to-json.invalidXml', '输入的 XML 格式无效'),
   },
-];
+]);
 </script>
 
 <template>
   <format-transformer
-    input-label="Your XML content"
+    :input-label="t('tools.xml-to-json.inputLabel', '输入的 XML 内容')"
     :input-default="defaultValue"
-    input-placeholder="Paste your XML content here..."
-    output-label="Converted JSON"
+    :input-placeholder="t('tools.xml-to-json.inputPlaceholder', '在此粘贴 XML 内容...')"
+    :output-label="t('tools.xml-to-json.outputLabel', '转换后的 JSON')"
     output-language="json"
     :transformer="transformer"
     :input-validation-rules="rules"

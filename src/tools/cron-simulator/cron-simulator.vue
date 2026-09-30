@@ -70,7 +70,7 @@ function copyExecutions() {
             <n-input
               v-model:value="cronExpression"
               size="large"
-              placeholder="输入 Cron 表达式（如 0 0 12 ? * WED 或 */15 * * * *）..."
+              :placeholder="t('tools.cron-simulator.inputPlaceholder', '输入 Cron 表达式（如 0 0 12 ? * WED 或 */15 * * * *）...')"
               font-mono
               clearable
             />
@@ -80,13 +80,13 @@ function copyExecutions() {
             <n-select
               v-model:value="selectedPreset"
               size="large"
-              placeholder="选择常用业务预设模板..."
+              :placeholder="t('tools.cron-simulator.selectPreset', '选择常用业务预设模板...')"
               :options="presetOptions"
               style="width: 260px"
               @update:value="handlePresetSelect"
             />
             <c-button size="large" @click="clearInput">
-              清空
+              {{ t('tools.cron-simulator.clear', '清空') }}
             </c-button>
           </div>
         </div>
@@ -98,16 +98,16 @@ function copyExecutions() {
               {{ dialectBadge.text }}
             </n-tag>
             <n-tag v-else type="error" size="medium" round>
-              {{ simulation.error || '表达式非法' }}
+              {{ simulation.error || t('tools.cron-simulator.invalidCron', '表达式非法') }}
             </n-tag>
           </div>
 
           <div flex items-center gap-3 text-13px>
-            <span text-gray-500>推演次数:</span>
+            <span text-gray-500>{{ t('tools.cron-simulator.simulateCount', '推演次数:') }}</span>
             <n-radio-group v-model:value="executionCount" size="small">
-              <n-radio-button :value="5">5 次</n-radio-button>
-              <n-radio-button :value="10">10 次</n-radio-button>
-              <n-radio-button :value="20">20 次</n-radio-button>
+              <n-radio-button :value="5">5 {{ t('tools.cron-simulator.timesUnit', '次') }}</n-radio-button>
+              <n-radio-button :value="10">10 {{ t('tools.cron-simulator.timesUnit', '次') }}</n-radio-button>
+              <n-radio-button :value="20">20 {{ t('tools.cron-simulator.timesUnit', '次') }}</n-radio-button>
             </n-radio-group>
           </div>
         </div>
@@ -117,7 +117,7 @@ function copyExecutions() {
     <!-- 中部：语义直译与分段解析 -->
     <div v-if="simulation.valid" grid grid-cols-1 md:grid-cols-2 gap-4 mb-4>
       <!-- 中文自然语言直译 -->
-      <c-card title="中文自然语言语义直译">
+      <c-card :title="t('tools.cron-simulator.readableTitle', '自然语言语义直译')">
         <template #header-extra>
           <n-icon size="20" text-amber-500 :component="Bulb" />
         </template>
@@ -132,7 +132,7 @@ function copyExecutions() {
       </c-card>
 
       <!-- 下一次触发倒计时徽标 -->
-      <c-card title="距离下一次触发时刻">
+      <c-card :title="t('tools.cron-simulator.countdownTitle', '距离下一次触发时刻')">
         <template #header-extra>
           <n-icon size="20" text-sky-500 :component="Clock" />
         </template>
@@ -150,13 +150,13 @@ function copyExecutions() {
           </n-tag>
         </div>
         <div v-else text-gray-400>
-          未推演出下一次执行时刻
+          {{ t('tools.cron-simulator.noNextExecution', '未推演出下一次执行时刻') }}
         </div>
       </c-card>
     </div>
 
     <!-- 字段拆解视图 -->
-    <c-card v-if="simulation.valid && simulation.fields.length > 0" title="Cron 分段语法拆解" mb-4>
+    <c-card v-if="simulation.valid && simulation.fields.length > 0" :title="t('tools.cron-simulator.fieldsTitle', 'Cron 分段语法拆解')" mb-4>
       <div grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 xl:grid-cols-7 gap-3>
         <div
           v-for="field in simulation.fields"
@@ -180,13 +180,13 @@ function copyExecutions() {
     </c-card>
 
     <!-- 下部：未来执行时间序列卡片与复制 -->
-    <c-card title="未来执行时间推演序列">
+    <c-card :title="t('tools.cron-simulator.executionsTitle', '未来执行时间推演序列')">
       <template #header-extra>
         <c-button size="small" @click="copyExecutions">
           <template #icon>
             <n-icon :component="Copy" />
           </template>
-          复制全部执行时间
+          {{ t('tools.cron-simulator.copySchedule', '复制全部执行时间') }}
         </c-button>
       </template>
 
@@ -223,7 +223,7 @@ function copyExecutions() {
       </div>
 
       <div v-else p-8 text-center text-gray-400>
-        无满足条件的执行时刻，请检查表达式语法
+        {{ t('tools.cron-simulator.noMatching', '无满足条件的执行时刻，请检查表达式语法') }}
       </div>
     </c-card>
   </div>

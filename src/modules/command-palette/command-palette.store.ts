@@ -16,61 +16,64 @@ export const useCommandPaletteStore = defineStore('command-palette', () => {
   const styleStore = useStyleStore();
   const router = useRouter();
   const searchPrompt = ref('');
+  const { t } = useI18n();
 
-  const toolsOptions = toolStore.tools.map(tool => ({
-    ...tool,
-    to: tool.path,
-    toolCategory: tool.category,
-    category: '工具',
-  }));
+  const searchOptions = computed<PaletteOption[]>(() => {
+    const toolsOptions = toolStore.tools.map(tool => ({
+      ...tool,
+      to: tool.path,
+      toolCategory: tool.category,
+      category: t('commandPalette.categories.tools', '工具'),
+    }));
 
-  const searchOptions: PaletteOption[] = [
-    ...toolsOptions,
-    {
-      name: '随机打开小工具 (Random tool)',
-      description: '从工具库中随机挑选并打开一个小工具',
-      action: () => {
-        const { path } = _.sample(toolStore.tools)!;
-        router.push(path);
+    return [
+      ...toolsOptions,
+      {
+        name: t('commandPalette.randomTool.name', '随机打开小工具'),
+        description: t('commandPalette.randomTool.description', '从工具库中随机挑选并打开一个小工具'),
+        action: () => {
+          const { path } = _.sample(toolStore.tools)!;
+          router.push(path);
+        },
+        icon: DiceIcon,
+        category: t('commandPalette.categories.actions', '操作'),
+        keywords: ['random', 'tool', 'pick', 'choose', 'select', '随机', '手气不错', '随便选', '工具'],
+        closeOnSelect: true,
       },
-      icon: DiceIcon,
-      category: '操作',
-      keywords: ['random', 'tool', 'pick', 'choose', 'select', '随机', '手气不错', '随便选', '工具'],
-      closeOnSelect: true,
-    },
-    {
-      name: '切换明暗颜色模式 (Toggle dark mode)',
-      description: '在浅色与深色主题外观之间切换',
-      action: () => styleStore.toggleDark(),
-      icon: SunIcon,
-      category: '操作',
-      keywords: ['dark', 'theme', 'toggle', 'mode', 'light', 'system', '暗黑', '深色', '浅色', '主题', '夜间', '日间', '模式'],
-    },
-    {
-      name: 'GitHub 开源仓库 (Github repository)',
-      href: 'https://github.com/atengk/Ateng-Tools',
-      category: '外部链接',
-      description: '前往 GitHub 查看 Ateng-Tools 源码与点亮 Star',
-      keywords: ['github', 'repo', 'repository', 'source', 'code', '源码', '仓库', '开源', '主页'],
-      icon: GithubIcon,
-    },
-    {
-      name: '提交反馈与建议 (Report an issue)',
-      description: '向 Ateng-Tools 提交 Issue、功能建议或缺陷反馈',
-      href: 'https://github.com/atengk/Ateng-Tools/issues/new/choose',
-      category: '外部链接',
-      keywords: ['report', 'issue', 'bug', 'problem', 'error', '反馈', '报错', '建议', '问题', '提问'],
-      icon: BugIcon,
-    },
-    {
-      name: '关于 Ateng-Tools (About)',
-      description: '了解 Ateng-Tools 的架构理念与开源致谢',
-      to: '/about',
-      category: '页面',
-      keywords: ['about', 'learn', 'more', 'info', 'information', '关于', '介绍', '说明', '致谢'],
-      icon: InfoIcon,
-    },
-  ];
+      {
+        name: t('commandPalette.toggleTheme.name', '切换明暗颜色模式'),
+        description: t('commandPalette.toggleTheme.description', '在浅色与深色主题外观之间切换'),
+        action: () => styleStore.toggleDark(),
+        icon: SunIcon,
+        category: t('commandPalette.categories.actions', '操作'),
+        keywords: ['dark', 'theme', 'toggle', 'mode', 'light', 'system', '暗黑', '深色', '浅色', '主题', '夜间', '日间', '模式'],
+      },
+      {
+        name: t('commandPalette.github.name', 'GitHub 开源仓库'),
+        href: 'https://github.com/atengk/Ateng-Tools',
+        category: t('commandPalette.categories.externalLinks', '外部链接'),
+        description: t('commandPalette.github.description', '前往 GitHub 查看 Ateng-Tools 源码与点亮 Star'),
+        keywords: ['github', 'repo', 'repository', 'source', 'code', '源码', '仓库', '开源', '主页'],
+        icon: GithubIcon,
+      },
+      {
+        name: t('commandPalette.reportIssue.name', '提交反馈与建议'),
+        description: t('commandPalette.reportIssue.description', '向 Ateng-Tools 提交 Issue、功能建议或缺陷反馈'),
+        href: 'https://github.com/atengk/Ateng-Tools/issues/new/choose',
+        category: t('commandPalette.categories.externalLinks', '外部链接'),
+        keywords: ['report', 'issue', 'bug', 'problem', 'error', '反馈', '报错', '建议', '问题', '提问'],
+        icon: BugIcon,
+      },
+      {
+        name: t('commandPalette.about.name', '关于 Ateng-Tools'),
+        description: t('commandPalette.about.description', '了解 Ateng-Tools 的架构理念与开源致谢'),
+        to: '/about',
+        category: t('commandPalette.categories.pages', '页面'),
+        keywords: ['about', 'learn', 'more', 'info', 'information', '关于', '介绍', '说明', '致谢'],
+        icon: InfoIcon,
+      },
+    ];
+  });
 
   const { searchResult } = useFuzzySearch({
     search: searchPrompt,

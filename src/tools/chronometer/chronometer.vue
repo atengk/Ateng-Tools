@@ -37,14 +37,14 @@ function pause() {
     </c-card>
     <div mt-5 flex justify-center gap-3>
       <c-button v-if="!isRunning" type="primary" @click="resume">
-        Start
+        {{ $t('common.start', 'Start') }}
       </c-button>
       <c-button v-else type="warning" @click="pause">
-        Stop
+        {{ $t('common.stop', 'Stop') }}
       </c-button>
 
       <c-button @click="counter = 0">
-        Reset
+        {{ $t('common.reset', 'Reset') }}
       </c-button>
     </div>
   </div>

@@ -119,13 +119,13 @@ function downloadOutput() {
 
           <div flex flex-wrap items-center gap-4>
             <div flex items-center gap-2>
-              <span text-12px text-gray-500>输入格式:</span>
+              <span text-12px text-gray-500>{{ t('tools.table-converter.inputFormat', '输入格式:') }}</span>
               <n-radio-group v-model:value="inputFormat" size="small">
-                <n-radio-button value="auto">自动识别 ({{ result.detectedFormat.toUpperCase() }})</n-radio-button>
-                <n-radio-button value="tsv">TSV / Excel 剪贴板</n-radio-button>
+                <n-radio-button value="auto">{{ t('tools.table-converter.autoDetect', { format: result.detectedFormat.toUpperCase() }) }}</n-radio-button>
+                <n-radio-button value="tsv">{{ t('tools.table-converter.tsvClipboard', 'TSV / Excel 剪贴板') }}</n-radio-button>
                 <n-radio-button value="csv">CSV</n-radio-button>
-                <n-radio-button value="markdown">Markdown 表格</n-radio-button>
-                <n-radio-button value="json">JSON 数组</n-radio-button>
+                <n-radio-button value="markdown">Markdown</n-radio-button>
+                <n-radio-button value="json">JSON</n-radio-button>
               </n-radio-group>
             </div>
           </div>
@@ -135,12 +135,12 @@ function downloadOutput() {
         <div flex flex-wrap items-center justify-between gap-4 pt-2 border-t border-gray-100 dark:border-zinc-700>
           <div flex flex-wrap items-center gap-4 text-12px>
             <n-checkbox v-model:checked="options.hasHeader">
-              首行作为表头列名
+              {{ t('tools.table-converter.hasHeader', '首行作为表头列名') }}
             </n-checkbox>
 
             <template v-if="targetFormat === 'sql'">
               <div flex items-center gap-1.5>
-                <span text-gray-500>目标表名:</span>
+                <span text-gray-500>{{ t('tools.table-converter.tableName', '目标表名:') }}</span>
                 <n-input
                   v-model:value="options.tableName"
                   size="small"
@@ -150,7 +150,7 @@ function downloadOutput() {
               </div>
 
               <div flex items-center gap-1.5>
-                <span text-gray-500>分批 Batch Size:</span>
+                <span text-gray-500>{{ t('tools.table-converter.batchSize', '分批大小:') }}</span>
                 <n-input-number
                   v-model:value="options.batchSize"
                   size="small"
@@ -161,11 +161,11 @@ function downloadOutput() {
               </div>
 
               <div flex items-center gap-1.5>
-                <span text-gray-500>字段引号:</span>
+                <span text-gray-500>{{ t('tools.table-converter.quoteIdentifier', '字段引号:') }}</span>
                 <n-radio-group v-model:value="options.quoteIdentifier" size="small">
                   <n-radio-button value="backtick">`col`</n-radio-button>
                   <n-radio-button value="double">"col"</n-radio-button>
-                  <n-radio-button value="none">无</n-radio-button>
+                  <n-radio-button value="none">{{ t('tools.table-converter.quoteNone', '无') }}</n-radio-button>
                 </n-radio-group>
               </div>
             </template>
@@ -173,7 +173,7 @@ function downloadOutput() {
 
           <div flex items-center gap-2>
             <n-tag size="small" type="info" round>
-              已识别 {{ result.rowCount }} 行 / {{ result.columnCount }} 列
+              {{ t('tools.table-converter.recognizedStats', { rows: result.rowCount, cols: result.columnCount }) }}
             </n-tag>
           </div>
         </div>
@@ -183,12 +183,12 @@ function downloadOutput() {
     <!-- 左右分栏对照 -->
     <div grid grid-cols-1 lg:grid-cols-2 gap-4>
       <!-- 左侧：源输入卡片 -->
-      <c-card title="表格源数据输入 (Source Table Data)">
+      <c-card :title="t('tools.table-converter.inputCardTitle', '表格源数据输入 (Source Table Data)')">
         <n-input
           v-model:value="inputContent"
           type="textarea"
           :rows="22"
-          placeholder="在此直接粘贴 Excel / 飞书表格复制的文本、CSV、Markdown 表格或 JSON 数组..."
+          :placeholder="t('tools.table-converter.inputPlaceholder', '在此直接粘贴 Excel / 飞书表格复制的文本、CSV、Markdown 表格或 JSON 数组...')"
           font-mono
         />
       </c-card>
@@ -199,15 +199,15 @@ function downloadOutput() {
           <div flex items-center justify-between w-full>
             <!-- 目标格式 Tab 切换 -->
             <n-tabs v-model:value="targetFormat" type="segment" size="small" style="max-width: 420px">
-              <n-tab name="sql">批量 SQL INSERT</n-tab>
-              <n-tab name="markdown">Markdown 表格</n-tab>
-              <n-tab name="json">JSON 数组</n-tab>
-              <n-tab name="csv">CSV 格式</n-tab>
+              <n-tab name="sql">{{ t('tools.table-converter.tabSql', '批量 SQL INSERT') }}</n-tab>
+              <n-tab name="markdown">{{ t('tools.table-converter.tabMarkdown', 'Markdown 表格') }}</n-tab>
+              <n-tab name="json">{{ t('tools.table-converter.tabJson', 'JSON 数组') }}</n-tab>
+              <n-tab name="csv">{{ t('tools.table-converter.tabCsv', 'CSV 格式') }}</n-tab>
             </n-tabs>
 
             <!-- 右侧下载操作 -->
             <div flex items-center gap-2>
-              <c-tooltip tooltip="导出下载文件" position="left">
+              <c-tooltip :tooltip="t('tools.table-converter.downloadTooltip', '导出下载文件')" position="left">
                 <c-button size="small" circle @click="downloadOutput">
                   <n-icon size="18" :component="Download" />
                 </c-button>
@@ -217,7 +217,7 @@ function downloadOutput() {
         </template>
 
         <!-- 异常报错提示 -->
-        <n-alert v-if="!result.success" type="error" mb-3 title="表格数据解析异常">
+        <n-alert v-if="!result.success" type="error" mb-3 :title="t('tools.table-converter.parseError', '表格数据解析异常')">
           {{ result.error }}
         </n-alert>
 
@@ -225,7 +225,7 @@ function downloadOutput() {
         <TextareaCopyable
           :value="result.output"
           :language="outputLanguageMap[targetFormat]"
-          copy-message="已复制转换结果至剪贴板"
+          :copy-message="t('tools.table-converter.copied', '已复制转换结果至剪贴板')"
         />
       </c-card>
     </div>

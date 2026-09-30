@@ -8,6 +8,7 @@ import BaseLayout from './base.layout.vue';
 import FavoriteButton from '@/components/FavoriteButton.vue';
 import type { Tool } from '@/tools/tools.types';
 import { useToolStore } from '@/tools/tools.store';
+import { useCategory } from '@/composable/category';
 
 const themeVars = useThemeVars();
 const route = useRoute();
@@ -15,6 +16,7 @@ const router = useRouter();
 const toolStore = useToolStore();
 
 const { t } = useI18n();
+const { getCategoryTitle } = useCategory();
 
 const i18nKey = computed<string>(() => route.path.trim().replace('/', ''));
 const toolTitle = computed<string>(() => t(`tools.${i18nKey.value}.title`, String(route.meta.name)));
@@ -59,7 +61,7 @@ useHead(head);
           class="breadcrumb-item breadcrumb-link clickable-category"
           @click="navigateCategory(currentTool.category)"
         >
-          {{ currentTool.category }}
+          {{ getCategoryTitle(currentTool.category) }}
         </span>
         <span v-if="currentTool?.category" class="breadcrumb-separator">/</span>
         <span class="breadcrumb-item breadcrumb-current" aria-current="page">

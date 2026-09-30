@@ -2,14 +2,15 @@
 import _ from 'lodash';
 import SpanCopyable from '@/components/SpanCopyable.vue';
 
-const props = withDefaults(defineProps<{ label: string; oldValue?: string; newValue?: string }>(), {
+const props = withDefaults(defineProps<{ label: string; oldValue?: string; newValue?: string; id?: string }>(), {
   label: '',
   oldValue: '',
   newValue: '',
+  id: '',
 });
-const { label, oldValue, newValue } = toRefs(props);
+const { label, oldValue, newValue, id } = toRefs(props);
 
-const testId = computed(() => _.kebabCase(label.value));
+const testId = computed(() => id?.value || _.kebabCase(label.value));
 </script>
 
 <template>

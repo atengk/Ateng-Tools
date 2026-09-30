@@ -160,7 +160,7 @@ async function pasteLogs() {
               {{ t('tools.mybatis-sql-converter.outputLabel', 'Executable SQL') }}
             </span>
             <n-tag v-if="restoreResult.statements.length > 0" type="success" size="small" round>
-              {{ restoreResult.statements.length }} {{ restoreResult.statements.length === 1 ? 'statement' : 'statements' }}
+              {{ t('tools.mybatis-sql-converter.statementCount', { count: restoreResult.statements.length }) }}
             </n-tag>
           </div>
         </div>

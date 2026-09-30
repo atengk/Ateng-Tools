@@ -106,20 +106,19 @@ function downloadMedia({ type, value, createdAt }: Media) {
 <template>
   <div>
     <c-card v-if="!isSupported">
-      Your browser does not support recording video from camera
+      {{ $t('tools.camera-recorder.notSupported', 'Your browser does not support recording video from camera') }}
     </c-card>
 
     <c-card v-else-if="!permissionGranted" text-center>
-      You need to grant permission to use your camera and microphone
+      {{ $t('tools.camera-recorder.grantNotice', 'You need to grant permission to use your camera and microphone') }}
 
       <c-alert v-if="permissionCannotBePrompted" mt-4 text-left>
-        Your browser has blocked permission request or does not support it. You need to grant permission manually in
-        your browser settings (usually the lock icon in the address bar).
+        {{ $t('tools.camera-recorder.permissionBlocked', 'Your browser has blocked permission request or does not support it. You need to grant permission manually in your browser settings (usually the lock icon in the address bar).') }}
       </c-alert>
 
       <div v-else mt-4 flex justify-center>
         <c-button @click="requestPermissions">
-          Grant permission
+          {{ $t('tools.camera-recorder.grantButton', 'Grant permission') }}
         </c-button>
       </div>
     </c-card>
@@ -129,25 +128,25 @@ function downloadMedia({ type, value, createdAt }: Media) {
         <c-select
           v-model:value="currentCamera"
           label-position="left"
-          label-width="60px"
-          label="Video:"
+          label-width="70px"
+          :label="$t('tools.camera-recorder.videoDevice', 'Video:')"
           :options="cameras.map(({ deviceId, label }) => ({ value: deviceId, label }))"
-          placeholder="Select camera"
+          :placeholder="$t('tools.camera-recorder.videoPlaceholder', 'Select camera')"
         />
         <c-select
           v-if="currentMicrophone && microphones.length > 0"
           v-model:value="currentMicrophone"
-          label="Audio:"
+          :label="$t('tools.camera-recorder.audioDevice', 'Audio:')"
           label-position="left"
-          label-width="60px"
+          label-width="70px"
           :options="microphones.map(({ deviceId, label }) => ({ value: deviceId, label }))"
-          placeholder="Select microphone"
+          :placeholder="$t('tools.camera-recorder.audioPlaceholder', 'Select microphone')"
         />
       </div>
 
       <div v-if="!isMediaStreamAvailable" mt-3 flex justify-center>
         <c-button type="primary" @click="start">
-          Start webcam
+          {{ $t('tools.camera-recorder.startWebcam', 'Start webcam') }}
         </c-button>
       </div>
 
@@ -159,32 +158,32 @@ function downloadMedia({ type, value, createdAt }: Media) {
         <div flex items-center justify-between gap-2>
           <c-button :disabled="!isMediaStreamAvailable" @click="takeScreenshot">
             <span mr-2> <icon-mdi-camera /></span>
-            Take screenshot
+            {{ $t('tools.camera-recorder.takeScreenshot', 'Take screenshot') }}
           </c-button>
 
           <div v-if="isRecordingSupported" flex justify-center gap-2>
             <c-button v-if="recordingState === 'stopped'" @click="startRecording">
               <span mr-2> <icon-mdi-video /></span>
-              Start recording
+              {{ $t('tools.camera-recorder.startRecording', 'Start recording') }}
             </c-button>
 
             <c-button v-if="recordingState === 'recording'" @click="pauseRecording">
               <span mr-2> <icon-mdi-pause /></span>
-              Pause
+              {{ $t('tools.camera-recorder.pause', 'Pause') }}
             </c-button>
 
             <c-button v-if="recordingState === 'paused'" @click="resumeRecording">
               <span mr-2> <icon-mdi-play /></span>
-              Resume
+              {{ $t('tools.camera-recorder.resume', 'Resume') }}
             </c-button>
 
             <c-button v-if="recordingState !== 'stopped'" type="error" @click="stopRecording">
               <span mr-2> <icon-mdi-record /></span>
-              Stop
+              {{ $t('tools.camera-recorder.stop', 'Stop') }}
             </c-button>
           </div>
           <div v-else italic op-60>
-            Video recording is not supported in your browser
+            {{ $t('tools.camera-recorder.recordingNotSupported', 'Video recording is not supported in your browser') }}
           </div>
         </div>
       </div>
@@ -198,7 +197,7 @@ function downloadMedia({ type, value, createdAt }: Media) {
 
         <div flex items-center justify-between>
           <div font-bold>
-            {{ type === 'image' ? 'Screenshot' : 'Video' }}
+            {{ type === 'image' ? $t('tools.camera-recorder.screenshot', 'Screenshot') : $t('tools.camera-recorder.video', 'Video') }}
           </div>
 
           <div flex gap-2>

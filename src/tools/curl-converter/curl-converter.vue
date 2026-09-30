@@ -100,18 +100,18 @@ async function pasteInput() {
     <!-- 左右分栏对照 -->
     <div grid grid-cols-1 lg:grid-cols-2 gap-4>
       <!-- 左侧：cURL 命令输入 -->
-      <c-card title="cURL 命令输入 (cURL Command)">
+      <c-card :title="t('tools.curl-converter.inputCardTitle', 'cURL 命令输入 (cURL Command)')">
         <n-input
           v-model:value="rawCurlInput"
           type="textarea"
           :rows="18"
-          placeholder="在此粘贴 curl 命令..."
+          :placeholder="t('tools.curl-converter.inputPlaceholder', '在此粘贴 curl 命令...')"
           font-mono
         />
       </c-card>
 
       <!-- 右侧：生成代码与参数拆解视图 -->
-      <c-card title="转换产物与解析拆解">
+      <c-card :title="t('tools.curl-converter.outputCardTitle', '转换产物与解析拆解')">
         <n-tabs v-model:value="activeTab" type="line" animated>
           <!-- Axios -->
           <n-tab-pane name="axios" tab="JavaScript Axios">
@@ -129,35 +129,35 @@ async function pasteInput() {
           </n-tab-pane>
 
           <!-- 请求参数拆解视图 -->
-          <n-tab-pane name="inspect" tab="请求参数拆解 (Inspection)">
+          <n-tab-pane name="inspect" :tab="t('tools.curl-converter.tabInspect', '请求参数拆解 (Inspection)')">
             <div v-if="parsedRequest" flex flex-col gap-4 max-h-500px overflow-y-auto p-1>
               <!-- 基础信息 -->
               <div p-3 bg-gray-50 dark:bg-zinc-800 rounded flex flex-col gap-2>
                 <div flex items-center gap-2>
-                  <n-tag type="primary" size="small">方法</n-tag>
+                  <n-tag type="primary" size="small">{{ t('tools.curl-converter.method', '方法') }}</n-tag>
                   <span font-bold>{{ parsedRequest.method }}</span>
                 </div>
                 <div flex items-center gap-2>
-                  <n-tag type="info" size="small">基础 URL</n-tag>
+                  <n-tag type="info" size="small">{{ t('tools.curl-converter.baseUrl', '基础 URL') }}</n-tag>
                   <span font-mono text-12px break-all>{{ parsedRequest.baseUrl }}</span>
                 </div>
                 <div v-if="parsedRequest.auth.type !== 'none'" flex items-center gap-2>
-                  <n-tag type="warning" size="small">认证 (Auth)</n-tag>
+                  <n-tag type="warning" size="small">{{ t('tools.curl-converter.auth', '认证 (Auth)') }}</n-tag>
                   <span text-12px>
-                    类型: {{ parsedRequest.auth.type }}
-                    {{ parsedRequest.auth.username ? `(用户: ${parsedRequest.auth.username})` : '' }}
+                    {{ t('tools.curl-converter.authType', '类型') }}: {{ parsedRequest.auth.type }}
+                    {{ parsedRequest.auth.username ? `(${t('tools.curl-converter.authUser', '用户')}: ${parsedRequest.auth.username})` : '' }}
                   </span>
                 </div>
               </div>
 
               <!-- Query 参数 -->
               <div v-if="parsedRequest.queryParams.length > 0">
-                <div font-semibold text-13px mb-1>Query 查询参数:</div>
+                <div font-semibold text-13px mb-1>{{ t('tools.curl-converter.queryParams', 'Query 查询参数:') }}</div>
                 <table w-full text-12px border-collapse>
                   <thead>
                     <tr bg-gray-100 dark:bg-zinc-700 text-left>
-                      <th p-2>参数名</th>
-                      <th p-2>参数值</th>
+                      <th p-2>{{ t('tools.curl-converter.paramName', '参数名') }}</th>
+                      <th p-2>{{ t('tools.curl-converter.paramValue', '参数值') }}</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -177,12 +177,12 @@ async function pasteInput() {
 
               <!-- Headers 请求头 -->
               <div v-if="parsedRequest.headersList.length > 0">
-                <div font-semibold text-13px mb-1>Headers 请求头:</div>
+                <div font-semibold text-13px mb-1>{{ t('tools.curl-converter.headers', 'Headers 请求头:') }}</div>
                 <table w-full text-12px border-collapse>
                   <thead>
                     <tr bg-gray-100 dark:bg-zinc-700 text-left>
-                      <th p-2>Header 键</th>
-                      <th p-2>Header 值</th>
+                      <th p-2>{{ t('tools.curl-converter.headerKey', 'Header 键') }}</th>
+                      <th p-2>{{ t('tools.curl-converter.headerValue', 'Header 值') }}</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -203,7 +203,7 @@ async function pasteInput() {
               <!-- 请求体 Body -->
               <div v-if="parsedRequest.body">
                 <div font-semibold text-13px mb-1>
-                  请求体 Body ({{ parsedRequest.bodyType }}):
+                  {{ t('tools.curl-converter.body', '请求体 Body') }} ({{ parsedRequest.bodyType }}):
                 </div>
                 <pre
                   p-3
@@ -218,7 +218,7 @@ async function pasteInput() {
               </div>
             </div>
             <div v-else text-gray-400 text-center py-8>
-              暂无有效的 cURL 请求可拆解
+              {{ t('tools.curl-converter.noValidCurl', '暂无有效的 cURL 请求可拆解') }}
             </div>
           </n-tab-pane>
         </n-tabs>

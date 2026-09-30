@@ -6,6 +6,8 @@ import InputCopyable from '../../components/InputCopyable.vue';
 import { convertHexToBin } from './hash-text.service';
 import { useQueryParam } from '@/composable/queryParams';
 
+const { t } = useI18n();
+
 const algos = {
   MD5,
   SHA1,
@@ -23,6 +25,25 @@ const algoNames = Object.keys(algos) as AlgoNames[];
 const encoding = useQueryParam<Encoding>({ defaultValue: 'Hex', name: 'encoding' });
 const clearText = ref('');
 
+const encodingOptions = computed(() => [
+  {
+    label: t('tools.hash-text.encodings.bin'),
+    value: 'Bin',
+  },
+  {
+    label: t('tools.hash-text.encodings.hex'),
+    value: 'Hex',
+  },
+  {
+    label: t('tools.hash-text.encodings.base64'),
+    value: 'Base64',
+  },
+  {
+    label: t('tools.hash-text.encodings.base64url'),
+    value: 'Base64url',
+  },
+]);
+
 function formatWithEncoding(words: lib.WordArray, encoding: Encoding) {
   if (encoding === 'Bin') {
     return convertHexToBin(words.toString(enc.Hex));
@@ -37,32 +58,24 @@ const hashText = (algo: AlgoNames, value: string) => formatWithEncoding(algos[al
 <template>
   <div>
     <c-card>
-      <c-input-text v-model:value="clearText" multiline raw-text placeholder="Your string to hash..." rows="3" autosize autofocus label="Your text to hash:" />
+      <c-input-text
+        v-model:value="clearText"
+        multiline
+        raw-text
+        :placeholder="$t('tools.hash-text.inputPlaceholder')"
+        rows="3"
+        autosize
+        autofocus
+        :label="$t('tools.hash-text.inputTextLabel')"
+      />
 
       <n-divider />
 
       <c-select
         v-model:value="encoding"
         mb-4
-        label="Digest encoding"
-        :options="[
-          {
-            label: 'Binary (base 2)',
-            value: 'Bin',
-          },
-          {
-            label: 'Hexadecimal (base 16)',
-            value: 'Hex',
-          },
-          {
-            label: 'Base64 (base 64)',
-            value: 'Base64',
-          },
-          {
-            label: 'Base64url (base 64 with url safe chars)',
-            value: 'Base64url',
-          },
-        ]"
+        :label="$t('tools.hash-text.digestEncoding')"
+        :options="encodingOptions"
       />
 
       <div v-for="algo in algoNames" :key="algo" style="margin: 5px 0">

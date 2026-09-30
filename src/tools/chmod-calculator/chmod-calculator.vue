@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { useI18n } from 'vue-i18n';
 import { useThemeVars } from 'naive-ui';
 
 import InputCopyable from '../../components/InputCopyable.vue';
@@ -7,13 +8,19 @@ import { computeChmodOctalRepresentation, computeChmodSymbolicRepresentation } f
 import type { Group, Scope } from './chmod-calculator.types';
 
 const themeVars = useThemeVars();
+const { t } = useI18n();
 
-const scopes: { scope: Scope; title: string }[] = [
-  { scope: 'read', title: 'Read (4)' },
-  { scope: 'write', title: 'Write (2)' },
-  { scope: 'execute', title: 'Execute (1)' },
-];
+const scopes = computed<{ scope: Scope; title: string }[]>(() => [
+  { scope: 'read', title: t('tools.chmod-calculator.read', '读取 (4)') },
+  { scope: 'write', title: t('tools.chmod-calculator.write', '写入 (2)') },
+  { scope: 'execute', title: t('tools.chmod-calculator.execute', '执行 (1)') },
+]);
 const groups: Group[] = ['owner', 'group', 'public'];
+const groupTitles = computed<Record<Group, string>>(() => ({
+  owner: t('tools.chmod-calculator.owner', '所有者 (u)'),
+  group: t('tools.chmod-calculator.group', '所属组 (g)'),
+  public: t('tools.chmod-calculator.public', '其他用户 (o)'),
+}));
 
 const permissions = ref({
   owner: { read: false, write: false, execute: false },
@@ -32,13 +39,13 @@ const symbolic = computed(() => computeChmodSymbolicRepresentation({ permissions
         <tr>
           <th class="text-center" scope="col" />
           <th class="text-center" scope="col">
-            Owner (u)
+            {{ groupTitles.owner }}
           </th>
           <th class="text-center" scope="col">
-            Group (g)
+            {{ groupTitles.group }}
           </th>
           <th class="text-center" scope="col">
-            Public (o)
+            {{ groupTitles.public }}
           </th>
         </tr>
       </thead>

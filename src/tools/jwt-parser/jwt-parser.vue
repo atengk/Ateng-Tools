@@ -1,8 +1,11 @@
 <script setup lang="ts">
+import { useI18n } from 'vue-i18n';
 import { decodeJwt } from './jwt-parser.service';
 import { useValidation } from '@/composable/validation';
 import { isNotThrowing } from '@/utils/boolean';
 import { withDefaultOnError } from '@/utils/defaults';
+
+const { t } = useI18n();
 
 const rawJwt = ref(
   'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c',
@@ -12,17 +15,17 @@ const decodedJWT = computed(() =>
   withDefaultOnError(() => decodeJwt({ jwt: rawJwt.value }), { header: [], payload: [] }),
 );
 
-const sections = [
-  { key: 'header', title: 'Header' },
-  { key: 'payload', title: 'Payload' },
-] as const;
+const sections = computed(() => [
+  { key: 'header' as const, title: t('tools.jwt-parser.header', 'Header') },
+  { key: 'payload' as const, title: t('tools.jwt-parser.payload', 'Payload') },
+]);
 
 const validation = useValidation({
   source: rawJwt,
   rules: [
     {
       validator: value => value.length > 0 && isNotThrowing(() => decodeJwt({ jwt: rawJwt.value })),
-      message: 'Invalid JWT',
+      message: () => t('tools.jwt-parser.invalidJwt', 'Invalid JWT'),
     },
   ],
 });
@@ -30,7 +33,17 @@ const validation = useValidation({
 
 <template>
   <c-card>
-    <c-input-text v-model:value="rawJwt" label="JWT to decode" :validation="validation" placeholder="Put your token here..." rows="5" multiline raw-text autofocus mb-3 />
+    <c-input-text
+      v-model:value="rawJwt"
+      :label="$t('tools.jwt-parser.inputLabel', 'JWT to decode')"
+      :validation="validation"
+      :placeholder="$t('tools.jwt-parser.inputPlaceholder', 'Put your token here...')"
+      rows="5"
+      multiline
+      raw-text
+      autofocus
+      mb-3
+    />
 
     <n-table v-if="validation.isValid">
       <tbody>

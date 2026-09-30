@@ -1,7 +1,10 @@
 <script setup lang="ts">
+import { computed, ref } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { useEventListener } from '@vueuse/core';
-
 import InputCopyable from '../../components/InputCopyable.vue';
+
+const { t } = useI18n();
 
 const event = ref<KeyboardEvent>();
 
@@ -16,28 +19,28 @@ const fields = computed(() => {
 
   return [
     {
-      label: 'Key :',
+      label: t('tools.keycode-info.key', 'Key :'),
       value: event.value.key,
-      placeholder: 'Key name...',
+      placeholder: t('tools.keycode-info.keyPlaceholder', 'Key name...'),
     },
     {
-      label: 'Keycode :',
+      label: t('tools.keycode-info.keycode', 'Keycode :'),
       value: String(event.value.keyCode),
-      placeholder: 'Keycode...',
+      placeholder: t('tools.keycode-info.keycodePlaceholder', 'Keycode...'),
     },
     {
-      label: 'Code :',
+      label: t('tools.keycode-info.code', 'Code :'),
       value: event.value.code,
-      placeholder: 'Code...',
+      placeholder: t('tools.keycode-info.codePlaceholder', 'Code...'),
     },
     {
-      label: 'Location :',
+      label: t('tools.keycode-info.location', 'Location :'),
       value: String(event.value.location),
-      placeholder: 'Code...',
+      placeholder: t('tools.keycode-info.locationPlaceholder', 'Location...'),
     },
 
     {
-      label: 'Modifiers :',
+      label: t('tools.keycode-info.modifiers', 'Modifiers :'),
       value: [
         event.value.metaKey && 'Meta',
         event.value.shiftKey && 'Shift',
@@ -46,7 +49,7 @@ const fields = computed(() => {
       ]
         .filter(Boolean)
         .join(' + '),
-      placeholder: 'None',
+      placeholder: t('tools.keycode-info.modifiersNone', 'None'),
     },
   ];
 });
@@ -59,7 +62,7 @@ const fields = computed(() => {
         {{ event.key }}
       </div>
       <span lh-1 op-70>
-        Press the key on your keyboard you want to get info about this key
+        {{ $t('tools.keycode-info.pressKey', 'Press the key on your keyboard you want to get info about this key') }}
       </span>
     </c-card>
 

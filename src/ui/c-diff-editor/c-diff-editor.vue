@@ -1,9 +1,10 @@
-<script setup lang="ts">
 import * as monaco from 'monaco-editor';
+import { useI18n } from 'vue-i18n';
 import { useStyleStore } from '@/stores/style.store';
 
 const props = withDefaults(defineProps<{ options?: monaco.editor.IDiffEditorOptions }>(), { options: () => ({}) });
 const { options } = toRefs(props);
+const { t } = useI18n();
 
 const editorContainer = ref<HTMLElement | null>(null);
 let editor: monaco.editor.IStandaloneDiffEditor | null = null;
@@ -57,8 +58,8 @@ onMounted(() => {
   });
 
   editor.setModel({
-    original: monaco.editor.createModel('original text', 'txt'),
-    modified: monaco.editor.createModel('modified text', 'txt'),
+    original: monaco.editor.createModel(t('tools.text-diff.originalText'), 'txt'),
+    modified: monaco.editor.createModel(t('tools.text-diff.modifiedText'), 'txt'),
   });
 });
 </script>
