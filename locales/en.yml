@@ -282,6 +282,23 @@ tools:
   base64-string-converter:
     title: Base64 string encoder/decoder
     description: Simply encode and decode strings into their base64 representation.
+    stringToBase64: String to base64
+    encodeUrlSafe: Encode URL safe
+    stringToEncode: String to encode
+    inputPlaceholder: Put your string here...
+    base64Output: Base64 of string
+    base64OutputPlaceholder: The base64 encoding of your string will be here
+    copyBase64: Copy base64
+    base64ToString: Base64 to string
+    decodeUrlSafe: Decode URL safe
+    base64ToDecode: Base64 string to decode
+    base64InputPlaceholder: Put your base64 string here...
+    decodedString: Decoded string
+    decodedPlaceholder: The decoded string will be here
+    copyString: Copy string
+    copiedBase64: Base64 string copied to the clipboard
+    copiedString: String copied to the clipboard
+    invalidBase64: Invalid base64 string
 
   toml-to-yaml:
     title: TOML to YAML
@@ -322,10 +339,22 @@ tools:
   json-prettify:
     title: JSON prettify and format
     description: Prettify your JSON string into a friendly, human-readable format.
+    sortKeys: Sort keys
+    indentSize: Indent size
+    rawJson: Your raw JSON
+    rawJsonPlaceholder: Paste your raw JSON here...
+    prettifiedJson: Prettified version of your JSON
+    invalidJson: Provided JSON is not valid.
 
   docker-run-to-docker-compose-converter:
     title: Docker run to Docker compose converter
     description: Transforms "docker run" commands into docker-compose files!
+    runCommandLabel: 'Your docker run command:'
+    runCommandPlaceholder: 'Your docker run command to convert...'
+    downloadButton: Download docker-compose.yml
+    notComposableTitle: This options are not translatable to docker-compose
+    notImplementedTitle: This options are not yet implemented and therefore haven't been translated to docker-compose
+    errorsTitle: The following errors occurred
 
   mac-address-lookup:
     title: MAC address lookup
@@ -362,6 +391,12 @@ tools:
   chmod-calculator:
     title: Chmod calculator
     description: Compute your chmod permissions and commands with this online chmod calculator.
+    read: Read (4)
+    write: Write (2)
+    execute: Execute (1)
+    owner: Owner (u)
+    group: Group (g)
+    public: Public (o)
 
   rsa-key-pair-generator:
     title: RSA key pair generator
@@ -465,6 +500,12 @@ tools:
     uploadTitle: Drag and drop a PDF file here or browse
     browseFiles: Browse PDF
 
+  pdf-studio:
+    title: PDF Studio
+    description: Visual PDF page orchestration workbench featuring drag-and-drop reordering, rotation, page deletion, and clean lossless re-export.
+    uploadTitle: Drag and drop a PDF file here to launch Studio workbench
+    browseFiles: Browse PDF Document
+
   json-minify:
     title: JSON minify
     description: Minify and compress your JSON by removing unnecessary whitespace.
@@ -524,6 +565,21 @@ tools:
   url-encoder:
     title: Encode/decode URL-formatted strings
     description: Encode text to URL-encoded format (also known as "percent-encoded"), or decode from it.
+    encodeTitle: Encode
+    rawString: 'Your string :'
+    encodePlaceholder: The string to encode
+    encodedString: 'Your string encoded :'
+    encodedPlaceholder: Your string encoded
+    copyEncoded: Copy
+    decodeTitle: Decode
+    encodedInput: 'Your encoded string :'
+    decodePlaceholder: The string to decode
+    decodedString: 'Your string decoded :'
+    decodedPlaceholder: Your string decoded
+    copyDecoded: Copy
+    copiedEncoded: Encoded string copied to the clipboard
+    copiedDecoded: Decoded string copied to the clipboard
+    parseError: Impossible to parse this string
 
   text-to-binary:
     title: Text to ASCII binary

@@ -279,6 +279,23 @@ tools:
   base64-string-converter:
     title: Base64 字符串编码/解码
     description: 将字符串编码和解码为其 Base64 格式表示形式即可。
+    stringToBase64: 文本转 Base64
+    encodeUrlSafe: URL 安全编码 (URL-safe)
+    stringToEncode: 待编码文本
+    inputPlaceholder: 在此处输入需要编码的文本...
+    base64Output: Base64 编码结果
+    base64OutputPlaceholder: 编码后的 Base64 字符串将显示于此处
+    copyBase64: 复制 Base64
+    base64ToString: Base64 转文本
+    decodeUrlSafe: URL 安全解码 (URL-safe)
+    base64ToDecode: 待解码 Base64 字符串
+    base64InputPlaceholder: 在此处输入 Base64 字符串...
+    decodedString: 解码还原文本
+    decodedPlaceholder: 解码还原后的文本内容将显示于此处
+    copyString: 复制还原文本
+    copiedBase64: Base64 字符串已成功复制至剪贴板
+    copiedString: 文本已成功复制至剪贴板
+    invalidBase64: 无效的 Base64 字符串格式
 
   toml-to-yaml:
     title: TOML 到 YAML
@@ -319,10 +336,22 @@ tools:
   json-prettify:
     title: JSON美化和格式化
     description: 将JSON字符串修饰为友好的可读格式。
+    sortKeys: 键名按字母排序
+    indentSize: 缩进空格数
+    rawJson: 原始 JSON 内容
+    rawJsonPlaceholder: 在此处粘贴原始 JSON 内容...
+    prettifiedJson: 美化排版后的 JSON
+    invalidJson: 提供的 JSON 格式不合法
 
   docker-run-to-docker-compose-converter:
     title: Docker Run 到 docker-compose 转换器
     description: 将 docker run 命令行转换为 docker-compose 文件!
+    runCommandLabel: 原始 docker run 命令行：
+    runCommandPlaceholder: 在此输入待转换的 docker run 命令行...
+    downloadButton: 下载 docker-compose.yml
+    notComposableTitle: 以下参数无法直接转换为 docker-compose 配置
+    notImplementedTitle: 转换器暂未实现以下参数的自动映射
+    errorsTitle: 转换过程中出现错误
 
   mac-address-lookup:
     title: MAC地址查找
@@ -359,6 +388,12 @@ tools:
   chmod-calculator:
     title: Chmod 计算器
     description: 使用此在线的chmod计算器计算chmod权限和命令。
+    read: 读取 (4)
+    write: 写入 (2)
+    execute: 执行 (1)
+    owner: 所有者 (u)
+    group: 所属组 (g)
+    public: 其他用户 (o)
 
   rsa-key-pair-generator:
     title: RSA密钥对生成器
@@ -461,6 +496,12 @@ tools:
     uploadTitle: 将 PDF 文件拖拽至此处，或点击浏览选择
     browseFiles: 浏览选择 PDF
 
+  pdf-studio:
+    title: PDF 工坊
+    description: 现代化可视化 PDF 页面编排工作台，支持自由拖拽重排、顺逆时针旋转、逻辑删减与无损重新编译导出。
+    uploadTitle: 将 PDF 文档拖拽至此处，开启可视化编排工作台
+    browseFiles: 浏览选择 PDF 文档
+
   json-minify:
     title: JSON 压缩
     description: 通过删除不必要的空白来缩小和压缩JSON。
@@ -520,6 +561,21 @@ tools:
   url-encoder:
     title: 编码/解码url格式的字符串
     description: 编码为url编码格式（也称为“百分比编码”）或从中解码。
+    encodeTitle: URL 编码 (Encode)
+    rawString: 原始文本：
+    encodePlaceholder: 输入待进行 URL 编码的字符串...
+    encodedString: URL 编码结果：
+    encodedPlaceholder: 编码后的字符串将显示在此处...
+    copyEncoded: 复制编码结果
+    decodeTitle: URL 解码 (Decode)
+    encodedInput: 待解码的 URL 编码字符串：
+    decodePlaceholder: 输入包含 % 百分号编码的字符串...
+    decodedString: URL 解码结果：
+    decodedPlaceholder: 解码还原后的字符串将显示在此处...
+    copyDecoded: 复制解码结果
+    copiedEncoded: URL 编码结果已成功复制至剪贴板
+    copiedDecoded: URL 解码结果已成功复制至剪贴板
+    parseError: 无法解析此字符串格式
 
   text-to-binary:
     title: 文本到 ASCII 二进制

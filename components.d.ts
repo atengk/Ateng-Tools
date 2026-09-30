@@ -202,6 +202,7 @@ declare module '@vue/runtime-core' {
     PdfEncryptDecrypt: typeof import('./src/tools/pdf-encrypt-decrypt/pdf-encrypt-decrypt.vue')['default']
     PdfSignatureChecker: typeof import('./src/tools/pdf-signature-checker/pdf-signature-checker.vue')['default']
     PdfSignatureDetails: typeof import('./src/tools/pdf-signature-checker/components/pdf-signature-details.vue')['default']
+    PdfStudio: typeof import('./src/tools/pdf-studio/pdf-studio.vue')['default']
     PdfTextExtractor: typeof import('./src/tools/pdf-text-extractor/pdf-text-extractor.vue')['default']
     PdfToImage: typeof import('./src/tools/pdf-to-image/pdf-to-image.vue')['default']
     PercentageCalculator: typeof import('./src/tools/percentage-calculator/percentage-calculator.vue')['default']
