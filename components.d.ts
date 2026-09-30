@@ -203,6 +203,7 @@ declare module '@vue/runtime-core' {
     PdfSignatureChecker: typeof import('./src/tools/pdf-signature-checker/pdf-signature-checker.vue')['default']
     PdfSignatureDetails: typeof import('./src/tools/pdf-signature-checker/components/pdf-signature-details.vue')['default']
     PdfTextExtractor: typeof import('./src/tools/pdf-text-extractor/pdf-text-extractor.vue')['default']
+    PdfToImage: typeof import('./src/tools/pdf-to-image/pdf-to-image.vue')['default']
     PercentageCalculator: typeof import('./src/tools/percentage-calculator/percentage-calculator.vue')['default']
     PhoneParserAndFormatter: typeof import('./src/tools/phone-parser-and-formatter/phone-parser-and-formatter.vue')['default']
     QrCodeGenerator: typeof import('./src/tools/qr-code-generator/qr-code-generator.vue')['default']

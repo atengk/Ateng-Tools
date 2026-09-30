@@ -16,6 +16,7 @@ import { tool as pdfSignatureChecker } from './pdf-signature-checker';
 import { tool as pdfTextExtractor } from './pdf-text-extractor';
 import { tool as pdfEncryptDecrypt } from './pdf-encrypt-decrypt';
 import { tool as imageToPdf } from './image-to-pdf';
+import { tool as pdfToImage } from './pdf-to-image';
 import { tool as numeronymGenerator } from './numeronym-generator';
 import { tool as macAddressGenerator } from './mac-address-generator';
 import { tool as textToBinary } from './text-to-binary';
@@ -158,7 +159,7 @@ export const toolsByCategory: ToolCategory[] = [
   },
   {
     name: 'PDF',
-    components: [pdfSignatureChecker, pdfTextExtractor, pdfEncryptDecrypt, imageToPdf],
+    components: [pdfSignatureChecker, pdfTextExtractor, pdfEncryptDecrypt, imageToPdf, pdfToImage],
   },
   {
     name: 'Development',

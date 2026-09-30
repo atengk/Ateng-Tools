@@ -455,6 +455,12 @@ tools:
     title: 图片转 PDF
     description: 批量将多张图片（JPG、PNG、WebP 等）按指定纸张与排版规则合成导出为标准 PDF 文档。
 
+  pdf-to-image:
+    title: PDF 转图片
+    description: 将 PDF 各页面光栅化转换为高清图片（PNG、JPEG、WebP），支持单页下载与一键 ZIP 压缩包批量归档。
+    uploadTitle: 将 PDF 文件拖拽至此处，或点击浏览选择
+    browseFiles: 浏览选择 PDF
+
   json-minify:
     title: JSON 压缩
     description: 通过删除不必要的空白来缩小和压缩JSON。

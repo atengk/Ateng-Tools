@@ -459,6 +459,12 @@ tools:
     title: Image to PDF
     description: Convert and combine multiple images (JPG, PNG, WebP) into a clean, custom-formatted PDF document.
 
+  pdf-to-image:
+    title: PDF to Image
+    description: Convert PDF pages into high-definition images (PNG, JPEG, WebP) with single-page download and batch ZIP archive.
+    uploadTitle: Drag and drop a PDF file here or browse
+    browseFiles: Browse PDF
+
   json-minify:
     title: JSON minify
     description: Minify and compress your JSON by removing unnecessary whitespace.
