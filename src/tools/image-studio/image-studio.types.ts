@@ -8,7 +8,7 @@
 /**
  * 图像输出格式
  */
-export type ExportImageFormat = 'image/png' | 'image/jpeg' | 'image/webp';
+export type ExportImageFormat = 'image/png' | 'image/jpeg' | 'image/webp' | 'image/x-icon';
 
 /**
  * 8192px 最大安全尺寸防御常量
@@ -193,6 +193,39 @@ export interface StudioWatermarkConfig {
 }
 
 /**
+ * 画布背景显示与填充模式
+ */
+export type CanvasBackgroundMode = 'checkerboard' | 'white' | 'black' | 'custom';
+
+/**
+ * 画布背景配置
+ */
+export interface CanvasBackgroundConfig {
+  /** 背景显示与填充模式 */
+  mode: CanvasBackgroundMode;
+  /** 自定义纯色色值 (HEX) */
+  customColor: string;
+}
+
+/**
+ * 开发者常用尺寸预设模型
+ */
+export interface DimensionPreset {
+  /** 唯一标识键 */
+  id: string;
+  /** 预设名称 */
+  name: string;
+  /** 分类分组 */
+  category: 'icon' | 'social' | 'common';
+  /** 预设宽度 (px) */
+  width: number;
+  /** 预设高度 (px) */
+  height: number;
+  /** 简述说明 */
+  description?: string;
+}
+
+/**
  * 综合渲染管线参数
  */
 export interface RenderPipelineOptions {
@@ -206,6 +239,10 @@ export interface RenderPipelineOptions {
   targetHeight?: number;
   /** 水印配置 (可选) */
   watermark?: StudioWatermarkConfig;
+  /** 画布底层填充纯色 (用于透明图转 JPEG 防黑边或纯色底渲染) */
+  backgroundColor?: string;
+  /** 外部预载入的 Logo Image (可选) */
+  loadedLogoImage?: HTMLImageElement | null;
 }
 
 /**

@@ -5,6 +5,7 @@
  * @since 2026-09-30
  */
 import {
+  type DimensionPreset,
   type ExifGpsInfo,
   type ExifMetadata,
   type ExportImageFormat,
@@ -103,6 +104,8 @@ export function getFormatExtension(format: ExportImageFormat): string {
       return 'jpg';
     case 'image/webp':
       return 'webp';
+    case 'image/x-icon':
+      return 'ico';
     default:
       return 'png';
   }
@@ -173,6 +176,10 @@ export async function exportCanvasToBlob(
   format: ExportImageFormat,
   quality = 0.92,
 ): Promise<Blob> {
+  if (format === 'image/x-icon') {
+    return generateIcoBlob(canvas);
+  }
+
   const safeQuality = Math.max(0.01, Math.min(1.0, quality));
 
   return new Promise<Blob>((resolve, reject) => {
@@ -456,6 +463,20 @@ export function renderImagePipeline(
     finalCtx.imageSmoothingEnabled = true;
     finalCtx.imageSmoothingQuality = 'high';
     finalCtx.drawImage(transformedCanvas, 0, 0, finalW, finalH);
+  }
+
+  // 4.1 背景底色填充 (若设置了非透明纯色底，防止透明转 JPEG 产生黑色暗边或按需着色)
+  if (options.backgroundColor && options.backgroundColor !== 'transparent') {
+    const bgCanvas = document.createElement('canvas');
+    bgCanvas.width = finalCanvas.width;
+    bgCanvas.height = finalCanvas.height;
+    const bgCtx = bgCanvas.getContext('2d');
+    if (bgCtx) {
+      bgCtx.fillStyle = options.backgroundColor;
+      bgCtx.fillRect(0, 0, bgCanvas.width, bgCanvas.height);
+      bgCtx.drawImage(finalCanvas, 0, 0);
+      finalCanvas = bgCanvas;
+    }
   }
 
   // 5. 阶段四：叠加图文水印
@@ -1248,6 +1269,240 @@ export function extractColorPalette(
     return [];
   }
 }
+
+/**
+ * 开发者常用尺寸预设模板库
+ */
+export const DIMENSION_PRESETS: DimensionPreset[] = [
+  // 图标与 Favicon
+  {
+    id: 'favicon-16',
+    name: 'Favicon 极小',
+    category: 'icon',
+    width: 16,
+    height: 16,
+    description: '浏览器标签栏经典尺寸 (16 × 16)',
+  },
+  {
+    id: 'favicon-32',
+    name: 'Favicon 标准',
+    category: 'icon',
+    width: 32,
+    height: 32,
+    description: '高分屏网页标签栏标准尺寸 (32 × 32)',
+  },
+  {
+    id: 'favicon-48',
+    name: 'Favicon 高清',
+    category: 'icon',
+    width: 48,
+    height: 48,
+    description: 'Windows 桌面快捷方式与书签栏图标 (48 × 48)',
+  },
+  {
+    id: 'apple-touch-180',
+    name: 'Apple Touch',
+    category: 'icon',
+    width: 180,
+    height: 180,
+    description: 'iOS Safari “添加到主屏幕”图标 (180 × 180)',
+  },
+  {
+    id: 'android-192',
+    name: 'Android / PWA',
+    category: 'icon',
+    width: 192,
+    height: 192,
+    description: 'Web App Manifest 标准图标 (192 × 192)',
+  },
+  {
+    id: 'app-512',
+    name: '应用高清大标',
+    category: 'icon',
+    width: 512,
+    height: 512,
+    description: 'PWA 启动大图与应用商店图标 (512 × 512)',
+  },
+
+  // 社交网络 & 开源平台
+  {
+    id: 'github-avatar',
+    name: 'GitHub 头像',
+    category: 'social',
+    width: 400,
+    height: 400,
+    description: 'GitHub / GitLab / 论坛方形头像标准 (400 × 400)',
+  },
+  {
+    id: 'twitter-card',
+    name: 'Twitter / OG 分享卡片',
+    category: 'social',
+    width: 1200,
+    height: 630,
+    description: 'OpenGraph 社交网络分享大卡片预览 (1200 × 630)',
+  },
+  {
+    id: 'twitter-banner',
+    name: 'Twitter/X 个人横幅',
+    category: 'social',
+    width: 1500,
+    height: 500,
+    description: '个人主页顶部背景大横幅 (1500 × 500, 3:1)',
+  },
+  {
+    id: 'wechat-cover',
+    name: '微信公众号首图',
+    category: 'social',
+    width: 900,
+    height: 383,
+    description: '微信公众平台图文推送首篇大封面 (900 × 383, 2.35:1)',
+  },
+  {
+    id: 'wechat-square',
+    name: '微信公众号次图',
+    category: 'social',
+    width: 200,
+    height: 200,
+    description: '微信公众平台次篇推送小方形缩略图 (200 × 200, 1:1)',
+  },
+  {
+    id: 'youtube-cover',
+    name: 'YouTube 视频封面',
+    category: 'social',
+    width: 1280,
+    height: 720,
+    description: '16:9 标清/高清视频封面海报 (1280 × 720)',
+  },
+  {
+    id: 'bilibili-cover',
+    name: 'B站视频封面',
+    category: 'social',
+    width: 1146,
+    height: 717,
+    description: 'Bilibili 视频稿件标准投稿比例封面 (1146 × 717)',
+  },
+];
+
+/**
+ * 纯函数：将若干帧 PNG/位图二进制数据组装打包为合法的 Windows ICO 图标二进制流
+ *
+ * @param images 各尺寸图像数据列表 (width, height, data)
+ * @returns 组装完成的合法 ICO 二进制 Uint8Array
+ */
+export function createIcoBinary(
+  images: Array<{ width: number; height: number; data: Uint8Array }>,
+): Uint8Array {
+  if (!images || images.length === 0) {
+    throw new Error('ICO 生成失败：必须提供至少一帧图像数据');
+  }
+
+  const count = images.length;
+  // 头部 ICONDIR 为 6 字节 + 每个目录条目 ICONDIRENTRY 为 16 字节
+  const headerSize = 6 + count * 16;
+  let totalDataSize = 0;
+  for (const img of images) {
+    totalDataSize += img.data.byteLength;
+  }
+
+  const totalSize = headerSize + totalDataSize;
+  const buffer = new ArrayBuffer(totalSize);
+  const view = new DataView(buffer);
+  const outBytes = new Uint8Array(buffer);
+
+  // 1. 写入 ICONDIR (6 字节)
+  view.setUint16(0, 0, true); // idReserved = 0
+  view.setUint16(2, 1, true); // idType = 1 (ICO)
+  view.setUint16(4, count, true); // idCount (图像数量)
+
+  // 2. 写入 ICONDIRENTRY 与图像数据
+  let currentImageOffset = headerSize;
+
+  for (let i = 0; i < count; i++) {
+    const img = images[i];
+    const entryOffset = 6 + i * 16;
+
+    // bWidth & bHeight (0 代表 256px)
+    view.setUint8(entryOffset + 0, img.width >= 256 ? 0 : img.width);
+    view.setUint8(entryOffset + 1, img.height >= 256 ? 0 : img.height);
+    view.setUint8(entryOffset + 2, 0); // bColorCount = 0 (真彩色)
+    view.setUint8(entryOffset + 3, 0); // bReserved = 0
+    view.setUint16(entryOffset + 4, 1, true); // wPlanes = 1
+    view.setUint16(entryOffset + 6, 32, true); // wBitCount = 32 位真彩色
+    view.setUint32(entryOffset + 8, img.data.byteLength, true); // dwBytesInRes
+    view.setUint32(entryOffset + 12, currentImageOffset, true); // dwImageOffset
+
+    // 拷贝图像二进制流
+    outBytes.set(img.data, currentImageOffset);
+    currentImageOffset += img.data.byteLength;
+  }
+
+  return outBytes;
+}
+
+/**
+ * 基于 Canvas 将当前画面缩放并打包为包含 16x16, 32x32, 48x48 像素的 Windows ICO Blob
+ *
+ * @param sourceCanvas 源 Canvas 画布
+ * @param sizes 需要包含的图标尺寸列表，默认 [16, 32, 48]
+ * @returns 包含多尺寸的合法 ICO Blob
+ */
+export async function generateIcoBlob(
+  sourceCanvas: HTMLCanvasElement,
+  sizes: number[] = [16, 32, 48],
+): Promise<Blob> {
+  const images: Array<{ width: number; height: number; data: Uint8Array }> = [];
+
+  for (const size of sizes) {
+    const offscreen = document.createElement('canvas');
+    offscreen.width = size;
+    offscreen.height = size;
+    const ctx = offscreen.getContext('2d');
+    if (!ctx) continue;
+
+    ctx.imageSmoothingEnabled = true;
+    ctx.imageSmoothingQuality = 'high';
+    ctx.drawImage(sourceCanvas, 0, 0, size, size);
+
+    const pngBlob = await new Promise<Blob | null>((resolve) => {
+      offscreen.toBlob(resolve, 'image/png');
+    });
+
+    if (pngBlob) {
+      const arrayBuffer = await pngBlob.arrayBuffer();
+      images.push({
+        width: size,
+        height: size,
+        data: new Uint8Array(arrayBuffer),
+      });
+    }
+  }
+
+  const icoBinary = createIcoBinary(images);
+  return new Blob([icoBinary], { type: 'image/x-icon' });
+}
+
+/**
+ * 将 Blob 异步转换为 Base64 Data URL 字符串
+ *
+ * @param blob 二进制 Blob 对象
+ * @returns Base64 Data URL 字符串
+ */
+export function blobToBase64(blob: Blob): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      if (typeof reader.result === 'string') {
+        resolve(reader.result);
+      }
+      else {
+        reject(new Error('转换 Base64 失败'));
+      }
+    };
+    reader.onerror = () => reject(reader.error || new Error('读取 Blob 失败'));
+    reader.readAsDataURL(blob);
+  });
+}
+
 
 
 

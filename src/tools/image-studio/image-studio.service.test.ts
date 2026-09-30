@@ -13,6 +13,8 @@ import {
   calculateTransformedDimensions,
   clampCropRegion,
   clampDimension,
+  createIcoBinary,
+  DIMENSION_PRESETS,
   extractColorPaletteFromImageData,
   formatExifSummary,
   generateExportFileName,
@@ -433,6 +435,84 @@ describe('image-studio.service', () => {
         expect(color.rgb).toMatch(/^rgb\(\d+,\s*\d+,\s*\d+\)$/);
         expect(color.percentage).toBeGreaterThan(0);
         expect(['#000000', '#FFFFFF']).toContain(color.textColor);
+      });
+    });
+  });
+
+  describe('createIcoBinary Windows Favicon 二进制打包算法', () => {
+    it('正确生成合法标准的 ICO 二进制结构 (包含魔数 0x0000、0x0001 与条目目录)', () => {
+      // 模拟 16x16 与 32x32 两帧 PNG 数据
+      const png16 = new Uint8Array([137, 80, 78, 71, 13, 10, 26, 10, 1, 2, 3, 4]); // 12 字节
+      const png32 = new Uint8Array([137, 80, 78, 71, 13, 10, 26, 10, 5, 6, 7, 8, 9, 10]); // 14 字节
+
+      const icoBytes = createIcoBinary([
+        { width: 16, height: 16, data: png16 },
+        { width: 32, height: 32, data: png32 },
+      ]);
+
+      expect(icoBytes).toBeInstanceOf(Uint8Array);
+      // 总长度：ICONDIR(6) + 2 * ICONDIRENTRY(16) + 12 + 14 = 38 + 26 = 64 字节
+      expect(icoBytes.byteLength).toBe(6 + 2 * 16 + 12 + 14);
+
+      const view = new DataView(icoBytes.buffer);
+
+      // 验证 ICONDIR
+      expect(view.getUint16(0, true)).toBe(0); // idReserved
+      expect(view.getUint16(2, true)).toBe(1); // idType (1 = ICO)
+      expect(view.getUint16(4, true)).toBe(2); // idCount (2 帧)
+
+      // 验证第 1 帧 ICONDIRENTRY (offset 6)
+      expect(view.getUint8(6)).toBe(16); // width
+      expect(view.getUint8(7)).toBe(16); // height
+      expect(view.getUint8(8)).toBe(0); // colorCount
+      expect(view.getUint16(10, true)).toBe(1); // planes
+      expect(view.getUint16(12, true)).toBe(32); // bitCount
+      expect(view.getUint32(14, true)).toBe(12); // bytes in res
+      expect(view.getUint32(18, true)).toBe(38); // dwImageOffset (6 + 32 = 38)
+
+      // 验证第 2 帧 ICONDIRENTRY (offset 22)
+      expect(view.getUint8(22)).toBe(32); // width
+      expect(view.getUint8(23)).toBe(32); // height
+      expect(view.getUint32(30, true)).toBe(14); // bytes in res
+      expect(view.getUint32(34, true)).toBe(50); // dwImageOffset (38 + 12 = 50)
+
+      // 验证数据无损嵌入
+      expect(icoBytes.slice(38, 50)).toEqual(png16);
+      expect(icoBytes.slice(50, 64)).toEqual(png32);
+    });
+
+    it('当传入 256px 尺寸时，目录条目宽度和高度规范写入 0 (Windows 规范)', () => {
+      const dummy = new Uint8Array([1, 2, 3]);
+      const icoBytes = createIcoBinary([{ width: 256, height: 256, data: dummy }]);
+      const view = new DataView(icoBytes.buffer);
+      expect(view.getUint8(6)).toBe(0); // 256px 对应写入 0
+      expect(view.getUint8(7)).toBe(0);
+    });
+
+    it('若传入空数组，抛出友好的错误提示', () => {
+      expect(() => createIcoBinary([])).toThrow('ICO 生成失败');
+    });
+  });
+
+  describe('DIMENSION_PRESETS 与格式支持', () => {
+    it('getFormatExtension 支持 image/x-icon 扩展名 ico', () => {
+      expect(getFormatExtension('image/x-icon')).toBe('ico');
+    });
+
+    it('DIMENSION_PRESETS 包含主流开发与社交媒体尺寸且数据完备', () => {
+      expect(DIMENSION_PRESETS.length).toBeGreaterThanOrEqual(10);
+
+      const ids = DIMENSION_PRESETS.map(p => p.id);
+      expect(ids).toContain('github-avatar');
+      expect(ids).toContain('favicon-32');
+      expect(ids).toContain('twitter-card');
+      expect(ids).toContain('wechat-cover');
+
+      DIMENSION_PRESETS.forEach((preset) => {
+        expect(preset.width).toBeGreaterThan(0);
+        expect(preset.height).toBeGreaterThan(0);
+        expect(preset.name.length).toBeGreaterThan(0);
+        expect(['icon', 'social', 'common']).toContain(preset.category);
       });
     });
   });

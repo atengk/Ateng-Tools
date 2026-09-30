@@ -11,6 +11,7 @@ import {
   Camera,
   Certificate,
   Check,
+  Code,
   ColorPicker,
   Columns,
   Copy,
@@ -25,6 +26,7 @@ import {
   GridDots,
   History,
   InfoCircle,
+  LayersSubtract,
   LayoutGrid,
   Link,
   MapPin,
@@ -44,12 +46,14 @@ import {
   ZoomOut,
 } from '@vicons/tabler';
 import {
+  blobToBase64,
   calculateDimensionsByHeight,
   calculateDimensionsByPercentage,
   calculateDimensionsByWidth,
   calculateTransformedDimensions,
   clampCropRegion,
   clampDimension,
+  DIMENSION_PRESETS,
   exportCanvasToBlob,
   extractColorPalette,
   formatExifSummary,
@@ -61,8 +65,11 @@ import {
   renderImagePipeline,
 } from './image-studio.service';
 import {
+  type CanvasBackgroundConfig,
+  type CanvasBackgroundMode,
   type CropAspectRatio,
   type CropRegion,
+  type DimensionPreset,
   type ExifMetadata,
   type ExportImageFormat,
   type ImageSourceInfo,
@@ -156,11 +163,72 @@ const isExifDrawerOpen = ref(false);
 const paletteColors = ref<PaletteColor[]>([]);
 const paletteCount = ref(6);
 
+// 画布背景显示与底色填充配置
+const backgroundConfig = ref<CanvasBackgroundConfig>({
+  mode: 'checkerboard',
+  customColor: '#FFFFFF',
+});
+
+// 计算当前生效的背景填充底色 (若透明转 JPEG 默认填充纯白兜底防黑边)
+const effectiveBackgroundColor = computed(() => {
+  switch (backgroundConfig.value.mode) {
+    case 'white':
+      return '#FFFFFF';
+    case 'black':
+      return '#000000';
+    case 'custom':
+      return backgroundConfig.value.customColor || '#FFFFFF';
+    case 'checkerboard':
+    default:
+      return exportFormat.value === 'image/jpeg' ? '#FFFFFF' : 'transparent';
+  }
+});
+
+const backgroundModeLabel = computed(() => {
+  switch (backgroundConfig.value.mode) {
+    case 'white':
+      return '纯白底';
+    case 'black':
+      return '纯黑底';
+    case 'custom':
+      return '自定义底色';
+    case 'checkerboard':
+    default:
+      return '透明棋盘格';
+  }
+});
+
+// 选中的开发者常用尺寸预设
+const selectedPresetId = ref<string | null>(null);
+
+// 尺寸预设分组选项 (供 NSelect 使用)
+const presetSelectOptions = computed(() => [
+  {
+    type: 'group',
+    label: 'Windows 图标与 Favicon',
+    key: 'icon-group',
+    children: DIMENSION_PRESETS.filter(p => p.category === 'icon').map(p => ({
+      label: `${p.name} (${p.width}×${p.height})`,
+      value: p.id,
+    })),
+  },
+  {
+    type: 'group',
+    label: '社交网络与开发者平台',
+    key: 'social-group',
+    children: DIMENSION_PRESETS.filter(p => p.category === 'social').map(p => ({
+      label: `${p.name} (${p.width}×${p.height})`,
+      value: p.id,
+    })),
+  },
+]);
+
 // 导出与压缩配置
 const exportFormat = ref<ExportImageFormat>('image/webp');
 const exportQuality = ref(90);
 const customExportName = ref('');
 const isExporting = ref(false);
+const isCopyingBase64 = ref(false);
 
 // 处理后的实时预览图 URL 与体积预估
 const processedPreviewUrl = ref<string>('');
@@ -169,6 +237,55 @@ let estimateDebounceTimer: ReturnType<typeof setTimeout> | null = null;
 
 // 隐藏的原生文件输入框
 const fileInputRef = ref<HTMLInputElement | null>(null);
+
+/**
+ * 应用开发者常用尺寸预设
+ */
+function applyDimensionPreset(presetId: string | null) {
+  if (!presetId) return;
+  const preset = DIMENSION_PRESETS.find(p => p.id === presetId);
+  if (!preset) return;
+  selectedPresetId.value = presetId;
+  targetWidth.value = preset.width;
+  targetHeight.value = preset.height;
+  message.success(`已应用“${preset.name}”预设尺寸 (${preset.width} × ${preset.height} px)`);
+}
+
+/**
+ * 一键复制当前渲染图的 Base64 Data URL 字符串
+ */
+async function handleCopyBase64() {
+  if (!rawImageElement.value || targetWidth.value <= 0 || targetHeight.value <= 0) {
+    message.warning('请先载入并处理图片');
+    return;
+  }
+
+  try {
+    isCopyingBase64.value = true;
+    const canvas = renderImagePipeline(rawImageElement.value, {
+      crop: appliedCrop.value || undefined,
+      transform: transform.value,
+      targetWidth: targetWidth.value,
+      targetHeight: targetHeight.value,
+      watermark: watermarkConfig.value,
+      backgroundColor: effectiveBackgroundColor.value,
+      loadedLogoImage: loadedLogoImage.value,
+    });
+
+    const quality = exportFormat.value === 'image/png' ? 1.0 : exportQuality.value / 100;
+    const blob = await exportCanvasToBlob(canvas, exportFormat.value, quality);
+    const dataUrl = await blobToBase64(blob);
+
+    copy(dataUrl);
+    message.success(`已成功复制 Base64 Data URL (共 ${dataUrl.length.toLocaleString()} 字符)`);
+  }
+  catch (err: any) {
+    message.error(`Base64 生成失败：${err?.message || '未知错误'}`);
+  }
+  finally {
+    isCopyingBase64.value = false;
+  }
+}
 
 /**
  * 一键复制全部 EXIF 摘要报告
@@ -775,6 +892,7 @@ function updatePipelinePreview() {
         targetWidth: targetWidth.value,
         targetHeight: targetHeight.value,
         watermark: watermarkConfig.value,
+        backgroundColor: effectiveBackgroundColor.value,
         loadedLogoImage: loadedLogoImage.value,
       });
 
@@ -804,6 +922,7 @@ watch(
     exportFormat,
     exportQuality,
     appliedCrop,
+    () => effectiveBackgroundColor.value,
     () => transform.value.rotation,
     () => transform.value.flipHorizontal,
     () => transform.value.flipVertical,
@@ -851,6 +970,7 @@ async function handleExportDownload() {
       targetWidth: targetWidth.value,
       targetHeight: targetHeight.value,
       watermark: watermarkConfig.value,
+      backgroundColor: effectiveBackgroundColor.value,
       loadedLogoImage: loadedLogoImage.value,
     });
 
@@ -1034,6 +1154,36 @@ onUnmounted(() => {
               {{ exifData.hasData ? '已检测到原图 EXIF 元数据，点击打开隐私透视抽屉' : '查看原图 EXIF 元数据与隐私检测' }}
             </n-tooltip>
 
+            <!-- 画布背景模式切换 -->
+            <n-popselect
+              v-model:value="backgroundConfig.mode"
+              :options="[
+                { label: '透明棋盘格 (默认)', value: 'checkerboard' },
+                { label: '纯白底色 (#FFF)', value: 'white' },
+                { label: '纯黑底色 (#000)', value: 'black' },
+                { label: '自定义纯色...', value: 'custom' },
+              ]"
+              size="small"
+              trigger="click"
+            >
+              <n-button size="tiny" secondary title="切换视口与导出背景模式">
+                <template #icon>
+                  <n-icon :component="LayersSubtract" />
+                </template>
+                {{ backgroundModeLabel }}
+              </n-button>
+            </n-popselect>
+
+            <!-- 自定义纯色底选择器 -->
+            <n-color-picker
+              v-if="backgroundConfig.mode === 'custom'"
+              v-model:value="backgroundConfig.customColor"
+              size="tiny"
+              :show-alpha="false"
+              style="width: 28px"
+              title="设置自定义背景纯色"
+            />
+
             <div class="toolbar-divider" />
 
             <n-button size="tiny" secondary type="primary" @click="triggerFileInput" title="更换新图片">
@@ -1045,10 +1195,18 @@ onUnmounted(() => {
           </div>
         </div>
 
-        <!-- 视口主画布舞台 (棋盘格透明底纹背景) -->
+        <!-- 视口主画布舞台 (根据 backgroundConfig.mode 自适应切换底色与纹理) -->
         <div
           ref="viewportContainerRef"
-          class="viewport-stage checkerboard-bg"
+          class="viewport-stage"
+          :class="{ 'checkerboard-bg': backgroundConfig.mode === 'checkerboard' }"
+          :style="{
+            backgroundColor: backgroundConfig.mode === 'white'
+              ? '#ffffff'
+              : (backgroundConfig.mode === 'black'
+                ? '#000000'
+                : (backgroundConfig.mode === 'custom' ? backgroundConfig.customColor : undefined)),
+          }"
           @wheel.prevent="onCanvasWheel"
           @dragover="onDragOver"
           @drop="onDrop"
@@ -1651,6 +1809,20 @@ onUnmounted(() => {
           </template>
 
           <div flex flex-col gap-3>
+            <!-- 开发者常用尺寸预设模板 -->
+            <div>
+              <span text-11px class="text-gray-500 mb-1 block">开发者常用尺寸模板：</span>
+              <n-select
+                v-model:value="selectedPresetId"
+                :options="presetSelectOptions"
+                placeholder="快速套用尺寸 (如 Favicon, GitHub 头像...)"
+                size="small"
+                clearable
+                filterable
+                @update:value="applyDimensionPreset"
+              />
+            </div>
+
             <!-- 快捷缩放比例按钮组 (水平居中) -->
             <div flex items-center justify-center gap-1.5 flex-wrap>
               <n-button
@@ -1714,9 +1886,9 @@ onUnmounted(() => {
             <div>
               <span text-11px class="text-gray-500 mb-1.5 block">目标文件格式：</span>
               <n-radio-group v-model:value="exportFormat" name="exportFormatRadio" size="small" style="width: 100%">
-                <div grid grid-cols-3 gap-1.5 w-full>
+                <div grid grid-cols-4 gap-1.5 w-full>
                   <n-radio-button value="image/webp" class="text-center">
-                    WebP (推荐)
+                    WebP
                   </n-radio-button>
                   <n-radio-button value="image/jpeg" class="text-center">
                     JPEG
@@ -1724,12 +1896,15 @@ onUnmounted(() => {
                   <n-radio-button value="image/png" class="text-center">
                     PNG
                   </n-radio-button>
+                  <n-radio-button value="image/x-icon" class="text-center">
+                    ICO
+                  </n-radio-button>
                 </div>
               </n-radio-group>
             </div>
 
-            <!-- 画质滑块 (JPEG & WebP) -->
-            <div v-if="exportFormat !== 'image/png'">
+            <!-- 画质滑块 (JPEG & WebP) 或无损提示 -->
+            <div v-if="exportFormat !== 'image/png' && exportFormat !== 'image/x-icon'">
               <div flex items-center justify-between mb-1>
                 <span text-11px class="text-gray-500">压缩画质：</span>
                 <span text-xs font-mono font-bold class="text-primary">{{ exportQuality }}%</span>
@@ -1740,6 +1915,9 @@ onUnmounted(() => {
                 :max="100"
                 :step="1"
               />
+            </div>
+            <div v-else-if="exportFormat === 'image/x-icon'" text-11px class="text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/40 p-2 rounded leading-relaxed">
+              Windows Favicon 格式自动打包 16×16、32×32、48×48 多尺寸高保真 PNG 图标容器
             </div>
             <div v-else text-11px class="text-gray-400 bg-gray-50 dark:bg-gray-800 p-2 rounded">
               PNG 格式采用无损压缩，画质滑块免配置
@@ -1793,12 +1971,12 @@ onUnmounted(() => {
               </n-tag>
             </div>
 
-            <!-- 导出按钮 (水平居中) -->
-            <div flex items-center justify-center pt-1>
+            <!-- 导出与 Base64 直出按钮组 (水平居中对齐) -->
+            <div flex items-center justify-center gap-2 pt-1>
               <n-button
                 type="primary"
                 size="medium"
-                block
+                style="flex: 1"
                 :loading="isExporting"
                 :disabled="isOverLimit"
                 @click="handleExportDownload"
@@ -1806,7 +1984,22 @@ onUnmounted(() => {
                 <template #icon>
                   <n-icon :component="Download" />
                 </template>
-                一键导出并下载
+                导出并下载
+              </n-button>
+
+              <n-button
+                size="medium"
+                secondary
+                type="info"
+                :loading="isCopyingBase64"
+                :disabled="isOverLimit"
+                title="一键生成并复制 Base64 Data URL 字符串"
+                @click="handleCopyBase64"
+              >
+                <template #icon>
+                  <n-icon :component="Code" />
+                </template>
+                复制 Base64
               </n-button>
             </div>
           </div>
