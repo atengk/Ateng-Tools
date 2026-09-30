@@ -3,6 +3,7 @@ import { type FormatOptionsWithLanguage, format as formatSQL } from 'sql-formatt
 import TextareaCopyable from '@/components/TextareaCopyable.vue';
 import { useStyleStore } from '@/stores/style.store';
 
+const { t } = useI18n();
 const inputElement = ref<HTMLElement>();
 const styleStore = useStyleStore();
 const config = reactive<FormatOptionsWithLanguage>({
@@ -15,6 +16,18 @@ const config = reactive<FormatOptionsWithLanguage>({
 
 const rawSQL = ref('select field1,field2,field3 from my_table where my_condition;');
 const prettySQL = computed(() => formatSQL(rawSQL.value, config));
+
+const keywordCaseOptions = computed(() => [
+  { label: t('tools.sql-prettify.uppercase', '大写 (UPPERCASE)'), value: 'upper' },
+  { label: t('tools.sql-prettify.lowercase', '小写 (lowercase)'), value: 'lower' },
+  { label: t('tools.sql-prettify.preserve', '保持原样 (Preserve)'), value: 'preserve' },
+]);
+
+const indentStyleOptions = computed(() => [
+  { label: t('tools.sql-prettify.standard', '标准缩进 (Standard)'), value: 'standard' },
+  { label: t('tools.sql-prettify.tabularLeft', '表格式靠左 (Tabular left)'), value: 'tabularLeft' },
+  { label: t('tools.sql-prettify.tabularRight', '表格式靠右 (Tabular right)'), value: 'tabularRight' },
+]);
 </script>
 
 <template>
@@ -23,7 +36,7 @@ const prettySQL = computed(() => formatSQL(rawSQL.value, config));
       <c-select
         v-model:value="config.language"
         flex-1
-        label="Dialect"
+        :label="t('tools.sql-prettify.dialect', 'SQL 方言')"
         :options="[
           { label: 'GCP BigQuery', value: 'bigquery' },
           { label: 'IBM DB2', value: 'db2' },
@@ -41,31 +54,25 @@ const prettySQL = computed(() => formatSQL(rawSQL.value, config));
         ]"
       />
       <c-select
-        v-model:value="config.keywordCase" label="Keyword case"
+        v-model:value="config.keywordCase"
+        :label="t('tools.sql-prettify.keywordCase', '关键字大小写')"
         flex-1
-        :options="[
-          { label: 'UPPERCASE', value: 'upper' },
-          { label: 'lowercase', value: 'lower' },
-          { label: 'Preserve', value: 'preserve' },
-        ]"
+        :options="keywordCaseOptions"
       />
       <c-select
-        v-model:value="config.indentStyle" label="Indent style"
+        v-model:value="config.indentStyle"
+        :label="t('tools.sql-prettify.indentStyle', '缩进风格')"
         flex-1
-        :options="[
-          { label: 'Standard', value: 'standard' },
-          { label: 'Tabular left', value: 'tabularLeft' },
-          { label: 'Tabular right', value: 'tabularRight' },
-        ]"
+        :options="indentStyleOptions"
       />
     </div>
   </div>
 
-  <n-form-item label="Your SQL query">
+  <n-form-item :label="t('tools.sql-prettify.inputLabel', '原始 SQL 查询语句')">
     <c-input-text
       ref="inputElement"
       v-model:value="rawSQL"
-      placeholder="Put your SQL query here..."
+      :placeholder="t('tools.sql-prettify.inputPlaceholder', '在此粘贴 SQL 查询语句...')"
       rows="20"
       multiline
       autocomplete="off"
@@ -75,7 +82,7 @@ const prettySQL = computed(() => formatSQL(rawSQL.value, config));
       monospace
     />
   </n-form-item>
-  <n-form-item label="Prettify version of your query">
+  <n-form-item :label="t('tools.sql-prettify.outputLabel', '美化后的 SQL 语句')">
     <TextareaCopyable :value="prettySQL" language="sql" :follow-height-of="inputElement" />
   </n-form-item>
 </template>

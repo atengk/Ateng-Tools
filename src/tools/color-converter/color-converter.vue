@@ -6,43 +6,46 @@ import cmykPlugin from 'colord/plugins/cmyk';
 import hwbPlugin from 'colord/plugins/hwb';
 import namesPlugin from 'colord/plugins/names';
 import lchPlugin from 'colord/plugins/lch';
+import { useI18n } from 'vue-i18n';
 import { buildColorFormat } from './color-converter.models';
 
 extend([cmykPlugin, hwbPlugin, namesPlugin, lchPlugin]);
 
+const { t } = useI18n();
+
 const formats = {
   picker: buildColorFormat({
-    label: 'color picker',
+    label: 'color-picker',
     format: (v: Colord) => v.toHex(),
     type: 'color-picker',
   }),
   hex: buildColorFormat({
-    label: 'hex',
+    label: 'HEX',
     format: (v: Colord) => v.toHex(),
     placeholder: 'e.g. #ff0000',
   }),
   rgb: buildColorFormat({
-    label: 'rgb',
+    label: 'RGB',
     format: (v: Colord) => v.toRgbString(),
     placeholder: 'e.g. rgb(255, 0, 0)',
   }),
   hsl: buildColorFormat({
-    label: 'hsl',
+    label: 'HSL',
     format: (v: Colord) => v.toHslString(),
     placeholder: 'e.g. hsl(0, 100%, 50%)',
   }),
   hwb: buildColorFormat({
-    label: 'hwb',
+    label: 'HWB',
     format: (v: Colord) => v.toHwbString(),
     placeholder: 'e.g. hwb(0, 0%, 0%)',
   }),
   lch: buildColorFormat({
-    label: 'lch',
+    label: 'LCH',
     format: (v: Colord) => v.toLchString(),
     placeholder: 'e.g. lch(53.24, 104.55, 40.85)',
   }),
   cmyk: buildColorFormat({
-    label: 'cmyk',
+    label: 'CMYK',
     format: (v: Colord) => v.toCmykString(),
     placeholder: 'e.g. cmyk(0, 100%, 100%, 0)',
   }),
@@ -54,6 +57,16 @@ const formats = {
 };
 
 updateColorValue(colord('#1ea54c'));
+
+function getLabel(key: string, defaultLabel: string) {
+  if (key === 'picker') {
+    return t('tools.color-converter.colorPicker', 'Color picker');
+  }
+  if (key === 'name') {
+    return t('tools.color-converter.colorName', 'Color name');
+  }
+  return defaultLabel;
+}
 
 function updateColorValue(value: Colord | undefined, omitLabel?: string) {
   if (value === undefined) {
@@ -79,9 +92,9 @@ function updateColorValue(value: Colord | undefined, omitLabel?: string) {
         v-if="type === 'text'"
         v-model:value="formats[key].value.value"
         :test-id="`input-${key}`"
-        :label="`${label}:`"
+        :label="`${getLabel(key, label)}:`"
         label-position="left"
-        label-width="100px"
+        label-width="120px"
         label-align="right"
         :placeholder="placeholder"
         :validation="validation"
@@ -91,7 +104,7 @@ function updateColorValue(value: Colord | undefined, omitLabel?: string) {
         @update:value="(v:string) => updateColorValue(parse(v), key)"
       />
 
-      <n-form-item v-else-if="type === 'color-picker'" :label="`${label}:`" label-width="100" label-placement="left" :show-feedback="false">
+      <n-form-item v-else-if="type === 'color-picker'" :label="`${getLabel(key, label)}:`" label-width="120" label-placement="left" :show-feedback="false">
         <n-color-picker
           v-model:value="formats[key].value.value"
           placement="bottom-end"

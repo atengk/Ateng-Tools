@@ -14,14 +14,14 @@ const result = computed(() => withDefaultOnError(() => evaluate(expression.value
       v-model:value="expression"
       rows="1"
       multiline
-      placeholder="Your math expression (ex: 2*sqrt(6) )..."
+      :placeholder="$t('tools.math-evaluator.expressionPlaceholder')"
       raw-text
       monospace
       autofocus
       autosize
     />
 
-    <c-card v-if="result !== ''" title="Result " mt-5>
+    <c-card v-if="result !== ''" :title="$t('tools.math-evaluator.resultTitle')" mt-5>
       {{ result }}
     </c-card>
   </div>

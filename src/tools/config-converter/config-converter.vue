@@ -125,9 +125,9 @@ function downloadOutput() {
 
           <div flex flex-wrap items-center gap-4>
             <div flex items-center gap-2>
-              <span text-12px text-gray-500>源格式:</span>
+              <span text-12px text-gray-500>{{ t('tools.config-converter.sourceFormat', '源格式:') }}</span>
               <n-radio-group v-model:value="selectedInputFormat" size="small">
-                <n-radio-button value="auto">自动嗅探 ({{ actualInputFormat.toUpperCase() }})</n-radio-button>
+                <n-radio-button value="auto">{{ t('tools.config-converter.autoDetect', { format: actualInputFormat.toUpperCase() }) }}</n-radio-button>
                 <n-radio-button value="yaml">YAML</n-radio-button>
                 <n-radio-button value="properties">Properties</n-radio-button>
                 <n-radio-button value="env">ENV</n-radio-button>
@@ -141,16 +141,16 @@ function downloadOutput() {
         <div flex flex-wrap items-center justify-between gap-4 pt-2 border-t border-gray-100 dark:border-zinc-700>
           <div flex items-center gap-5 text-12px>
             <n-checkbox v-model:checked="options.relaxedBinding">
-              Spring 宽松绑定 (Relaxed: 连字符转下划线、大写转义)
+              {{ t('tools.config-converter.relaxedBinding', 'Spring 宽松绑定 (连字符转下划线、大写转义)') }}
             </n-checkbox>
             <n-checkbox v-model:checked="options.sortKeys">
-              按键名字典序排序
+              {{ t('tools.config-converter.sortKeys', '按键名字典序排序') }}
             </n-checkbox>
           </div>
 
           <div flex items-center gap-2>
             <n-tag size="small" type="info" round>
-              已解析 {{ result.entryCount }} 个配置项
+              {{ t('tools.config-converter.parsedCount', { count: result.entryCount }) }}
             </n-tag>
           </div>
         </div>
@@ -160,12 +160,12 @@ function downloadOutput() {
     <!-- 左右分栏对照 -->
     <div grid grid-cols-1 lg:grid-cols-2 gap-4>
       <!-- 左侧：源输入卡片 -->
-      <c-card title="配置源输入 (Source)">
+      <c-card :title="t('tools.config-converter.inputCardTitle', '配置源输入 (Source)')">
         <n-input
           v-model:value="inputContent"
           type="textarea"
           :rows="22"
-          placeholder="在此粘贴任意 YAML、Properties、ENV 或 JSON 内容..."
+          :placeholder="t('tools.config-converter.inputPlaceholder', '在此粘贴任意 YAML、Properties、ENV 或 JSON 内容...')"
           font-mono
         />
       </c-card>
@@ -176,7 +176,7 @@ function downloadOutput() {
           <div flex items-center justify-between w-full>
             <!-- 目标格式 Tab 切换 -->
             <n-tabs v-model:value="targetFormat" type="segment" size="small" style="max-width: 380px">
-              <n-tab name="env">ENV 环境变量</n-tab>
+              <n-tab name="env">{{ t('tools.config-converter.envTab', 'ENV 环境变量') }}</n-tab>
               <n-tab name="properties">Properties</n-tab>
               <n-tab name="yaml">YAML</n-tab>
               <n-tab name="json">JSON</n-tab>
@@ -184,7 +184,7 @@ function downloadOutput() {
 
             <!-- 右侧下载操作 -->
             <div flex items-center gap-2>
-              <c-tooltip tooltip="下载导出配置文件" position="left">
+              <c-tooltip :tooltip="t('tools.config-converter.downloadTooltip', '下载导出配置文件')" position="left">
                 <c-button size="small" circle @click="downloadOutput">
                   <n-icon size="18" :component="Download" />
                 </c-button>
@@ -194,7 +194,7 @@ function downloadOutput() {
         </template>
 
         <!-- 异常报错提示 -->
-        <n-alert v-if="!result.success" type="error" mb-3 title="语法解析异常">
+        <n-alert v-if="!result.success" type="error" mb-3 :title="t('tools.config-converter.syntaxError', '语法解析异常')">
           {{ result.error }}
         </n-alert>
 
@@ -202,7 +202,7 @@ function downloadOutput() {
         <TextareaCopyable
           :value="result.output"
           :language="outputLanguageMap[targetFormat]"
-          copy-message="已复制转换结果至剪贴板"
+          :copy-message="t('tools.config-converter.copied', '已复制转换结果至剪贴板')"
         />
       </c-card>
     </div>

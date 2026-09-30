@@ -13,23 +13,23 @@ const { copy: copyUnescaped } = useCopy({ source: unescapeOutput });
 </script>
 
 <template>
-  <c-card title="Escape html entities">
-    <n-form-item label="Your string :">
+  <c-card :title="$t('tools.html-entities.escapeCardTitle')">
+    <n-form-item :label="$t('tools.html-entities.escapeInputLabel')">
       <c-input-text
         v-model:value="escapeInput"
         multiline
-        placeholder="The string to escape"
+        :placeholder="$t('tools.html-entities.escapeInputPlaceholder')"
         rows="3"
         autosize
         raw-text
       />
     </n-form-item>
 
-    <n-form-item label="Your string escaped :">
+    <n-form-item :label="$t('tools.html-entities.escapeOutputLabel')">
       <c-input-text
         multiline
         readonly
-        placeholder="Your string escaped"
+        :placeholder="$t('tools.html-entities.escapeOutputPlaceholder')"
         :value="escapeOutput"
         rows="3"
         autosize
@@ -38,28 +38,28 @@ const { copy: copyUnescaped } = useCopy({ source: unescapeOutput });
 
     <div flex justify-center>
       <c-button @click="copyEscaped()">
-        Copy
+        {{ $t('common.copy') }}
       </c-button>
     </div>
   </c-card>
-  <c-card title="Unescape html entities">
-    <n-form-item label="Your escaped string :">
+  <c-card :title="$t('tools.html-entities.unescapeCardTitle')" mt-4>
+    <n-form-item :label="$t('tools.html-entities.unescapeInputLabel')">
       <c-input-text
         v-model:value="unescapeInput"
         multiline
-        placeholder="The string to unescape"
+        :placeholder="$t('tools.html-entities.unescapeInputPlaceholder')"
         rows="3"
         autosize
         raw-text
       />
     </n-form-item>
 
-    <n-form-item label="Your string unescaped :">
+    <n-form-item :label="$t('tools.html-entities.unescapeOutputLabel')">
       <c-input-text
         :value="unescapeOutput"
         multiline
         readonly
-        placeholder="Your string unescaped"
+        :placeholder="$t('tools.html-entities.unescapeOutputPlaceholder')"
         rows="3"
         autosize
       />
@@ -67,7 +67,7 @@ const { copy: copyUnescaped } = useCopy({ source: unescapeOutput });
 
     <div flex justify-center>
       <c-button @click="copyUnescaped()">
-        Copy
+        {{ $t('common.copy') }}
       </c-button>
     </div>
   </c-card>

@@ -87,7 +87,7 @@ async function pasteInput() {
           </div>
 
           <div flex items-center gap-2>
-            <span text-13px font-semibold>生成目标:</span>
+            <span text-13px font-semibold>{{ t('tools.sql-ddl-to-entity.targetLanguage', '生成目标:') }}</span>
             <n-radio-group v-model:value="options.targetLanguage" size="small">
               <n-radio-button value="java">Java (MyBatis-Plus + Lombok)</n-radio-button>
               <n-radio-button value="typescript">TypeScript Interface</n-radio-button>
@@ -98,7 +98,7 @@ async function pasteInput() {
         <!-- 第二行：Java / 数据库配置项 -->
         <div flex flex-wrap items-center gap-4 pt-2 border-t border-gray-100 dark:border-zinc-700>
           <div v-if="options.targetLanguage === 'java'" flex items-center gap-2>
-            <span text-12px text-gray-500>包名:</span>
+            <span text-12px text-gray-500>{{ t('tools.sql-ddl-to-entity.packageName', '包名:') }}</span>
             <n-input
               v-model:value="options.packageName"
               size="small"
@@ -108,7 +108,7 @@ async function pasteInput() {
           </div>
 
           <div flex items-center gap-2>
-            <span text-12px text-gray-500>类名后缀:</span>
+            <span text-12px text-gray-500>{{ t('tools.sql-ddl-to-entity.entityNameSuffix', '类名后缀:') }}</span>
             <n-input
               v-model:value="options.entityNameSuffix"
               size="small"
@@ -118,7 +118,7 @@ async function pasteInput() {
           </div>
 
           <div v-if="options.targetLanguage === 'java'" flex items-center gap-2>
-            <span text-12px text-gray-500>主键策略:</span>
+            <span text-12px text-gray-500>{{ t('tools.sql-ddl-to-entity.idType', '主键策略:') }}</span>
             <n-select
               v-model:value="options.idType"
               :options="idTypeOptions"
@@ -129,15 +129,15 @@ async function pasteInput() {
 
           <div flex items-center gap-4 text-12px>
             <n-checkbox v-model:checked="options.removeTablePrefix">
-              剥离 t_ 表前缀
+              {{ t('tools.sql-ddl-to-entity.removeTablePrefix', '剥离 t_ 表前缀') }}
             </n-checkbox>
 
             <template v-if="options.targetLanguage === 'java'">
               <n-checkbox v-model:checked="options.useLombok">
-                Lombok 注解
+                {{ t('tools.sql-ddl-to-entity.useLombok', 'Lombok 注解') }}
               </n-checkbox>
               <n-checkbox v-model:checked="options.useMyBatisPlus">
-                MyBatis-Plus 注解
+                {{ t('tools.sql-ddl-to-entity.useMyBatisPlus', 'MyBatis-Plus 注解') }}
               </n-checkbox>
             </template>
           </div>
@@ -148,18 +148,18 @@ async function pasteInput() {
     <!-- 左右分栏对照 -->
     <div grid grid-cols-1 lg:grid-cols-2 gap-4>
       <!-- 左侧：DDL 输入 -->
-      <c-card title="MySQL DDL 建表语句 (SQL DDL)">
+      <c-card :title="t('tools.sql-ddl-to-entity.inputCardTitle', 'MySQL DDL 建表语句 (SQL DDL)')">
         <n-input
           v-model:value="rawDdlInput"
           type="textarea"
           :rows="20"
-          placeholder="在此粘贴 MySQL CREATE TABLE 语句..."
+          :placeholder="t('tools.sql-ddl-to-entity.inputPlaceholder', '在此粘贴 MySQL CREATE TABLE 语句...')"
           font-mono
         />
       </c-card>
 
       <!-- 右侧：生成代码预览 -->
-      <c-card :title="options.targetLanguage === 'java' ? 'Java Entity 实体类代码' : 'TypeScript Interface 接口代码'">
+      <c-card :title="options.targetLanguage === 'java' ? t('tools.sql-ddl-to-entity.outputTitleJava', 'Java Entity 实体类代码') : t('tools.sql-ddl-to-entity.outputTitleTs', 'TypeScript Interface 接口代码')">
         <TextareaCopyable
           :value="generatedCode"
           :language="options.targetLanguage === 'java' ? 'java' : 'typescript'"

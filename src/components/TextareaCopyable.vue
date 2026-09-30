@@ -33,11 +33,12 @@ hljs.registerLanguage('yaml', yamlHljs);
 hljs.registerLanguage('toml', iniHljs);
 hljs.registerLanguage('markdown', markdownHljs);
 
+const { t } = useI18n();
 const { value, language, followHeightOf, copyPlacement, copyMessage } = toRefs(props);
 const { height } = followHeightOf.value ? useElementSize(followHeightOf) : { height: ref(null) };
 
 const { copy, isJustCopied } = useCopy({ source: value, createToast: false });
-const tooltipText = computed(() => isJustCopied.value ? 'Copied!' : copyMessage.value);
+const tooltipText = computed(() => isJustCopied.value ? t('common.copied', '已复制！') : (copyMessage.value && copyMessage.value !== 'Copy to clipboard' ? copyMessage.value : t('common.copyToClipboard', '复制到剪贴板')));
 </script>
 
 <template>

@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { useI18n } from 'vue-i18n';
 import {
   chineseSimplifiedWordList,
   chineseTraditionalWordList,
@@ -20,6 +21,8 @@ import { useCopy } from '@/composable/copy';
 import { useValidation } from '@/composable/validation';
 import { isNotThrowing } from '@/utils/boolean';
 import { withDefaultOnError } from '@/utils/defaults';
+
+const { t } = useI18n();
 
 const languages = {
   'English': englishWordList,
@@ -53,11 +56,11 @@ const entropyValidation = useValidation({
   rules: [
     {
       validator: value => value === '' || (value.length <= 32 && value.length >= 16 && value.length % 4 === 0),
-      message: 'Entropy length should be >= 16, <= 32 and be a multiple of 4',
+      message: () => t('tools.bip39-generator.entropyLengthError', 'Entropy length should be >= 16, <= 32 and be a multiple of 4'),
     },
     {
       validator: value => /^[a-fA-F0-9]*$/.test(value),
-      message: 'Entropy should be an hexadecimal string',
+      message: () => t('tools.bip39-generator.entropyHexError', 'Entropy should be an hexadecimal string'),
     },
   ],
 });
@@ -67,7 +70,7 @@ const mnemonicValidation = useValidation({
   rules: [
     {
       validator: value => isNotThrowing(() => mnemonicToEntropy(value, languages[language.value])),
-      message: 'Invalid mnemonic',
+      message: () => t('tools.bip39-generator.invalidMnemonic', 'Invalid mnemonic'),
     },
   ],
 });
@@ -76,8 +79,14 @@ function refreshEntropy() {
   entropy.value = generateEntropy();
 }
 
-const { copy: copyEntropy } = useCopy({ source: entropy, text: 'Entropy copied to the clipboard' });
-const { copy: copyPassphrase } = useCopy({ source: passphrase, text: 'Passphrase copied to the clipboard' });
+const { copy: copyEntropy } = useCopy({
+  source: entropy,
+  text: computed(() => t('tools.bip39-generator.entropyCopied', 'Entropy copied to the clipboard')),
+});
+const { copy: copyPassphrase } = useCopy({
+  source: passphrase,
+  text: computed(() => t('tools.bip39-generator.passphraseCopied', 'Passphrase copied to the clipboard')),
+});
 </script>
 
 <template>
@@ -87,18 +96,18 @@ const { copy: copyPassphrase } = useCopy({ source: passphrase, text: 'Passphrase
         <c-select
           v-model:value="language"
           searchable
-          label="Language:"
+          :label="$t('tools.bip39-generator.language', 'Language:')"
           :options="Object.keys(languages)"
         />
       </n-gi>
       <n-gi span="2">
         <n-form-item
-          label="Entropy (seed):"
+          :label="$t('tools.bip39-generator.entropy', 'Entropy (seed):')"
           :feedback="entropyValidation.message"
           :validation-status="entropyValidation.status"
         >
           <n-input-group>
-            <c-input-text v-model:value="entropy" placeholder="Your string..." />
+            <c-input-text v-model:value="entropy" :placeholder="$t('tools.bip39-generator.entropyPlaceholder', 'Your string...')" />
 
             <c-button @click="refreshEntropy()">
               <n-icon size="22">
@@ -115,12 +124,12 @@ const { copy: copyPassphrase } = useCopy({ source: passphrase, text: 'Passphrase
       </n-gi>
     </n-grid>
     <n-form-item
-      label="Passphrase (mnemonic):"
+      :label="$t('tools.bip39-generator.passphrase', 'Passphrase (mnemonic):')"
       :feedback="mnemonicValidation.message"
       :validation-status="mnemonicValidation.status"
     >
       <n-input-group>
-        <c-input-text v-model:value="passphrase" placeholder="Your mnemonic..." raw-text />
+        <c-input-text v-model:value="passphrase" :placeholder="$t('tools.bip39-generator.passphrasePlaceholder', 'Your mnemonic...')" raw-text />
 
         <c-button @click="copyPassphrase()">
           <n-icon size="22" :component="Copy" />

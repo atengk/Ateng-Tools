@@ -5,6 +5,7 @@ import { RouterLink, useRoute, useRouter } from 'vue-router';
 import MenuIconItem from './MenuIconItem.vue';
 import type { Tool, ToolCategory } from '@/tools/tools.types';
 import { useToolStore } from '@/tools/tools.store';
+import { useCategory } from '@/composable/category';
 
 const props = withDefaults(defineProps<{ toolsByCategory?: ToolCategory[] }>(), { toolsByCategory: () => [] });
 const { toolsByCategory } = toRefs(props);
@@ -12,6 +13,7 @@ const route = useRoute();
 const router = useRouter();
 const toolStore = useToolStore();
 const themeVars = useThemeVars();
+const { getCategoryTitle } = useCategory();
 
 const makeLabel = (tool: Tool) => () => h(RouterLink, { to: tool.path }, { default: () => tool.name });
 const makeIcon = (tool: Tool) => () => h(MenuIconItem, { tool });
@@ -159,7 +161,7 @@ const menuOptions = computed(() =>
       >
         <div class="item-left">
           <span class="category-icon">{{ getCategoryEmoji(name) }}</span>
-          <span class="category-title">{{ name }}</span>
+          <span class="category-title">{{ getCategoryTitle(name) }}</span>
         </div>
 
         <div class="item-right">

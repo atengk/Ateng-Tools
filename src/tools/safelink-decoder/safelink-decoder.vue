@@ -18,14 +18,14 @@ const outputDecodedUrl = computed(() => {
     <c-input-text
       v-model:value="inputSafeLinkUrl"
       raw-text
-      placeholder="Your input Outlook SafeLink Url..."
+      :placeholder="$t('tools.safelink-decoder.inputPlaceholder', 'Your input Outlook SafeLink Url...')"
       autofocus
-      label="Your input Outlook SafeLink Url:"
+      :label="$t('tools.safelink-decoder.inputLabel', 'Your input Outlook SafeLink Url:')"
     />
 
     <n-divider />
 
-    <n-form-item label="Output decoded URL:">
+    <n-form-item :label="$t('tools.safelink-decoder.outputLabel', 'Output decoded URL:')">
       <TextareaCopyable :value="outputDecodedUrl" :word-wrap="true" />
     </n-form-item>
   </div>

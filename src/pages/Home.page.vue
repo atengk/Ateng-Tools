@@ -6,10 +6,12 @@ import Draggable from 'vuedraggable';
 import { useThemeVars } from 'naive-ui';
 import ToolCard from '../components/ToolCard.vue';
 import { useToolStore } from '@/tools/tools.store';
+import { useCategory } from '@/composable/category';
 
 const toolStore = useToolStore();
 const theme = useThemeVars();
 const { t } = useI18n();
+const { getCategoryTitle } = useCategory();
 
 useHead({
   title: computed(() => `${t('home.brand')} - ${t('home.subtitle')}`),
@@ -28,7 +30,7 @@ const categoryOptions = computed(() => {
     { key: 'all', label: t('home.filter.all'), count: toolStore.tools.length },
     ...toolStore.toolsByCategory.map(cat => ({
       key: cat.name,
-      label: cat.name,
+      label: getCategoryTitle(cat.name),
       count: cat.components.length,
     })),
   ];
@@ -72,13 +74,13 @@ function onUpdateFavoriteTools() {
             <div class="stat-item">
               <span class="dot bg-blue" />
               <span class="stat-label">{{ $t('home.hero.stats.total') }}</span>
-              <strong class="stat-val">{{ toolStore.tools.length }} 款</strong>
+              <strong class="stat-val">{{ toolStore.tools.length }} {{ $t('home.hero.stats.unit') }}</strong>
             </div>
 
             <div class="stat-item">
               <span class="dot bg-green" />
               <span class="stat-label">{{ $t('home.hero.stats.new') }}</span>
-              <strong class="stat-val">{{ toolStore.newTools.length }} 款</strong>
+              <strong class="stat-val">{{ toolStore.newTools.length }} {{ $t('home.hero.stats.unit') }}</strong>
             </div>
 
             <div class="stat-item">
@@ -143,7 +145,7 @@ function onUpdateFavoriteTools() {
 
           <div class="current-cat-indicator">
             <span>{{ $t('home.filter.current') }}</span>
-            <strong>{{ selectedCategory === 'all' ? $t('home.filter.all') : selectedCategory }}</strong>
+            <strong>{{ selectedCategory === 'all' ? $t('home.filter.all') : getCategoryTitle(selectedCategory) }}</strong>
           </div>
         </div>
 

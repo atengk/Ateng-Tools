@@ -80,6 +80,72 @@ search:
   label: '搜索'
   placeholder: '输入以搜索工具或指令...'
 tools:
+  regex-tester:
+    invalidRegex: '无效的正则表达式：{0}'
+    cardRegex: '正则表达式配置'
+    regexLabel: '待测试的正则表达式：'
+    regexPlaceholder: '输入待测试的正则表达式...'
+    seeCheatsheet: '查看正则表达式备忘清单'
+    flags:
+      globalTitle: '全局搜索 (g)'
+      globalLabel: '全局搜索'
+      ignoreCaseTitle: '忽略大小写 (i)'
+      ignoreCaseLabel: '忽略大小写'
+      multilineTitle: '多行模式：允许 ^ 和 $ 匹配每一行的行首和行尾 (m)'
+      multilineLabel: '多行模式'
+      dotAllTitle: '单行模式：允许 . 匹配包含换行符在内的所有字符 (s)'
+      dotAllLabel: '单行模式'
+      unicodeTitle: 'Unicode 模式：将模式视为 Unicode 码点序列 (u)'
+      unicodeLabel: 'Unicode 模式'
+      unicodeSetsTitle: 'Unicode 集合增强模式 (v)'
+      unicodeSetsLabel: 'Unicode 集合增强'
+    textLabel: '待匹配的目标文本：'
+    textPlaceholder: '输入要匹配的测试文本...'
+    cardMatches: '匹配结果'
+    colIndex: '文本偏移位置'
+    colValue: '匹配内容'
+    colCaptures: '捕获子组'
+    colGroups: '命名分组'
+    noMatch: '未找到任何匹配项'
+    cardSample: '逆向生成示例匹配文本'
+    cardDiagram: '正则表达式状态机可视化轨道图'
+
+  email-normalizer:
+    inputLabel: '待规范化的原始邮箱列表：'
+    inputPlaceholder: '在此输入邮箱地址 (每行一个)...'
+    outputLabel: '规范化后的邮箱地址：'
+    outputPlaceholder: '规范化处理后的邮箱将在此显示...'
+    clearButton: '清空邮箱'
+    copyButton: '复制规范化结果'
+    unableToParse: '无法解析邮箱地址：{email}'
+    copiedToast: '规范化邮箱地址已成功复制到剪贴板'
+
+  ascii-text-drawer:
+    inputLabel: '待绘制的文本：'
+    inputPlaceholder: '输入要绘制为 ASCII 艺术字的文本...'
+    fontLabel: '艺术字体：'
+    fontPlaceholder: '选择要使用的 ASCII 艺术字体...'
+    widthLabel: '输出宽度：'
+    widthPlaceholder: '文本换行宽度限制...'
+    loadingFont: '正在加载字体渲染...'
+    errorNotice: '当前配置参数导致生成错误，请尝试调整宽度或字体。'
+    outputLabel: 'ASCII 艺术字文本：'
+
+  safelink-decoder:
+    title: '安全链接解码器'
+    description: '解码并还原 Outlook / Office 365 包装的安全重定向链接'
+    inputLabel: '原始安全链接 (Safelink URL)'
+    inputPlaceholder: '在此粘贴 Outlook / Office 365 安全链接...'
+    outputLabel: '解码后的原始链接'
+
+  wifi-qr-code-generator:
+    download: '下载 WiFi 二维码'
+    fgColor: '前景色'
+    bgColor: '背景色'
+
+  qr-code-generator:
+    download: '下载二维码图片'
+
   categories:
     favorite-tools: '我的收藏'
     crypto: '加密'
@@ -97,10 +163,18 @@ tools:
   password-strength-analyser:
     title: 密码强度分析仪
     description: 使用此密码强度分析器和破解时间估计工具来发现密码的强度。
+    passwordPlaceholder: '输入待评估强度的密码...'
+    bruteForceDuration: '暴力穷举破解所需估算时间'
+    passwordLength: '密码长度：'
+    entropy: '信息熵 (Entropy)：'
+    charsetSize: '字符集大小：'
+    score: '综合强度评分：'
+    noteLabel: '注意：'
+    noteText: '计算出的强度基于通过暴力穷举破解密码所需的时间，未考虑针对常见弱口令的字典攻击风险。'
 
   chronometer:
-    title: 计时器
-    description: 监控事物的持续时间。基本上是一种具有简单计时器功能的计时器。
+    title: '秒表计时器'
+    description: '高精度秒表，支持分段计时与记录'
   token-generator:
     title: Token 生成器
     description: 使用您想要的字符、大写或小写字母、数字和/或符号生成随机字符串。
@@ -118,6 +192,14 @@ tools:
   percentage-calculator:
     title: 百分比计算器
     description: 轻松计算从一个值到另一个值的百分比，或从百分比到值的百分比。
+    whatIs: '计算数值'
+    percentOf: '% 于数值'
+    result: '结果：'
+    xIsWhatPercentOfY: '计算数值'
+    isWhatPercentOf: '占数值'
+    whatIsIncreaseDecrease: '计算从数值'
+    from: '从'
+    to: '变为'
 
   svg-placeholder-generator:
     title: SVG 占位符生成器
@@ -130,14 +212,58 @@ tools:
   camera-recorder:
     title: 摄像机记录器
     description: 从网络摄像头或照相机拍摄照片或录制视频。
+    grantNotice: '请授予浏览器访问摄像头和麦克风的权限以使用录制与快照功能。'
+    grantButton: '授予设备权限'
+    permissionBlocked: '摄像头权限已被阻止，请在浏览器地址栏权限设置中允许访问。'
+    notSupported: '当前浏览器环境不支持 MediaDevices API。'
+    recordingNotSupported: '当前浏览器环境不支持 MediaRecorder 录制能力。'
+    videoDevice: '视频输入设备'
+    videoPlaceholder: '选择摄像头...'
+    audioDevice: '音频输入设备'
+    audioPlaceholder: '选择麦克风...'
+    startWebcam: '开启摄像头预览'
+    takeScreenshot: '截图快照'
+    startRecording: '开始录制视频'
+    pause: '暂停'
+    resume: '继续'
+    stop: '停止'
+    screenshot: '快照预览'
+    video: '录像回放'
 
   keycode-info:
     title: Keycode 信息
     description: 查找任何按下的键的javascript键代码、代码、位置和修饰符。
+    pressKey: '请在键盘上按下任意按键...'
+    key: '按键字符 (event.key)'
+    keyPlaceholder: '按下按键后显示 key'
+    keycode: '按键数值 (event.which / keyCode)'
+    keycodePlaceholder: '按下按键后显示 keycode'
+    code: '物理按键编码 (event.code)'
+    codePlaceholder: '按下按键后显示 code'
+    location: '按键物理位置 (event.location)'
+    locationPlaceholder: '按下按键后显示 location'
+    modifiers: '当前修饰键状态'
+    modifiersNone: '无激活修饰键'
 
   emoji-picker:
     title: Emoji 选择器
     description: 轻松复制和粘贴Emoji表情符号，并获得每个表情符号的unicode和code points值.
+    searchPlaceholder: '搜索 Emoji 表情 (例如 "smile"、"微笑")...'
+    noResults: '未找到匹配的 Emoji 表情'
+    searchResults: '搜索结果'
+    emojiCopied: 'Emoji 表情 {emoji} 已复制到剪贴板'
+    codePointsCopied: '码点 "{codePoints}" 已复制到剪贴板'
+    unicodeCopied: 'Unicode "{unicode}" 已复制到剪贴板'
+    groups:
+      smileys-emotion: '表情与情感 (Smileys & Emotion)'
+      people-body: '人物与身体 (People & Body)'
+      animals-nature: '动物与自然 (Animals & Nature)'
+      food-drink: '食物与饮品 (Food & Drink)'
+      travel-places: '旅行与地点 (Travel & Places)'
+      activities: '活动与赛事 (Activities)'
+      objects: '物体与工具 (Objects)'
+      symbols: '符号与标识 (Symbols)'
+      flags: '旗帜 (Flags)'
 
   color-converter:
     title: Color 选择器
@@ -153,6 +279,13 @@ tools:
   http-status-codes:
     title: HTTP 状态码
     description: 所有HTTP状态的列表对其名称和含义解释。
+    searchPlaceholder: '搜索 HTTP 状态码或说明 (如 200, 404, Not Found)...'
+    searchResults: '搜索结果'
+    category1xx: '1xx 信息响应'
+    category2xx: '2xx 成功响应'
+    category3xx: '3xx 重定向'
+    category4xx: '4xx 客户端错误'
+    category5xx: '5xx 服务端错误'
 
   sql-prettify:
     title: SQL 美化和格式化
@@ -232,6 +365,24 @@ tools:
   benchmark-builder:
     title: 基准生成器
     description: 简单的在线基准构建器可以轻松比较任务的执行时间。
+    suite: '测试套件'
+    suiteName: '套件名称'
+    suiteNamePlaceholder: '例如：方案 A'
+    unit: '测量单位'
+    unitPlaceholder: '例如：ms / op'
+    suiteValues: '采样数值 (以逗号或换行分隔)'
+    measurePlaceholder: '输入测量数值...'
+    addMeasure: '添加测量值'
+    deleteMeasure: '删除测量值'
+    addSuite: '添加新套件'
+    deleteSuite: '删除此套件'
+    resetSuites: '重置所有套件'
+    copyMarkdown: '复制 Markdown 表格'
+    copyBulletList: '复制项目符号列表'
+    position: '排名'
+    samples: '样本数'
+    mean: '平均值'
+    variance: '方差'
 
   git-memo:
     title: Git 备忘录
@@ -240,6 +391,12 @@ tools:
   slugify-string:
     title: 打乱字符串
     description: 确保字符串 url、文件名和 id 安全。
+    inputPlaceholder: '输入待转换的原始字符串 (例如：My file path)...'
+    inputLabel: '待转换的文本：'
+    outputPlaceholder: '生成的 Slug 别名将显示在此 (例如：my-file-path)'
+    outputLabel: '生成的 Slug 别名：'
+    copyButton: '复制 Slug 别名'
+    copiedToast: 'Slug 别名已复制到剪贴板'
 
   encryption:
     title: 加密/解密文本
@@ -270,6 +427,19 @@ tools:
   eta-calculator:
     title: ETA 计算器
     description: ETA（估计到达时间）计算器，用于知道任务的近似结束时间，例如下载的结束时刻。
+    exampleDesc: '计算预计完成时刻与剩余耗时。例如：备份 1000 个文件，已完成 200 个，耗时 10 分钟。'
+    amountConsume: '已处理数量'
+    startedAt: '任务起始时刻'
+    unitConsumedSpan: '耗费时间'
+    totalDuration: '总耗时估算'
+    itWillEnd: '预计将于以下时刻完成：'
+    in: '大约还需：'
+    units:
+      ms: '毫秒'
+      s: '秒'
+      m: '分钟'
+      h: '小时'
+      d: '天'
 
   roman-numeral-converter:
     title: 罗马数字转换器
@@ -332,6 +502,8 @@ tools:
   math-evaluator:
     title: 数学计算器
     description: 计算数学表达式的计算器。您可以使用sqrt、cos、sin、abs等函数。
+    expressionPlaceholder: '输入数学表达式 (例如：2*sqrt(6) + sin(pi/4))...'
+    resultTitle: '计算结果'
 
   json-to-yaml-converter:
     title: JSON到YAML转换器
@@ -340,24 +512,67 @@ tools:
   url-parser:
     title: Url分析器
     description: 解析url字符串以获取所有不同的部分（协议、来源、参数、端口、用户名密码…）
+    urlToParse: '待解析的 URL：'
+    urlPlaceholder: '在此输入待解析的 URL...'
+    invalidUrl: '无效的 URL 地址'
+    protocol: '协议 (Protocol)'
+    username: '用户名 (Username)'
+    password: '密码 (Password)'
+    hostname: '主机名 (Hostname)'
+    port: '端口号 (Port)'
+    path: '路径 (Path)'
+    params: '查询参数 (Params)'
 
   iban-validator-and-parser:
     title: IBAN验证器和解析器
     description: 验证和分析IBAN编号。检查IBAN是否有效，并获取国家BBAN，如果它是QR-IBAN和IBAN友好格式。
+    placeholder: '输入待验证的 IBAN 账号 (如 CH93 0000 0000 0000 0000 0)...'
+    isValid: 'IBAN 有效性'
+    isQRIban: '是否为 QR-IBAN'
+    bban: 'BBAN 账号'
+    friendlyFormat: '易读友好格式'
+    countryCode: '国家/地区代码'
+    errors: '校验错误详情'
+    validExamplesTitle: '常见有效 IBAN 示例'
 
   user-agent-parser:
     title: 用户代理分析器
     description: 从用户代理字符串中检测和分析浏览器、引擎、操作系统、CPU和设备类型/型号。
+    uaLabel: '用户代理字符串 (User Agent)'
+    uaPlaceholder: '在此粘贴 User Agent 字符串...'
+    browser: '浏览器 (Browser)'
+    engine: '渲染引擎 (Engine)'
+    os: '操作系统 (OS)'
+    device: '设备信息 (Device)'
+    cpu: '处理器架构 (CPU)'
+    name: '名称'
+    version: '版本'
+    model: '型号'
+    type: '类型'
+    vendor: '厂商'
+    architecture: '架构'
+    noBrowserName: '未识别出浏览器名称'
+    noBrowserVersion: '未识别出浏览器版本'
+    noEngineName: '未识别出渲染引擎名称'
+    noEngineVersion: '未识别出渲染引擎版本'
+    noOsName: '未识别出操作系统名称'
+    noOsVersion: '未识别出操作系统版本'
+    noDeviceModel: '未识别出设备型号'
+    noDeviceType: '未识别出设备类型'
+    noDeviceVendor: '未识别出设备厂商'
+    noCpuArch: '未识别出 CPU 架构'
 
   numeronym-generator:
     title: 数字名称生成器
     description: 数字名是一个用数字构成缩写的词。例如，“i18n”是“国际化”的名词，其中18表示单词中第一个i和最后一个n之间的字母数。
+    wordPlaceholder: '输入英文单词 (例如："internationalization")...'
+    resultPlaceholder: '生成的缩写形式将显示在此 (例如："i18n")'
 
   case-converter:
     title: 大小写转换
     description: 更改字符串的大小写并在不同格式之间进行选择
-    inputLabel: 待转换文本：
-    inputPlaceholder: 输入待转换大小写格式的文本...
+    inputLabel: '待转换的字符串：'
+    inputPlaceholder: '输入待转换的字符串...'
     formats:
       lowercase: '小写 (lowercase):'
       uppercase: '大写 (UPPERCASE):'
@@ -377,6 +592,16 @@ tools:
   html-entities:
     title: 转义html实体
     description: 转义或unescape html实体（将<、>、&、“和\'替换为其html版本）
+    escapeCardTitle: '转义 HTML 实体'
+    escapeInputLabel: '待转义的原始字符串：'
+    escapeInputPlaceholder: '输入待转义的字符串...'
+    escapeOutputLabel: '转义后的字符串：'
+    escapeOutputPlaceholder: '转义后的字符串将显示在此'
+    unescapeCardTitle: '反转义 HTML 实体'
+    unescapeInputLabel: '待反转义的实体字符串：'
+    unescapeInputPlaceholder: '输入包含 HTML 实体的字符串...'
+    unescapeOutputLabel: '反转义后的字符串：'
+    unescapeOutputPlaceholder: '反转义后的字符串将显示在此'
 
   json-prettify:
     title: JSON美化和格式化
@@ -401,10 +626,28 @@ tools:
   mac-address-lookup:
     title: MAC地址查找
     description: 通过设备的MAC地址查找设备的供应商和制造商。
+    macLabel: 'MAC 地址'
+    macPlaceholder: '输入 MAC 地址 (如 00:1A:2B:3C:4D:5E)...'
+    vendorInfo: '厂商信息'
+    unknownVendor: '未知厂商 (未匹配到对应 OUI)'
+    copyVendor: '复制厂商信息'
+    copied: '厂商信息已复制到剪贴板'
 
   mime-types:
     title: mime类型
     description: 将mime类型转换为扩展，反之亦然。
+    mimeToExtTitle: 'MIME 类型转扩展名'
+    mimeToExtDesc: '根据 MIME 类型查找对应的文件扩展名'
+    mimeSelectPlaceholder: '输入或选择 MIME 类型 (如 application/json)...'
+    extFoundPrefix: '找到 '
+    extFoundSuffix: ' 个关联扩展名：'
+    extToMimeTitle: '扩展名转 MIME 类型'
+    extToMimeDesc: '根据文件扩展名查找对应的 MIME 类型'
+    extSelectPlaceholder: '输入或选择扩展名 (如 json 或 .png)...'
+    mimeFoundPrefix: '找到 '
+    mimeFoundSuffix: ' 个关联 MIME 类型：'
+    colMime: 'MIME 类型'
+    colExt: '扩展名'
 
   toml-to-json:
     title: TOML 到 JSON
@@ -413,14 +656,43 @@ tools:
   lorem-ipsum-generator:
     title: Lorem ipsum生成器
     description: Lorem ipsum是一种占位符文本，通常用于演示文档或字体的视觉形式，而不依赖于有意义的内容
+    paragraphs: '生成段落数'
+    sentencesPerParagraph: '每段句子数'
+    wordsPerSentence: '每句词数'
+    startWithLoremIpsum: '以 "Lorem ipsum" 开头'
+    asHtml: '输出为 HTML 格式'
+    outputPlaceholder: '生成的 Lorem ipsum 占位文本将显示在此...'
+    copiedToast: '占位文本已复制到剪贴板'
 
   qrcode-generator:
     title: 二维码生成器
     description: 生成并下载url或文本的QR代码，并自定义背景和前景颜色。
+    textLabel: '待编码内容 (文本或链接)'
+    textPlaceholder: '在此输入要生成二维码的文本或 URL...'
+    fgColor: '前景色 (二维码颜色)'
+    bgColor: '背景色'
+    errorResistance: '容错率'
+    low: '低 (7%)'
+    medium: '中 (15%)'
+    quartile: '较高 (25%)'
+    high: '高 (30%)'
+    download: '下载二维码图片'
 
   wifi-qrcode-generator:
     title: WiFi 二维码生成器
     description: 生成和下载QR码以快速连接到WiFi网络。
+    ssidLabel: 'WiFi 网络名称 (SSID)'
+    ssidPlaceholder: '输入 WiFi 名称...'
+    passwordLabel: 'WiFi 密码'
+    passwordPlaceholder: '输入 WiFi 密码 (无密码可留空)...'
+    encryptionMethod: '加密方式'
+    noPassword: '无密码 (开放网络)'
+    hiddenSSID: '隐藏网络 (Hidden SSID)'
+    eapMethod: 'EAP 认证方法'
+    eapPhase2: 'EAP Phase 2 认证'
+    identityLabel: 'EAP 身份标识'
+    identityPlaceholder: '输入 EAP Identity...'
+    anonymous: '匿名 EAP Identity'
 
   xml-formatter:
     title: XML 格式化
@@ -429,6 +701,14 @@ tools:
   temperature-converter:
     title: 温度转换器
     description: 开尔文、摄氏度、华氏度、兰金、德莱尔、牛顿、雷奥穆尔和罗默温度度数转换。
+    kelvin: '开尔文 (Kelvin)'
+    celsius: '摄氏度 (Celsius)'
+    fahrenheit: '华氏度 (Fahrenheit)'
+    rankine: '兰氏度 (Rankine)'
+    delisle: '德利尔度 (Delisle)'
+    newton: '牛顿度 (Newton)'
+    reaumur: '列氏度 (Réaumur)'
+    romer: '罗氏度 (Rømer)'
 
   chmod-calculator:
     title: Chmod 计算器
@@ -447,6 +727,23 @@ tools:
   html-wysiwyg-editor:
     title: HTML所见即所得编辑器
     description: 在线HTML编辑器具有功能丰富的所见即所得编辑器，立即获得内容的源代码。
+    menu:
+      bold: '粗体'
+      italic: '斜体'
+      strike: '删除线'
+      code: '行内代码'
+      h1: '一级标题 (H1)'
+      h2: '二级标题 (H2)'
+      h3: '三级标题 (H3)'
+      h4: '四级标题 (H4)'
+      bulletList: '无序列表'
+      orderedList: '有序列表'
+      codeBlock: '代码块'
+      blockquote: '引用块'
+      hardBreak: '换行'
+      clearFormat: '清除格式'
+      undo: '撤销'
+      redo: '重做'
 
   yaml-to-toml:
     title: YAML 到 TOML
@@ -470,10 +767,42 @@ tools:
   phone-parser-and-formatter:
     title: 电话分析器和格式化程序
     description: 解析、验证和格式化电话号码。获取有关电话号码的信息，如国家/地区代码、类型等。
+    phoneLabel: '电话号码'
+    phonePlaceholder: '输入电话号码 (如 +86 13800138000 或 010-88888888)...'
+    defaultCountry: '默认国家/地区'
+    countryIso: '国家代码 (ISO)'
+    countryName: '国家/地区名称'
+    callingCode: '国际电话区号'
+    type: '号码类型'
+    isValid: '是否有效号码'
+    isPossible: '是否可能为有效号码'
+    international: '国际格式 (International)'
+    national: '国内格式 (National)'
+    e164: 'E.164 格式'
+    rfc3966: 'RFC3966 格式'
+    invalidPhone: '无效或无法识别的电话号码'
 
   ipv4-subnet-calculator:
     title: IPv4子网计算器
     description: 解析IPv4 CIDR块，并获取有关子网络的所有所需信息。
+    ipLabel: '带有或不带掩码的 IPv4 地址'
+    ipPlaceholder: '输入 IPv4 地址 (如 192.168.0.1/24)...'
+    validationError: '无法解析此 IP 地址，请检查格式'
+    netmask: '子网掩码'
+    networkAddress: '网络地址 (Network address)'
+    networkMask: '网络掩码 (Network mask)'
+    networkMaskBinary: '二进制网络掩码'
+    cidrNotation: 'CIDR 记法'
+    wildcardMask: '通配符掩码 (Wildcard mask)'
+    networkSize: '可用地址数量'
+    firstAddress: '起始地址'
+    lastAddress: '末尾地址'
+    broadcastAddress: '广播地址'
+    noBroadcast: '当前掩码无广播地址'
+    ipClass: 'IP 分类'
+    unknownClass: '未知分类'
+    prevBlock: '上一个网段'
+    nextBlock: '下一个网段'
 
   og-meta-generator:
     title: 开放式图形元生成器
@@ -502,6 +831,19 @@ tools:
   device-information:
     title: 设备信息
     description: 获取有关当前设备的信息（屏幕大小、像素比率、用户代理…）
+    screen: '屏幕信息'
+    screenSize: '屏幕分辨率'
+    orientation: '屏幕方向'
+    orientationAngle: '屏幕旋转角度'
+    colorDepth: '色彩深度'
+    pixelRatio: '设备像素比 (Pixel Ratio)'
+    windowSize: '窗口视口尺寸'
+    device: '设备信息'
+    browserVendor: '浏览器厂商'
+    languages: '首选语言'
+    platform: '运行平台'
+    userAgent: '用户代理 (User Agent)'
+    unknown: '未知'
 
   pdf-signature-checker:
     title: PDF签名检查器
@@ -569,6 +911,11 @@ tools:
   string-obfuscator:
     title: 字符串混淆器
     description: 混淆字符串（如秘密、IBAN 或令牌），使其可共享和可识别，而不泄露其内容。
+    inputPlaceholder: '输入待混淆的字符串...'
+    inputLabel: '待混淆的文本：'
+    keepFirst: '保留前导字符数：'
+    keepLast: '保留尾部字符数：'
+    keepSpaces: '保留空格字符：'
 
   base-converter:
     title: 整数基转换器
@@ -595,10 +942,24 @@ tools:
   ipv4-address-converter:
     title: Ipv4地址转换器
     description: 在ipv6中，将ip地址转换为十进制、二进制、十六进制或事件
+    ipLabel: 'IPv4 地址'
+    ipPlaceholder: '输入 IPv4 地址 (如 192.168.1.1)...'
+    correctIpPlaceholder: '有效 IPv4 地址'
+    invalidIp: '无效的 IPv4 地址'
+    decimal: '十进制'
+    hexadecimal: '十六进制'
+    binary: '二进制'
+    ipv6: 'IPv6 映射地址'
+    ipv6Short: 'IPv6 紧凑地址'
 
   text-statistics:
     title: 文本统计
     description: 获取有关文本、字符数、字数、大小等的信息
+    inputPlaceholder: '在此输入待统计的文本...'
+    characterCount: '字符数'
+    wordCount: '词数'
+    lineCount: '行数'
+    byteSize: '字节大小'
 
   text-to-nato-alphabet:
     title: 文本转北约字母表
@@ -615,10 +976,25 @@ tools:
   ipv4-range-expander:
     title: IPv4范围扩展器
     description: 给定起始和结束IPv4地址，此工具使用其CIDR表示法计算有效的IPv4网络。
+    startLabel: '起始 IPv4 地址'
+    startPlaceholder: '例如 192.168.1.1'
+    endLabel: '结束 IPv4 地址'
+    endPlaceholder: '例如 192.168.1.254'
+    switchAddresses: '交换起始和结束地址'
+    startAddress: '起始地址'
+    endAddress: '结束地址'
+    addressesInRange: '包含的地址总数'
+    invalidIp: '无效的 IPv4 地址'
+    invalidCombinationTitle: '无效的地址范围'
+    invalidCombinationDesc: '结束 IP 地址必须大于或等于起始 IP 地址'
+    oldValue: '旧值'
+    newValue: '新值'
 
   text-diff:
     title: 文本比较
     description: 比较两个文本并查看它们之间的差异。
+    originalText: '原始文本'
+    modifiedText: '修改后的文本'
 
   otp-generator:
     title: OTP代码生成器

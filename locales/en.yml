@@ -80,6 +80,72 @@ search:
   label: Search
   placeholder: 'Type to search a tool or a command...'
 tools:
+  regex-tester:
+    invalidRegex: 'Invalid regex: {0}'
+    cardRegex: 'Regex'
+    regexLabel: 'Regex to test:'
+    regexPlaceholder: 'Put the regex to test'
+    seeCheatsheet: 'See Regular Expression Cheatsheet'
+    flags:
+      globalTitle: 'Global search'
+      globalLabel: 'Global search.'
+      ignoreCaseTitle: 'Case-insensitive search'
+      ignoreCaseLabel: 'Case-insensitive search.'
+      multilineTitle: 'Allows ^ and $ to match next to newline characters.'
+      multilineLabel: 'Multiline'
+      dotAllTitle: 'Allows . to match newline characters.'
+      dotAllLabel: 'Singleline'
+      unicodeTitle: 'Unicode; treat a pattern as a sequence of Unicode code points.'
+      unicodeLabel: 'Unicode'
+      unicodeSetsTitle: 'An upgrade to the u mode with more Unicode features.'
+      unicodeSetsLabel: 'Unicode Sets'
+    textLabel: 'Text to match:'
+    textPlaceholder: 'Put the text to match'
+    cardMatches: 'Matches'
+    colIndex: 'Index in text'
+    colValue: 'Value'
+    colCaptures: 'Captures'
+    colGroups: 'Groups'
+    noMatch: 'No match'
+    cardSample: 'Sample matching text'
+    cardDiagram: 'Regex Diagram'
+
+  email-normalizer:
+    inputLabel: 'Raw emails to normalize:'
+    inputPlaceholder: 'Put your emails here (one per line)...'
+    outputLabel: 'Normalized emails:'
+    outputPlaceholder: 'Normalized emails will appear here...'
+    clearButton: 'Clear emails'
+    copyButton: 'Copy normalized emails'
+    unableToParse: 'Unable to parse email: {email}'
+    copiedToast: 'Normalized emails copied to the clipboard'
+
+  ascii-text-drawer:
+    inputLabel: 'Your text:'
+    inputPlaceholder: 'Your text to draw'
+    fontLabel: 'Font:'
+    fontPlaceholder: 'Select font to use'
+    widthLabel: 'Width:'
+    widthPlaceholder: 'Width of the text'
+    loadingFont: 'Loading font...'
+    errorNotice: 'Current settings resulted in error.'
+    outputLabel: 'Ascii Art text:'
+
+  safelink-decoder:
+    title: 'Safelink decoder'
+    description: 'Decode Outlook/Office 365 Safelink URLs to obtain the original target link'
+    inputLabel: 'Original Safelink URL'
+    inputPlaceholder: 'Paste encoded Safelink URL here...'
+    outputLabel: 'Decoded URL'
+
+  wifi-qr-code-generator:
+    download: 'Download WiFi QR Code'
+    fgColor: 'Foreground color'
+    bgColor: 'Background color'
+
+  qr-code-generator:
+    download: 'Download QR Code'
+
   categories:
     favorite-tools: 'Your favorite tools'
     crypto: Crypto
@@ -97,10 +163,18 @@ tools:
   password-strength-analyser:
     title: Password strength analyser
     description: Discover the strength of your password with this client-side-only password strength analyser and crack time estimation tool.
+    passwordPlaceholder: 'Enter a password...'
+    bruteForceDuration: 'Duration to crack this password with brute force'
+    passwordLength: 'Password length:'
+    entropy: 'Entropy:'
+    charsetSize: 'Character set size:'
+    score: 'Score:'
+    noteLabel: 'Note: '
+    noteText: 'The computed strength is based on the time it would take to crack the password using a brute force approach, it does not take into account the possibility of a dictionary attack.'
 
   chronometer:
-    title: Chronometer
-    description: Monitor the duration of a thing. Basically a chronometer with simple chronometer features.
+    title: 'Chronometer'
+    description: 'High precision chronometer for time measurements'
 
   token-generator:
     title: Token generator
@@ -119,6 +193,14 @@ tools:
   percentage-calculator:
     title: Percentage calculator
     description: Easily calculate percentages from a value to another value, or from a percentage to a value.
+    whatIs: 'What is'
+    percentOf: '% of'
+    result: 'Result:'
+    xIsWhatPercentOfY: 'Value'
+    isWhatPercentOf: 'is what % of'
+    whatIsIncreaseDecrease: 'Percentage change from'
+    from: 'From'
+    to: 'to'
 
   svg-placeholder-generator:
     title: SVG placeholder generator
@@ -131,14 +213,58 @@ tools:
   camera-recorder:
     title: Camera recorder
     description: Take a picture or record a video from your webcam or camera.
+    grantNotice: 'Please grant browser camera and microphone permissions to record and capture snapshots.'
+    grantButton: 'Grant camera permissions'
+    permissionBlocked: 'Camera permission is blocked, please allow access in browser address bar settings.'
+    notSupported: 'MediaDevices API is not supported in this browser environment.'
+    recordingNotSupported: 'MediaRecorder is not supported in this browser environment.'
+    videoDevice: 'Video input device'
+    videoPlaceholder: 'Select camera...'
+    audioDevice: 'Audio input device'
+    audioPlaceholder: 'Select microphone...'
+    startWebcam: 'Start preview'
+    takeScreenshot: 'Take snapshot'
+    startRecording: 'Start recording'
+    pause: 'Pause'
+    resume: 'Resume'
+    stop: 'Stop'
+    screenshot: 'Snapshot preview'
+    video: 'Video playback'
 
   keycode-info:
     title: Keycode info
     description: Find the javascript keycode, code, location and modifiers of any pressed key.
+    pressKey: 'Press any key on your keyboard...'
+    key: 'Key (event.key)'
+    keyPlaceholder: 'Displays key after press'
+    keycode: 'Keycode (event.which / keyCode)'
+    keycodePlaceholder: 'Displays keycode after press'
+    code: 'Physical code (event.code)'
+    codePlaceholder: 'Displays code after press'
+    location: 'Key location (event.location)'
+    locationPlaceholder: 'Displays location after press'
+    modifiers: 'Modifiers active'
+    modifiersNone: 'No modifiers active'
 
   emoji-picker:
     title: Emoji picker
     description: Copy and paste emojis easily and get the unicode and code points value of each emoji.
+    searchPlaceholder: 'Search emojis (e.g. "smile")...'
+    noResults: 'No results'
+    searchResults: 'Search result'
+    emojiCopied: 'Emoji {emoji} copied to the clipboard'
+    codePointsCopied: 'Code points "{codePoints}" copied to the clipboard'
+    unicodeCopied: 'Unicode "{unicode}" copied to the clipboard'
+    groups:
+      smileys-emotion: 'Smileys & Emotion'
+      people-body: 'People & Body'
+      animals-nature: 'Animals & Nature'
+      food-drink: 'Food & Drink'
+      travel-places: 'Travel & Places'
+      activities: 'Activities'
+      objects: 'Objects'
+      symbols: 'Symbols'
+      flags: 'Flags'
 
   color-converter:
     title: Color converter
@@ -155,6 +281,13 @@ tools:
   http-status-codes:
     title: HTTP status codes
     description: The list of all HTTP status codes, their name, and their meaning.
+    searchPlaceholder: 'Search HTTP status codes or descriptions (e.g. 200, 404, Not Found)...'
+    searchResults: 'Search results'
+    category1xx: '1xx Informational'
+    category2xx: '2xx Successful'
+    category3xx: '3xx Redirection'
+    category4xx: '4xx Client error'
+    category5xx: '5xx Server error'
 
   sql-prettify:
     title: SQL prettify and format
@@ -234,6 +367,24 @@ tools:
   benchmark-builder:
     title: Benchmark builder
     description: Easily compare execution time of tasks with this very simple online benchmark builder.
+    suite: 'Benchmark suite'
+    suiteName: 'Suite name'
+    suiteNamePlaceholder: 'e.g. Solution A'
+    unit: 'Unit'
+    unitPlaceholder: 'e.g. ms / op'
+    suiteValues: 'Sample values (comma or newline separated)'
+    measurePlaceholder: 'Enter measurement value...'
+    addMeasure: 'Add measurement'
+    deleteMeasure: 'Delete measurement'
+    addSuite: 'Add new suite'
+    deleteSuite: 'Delete this suite'
+    resetSuites: 'Reset all suites'
+    copyMarkdown: 'Copy Markdown table'
+    copyBulletList: 'Copy bullet list'
+    position: 'Rank'
+    samples: 'Samples'
+    mean: 'Mean'
+    variance: 'Variance'
 
   git-memo:
     title: Git cheatsheet
@@ -242,6 +393,12 @@ tools:
   slugify-string:
     title: Slugify string
     description: Make a string url, filename and id safe.
+    inputPlaceholder: 'Put your string here (ex: My file path)'
+    inputLabel: 'Your string to slugify'
+    outputPlaceholder: 'Your slug will be generated here (ex: my-file-path)'
+    outputLabel: 'Your slug'
+    copyButton: 'Copy slug'
+    copiedToast: 'Slug copied to clipboard'
 
   encryption:
     title: Encrypt / decrypt text
@@ -272,6 +429,19 @@ tools:
   eta-calculator:
     title: ETA calculator
     description: An ETA (Estimated Time of Arrival) calculator to determine the approximate end time of a task, for example, the end time and duration of a file download.
+    exampleDesc: 'Calculate estimated time of completion and remaining time. E.g.: backing up 1000 files, completed 200, took 10 minutes.'
+    amountConsume: 'Processed amount'
+    startedAt: 'Task started at'
+    unitConsumedSpan: 'Time elapsed'
+    totalDuration: 'Estimated total duration'
+    itWillEnd: 'Estimated to complete at:'
+    in: 'In approximately:'
+    units:
+      ms: 'ms'
+      s: 's'
+      m: 'min'
+      h: 'h'
+      d: 'days'
 
   roman-numeral-converter:
     title: Roman numeral converter
@@ -335,6 +505,8 @@ tools:
   math-evaluator:
     title: Math evaluator
     description: A calculator for evaluating mathematical expressions. You can use functions like sqrt, cos, sin, abs, etc.
+    expressionPlaceholder: 'Your math expression (ex: 2*sqrt(6) )...'
+    resultTitle: 'Result'
 
   json-to-yaml-converter:
     title: JSON to YAML converter
@@ -343,18 +515,61 @@ tools:
   url-parser:
     title: URL parser
     description: Parse a URL into its separate constituent parts (protocol, origin, params, port, username-password, ...)
+    urlToParse: 'URL to parse:'
+    urlPlaceholder: 'Paste a URL to parse here...'
+    invalidUrl: 'Invalid URL'
+    protocol: 'Protocol'
+    username: 'Username'
+    password: 'Password'
+    hostname: 'Hostname'
+    port: 'Port'
+    path: 'Path'
+    params: 'Query params'
 
   iban-validator-and-parser:
     title: IBAN validator and parser
     description: Validate and parse IBAN numbers. Check if an IBAN is valid and get the country, BBAN, if it is a QR-IBAN and the IBAN friendly format.
+    placeholder: 'Enter IBAN to validate (e.g. CH93 0000 0000 0000 0000 0)...'
+    isValid: 'IBAN validity'
+    isQRIban: 'Is QR-IBAN'
+    bban: 'BBAN'
+    friendlyFormat: 'Friendly format'
+    countryCode: 'Country code'
+    errors: 'Validation errors'
+    validExamplesTitle: 'Valid IBAN examples'
 
   user-agent-parser:
     title: User-agent parser
     description: Detect and parse Browser, Engine, OS, CPU, and Device type/model from an user-agent string.
+    uaLabel: 'User-Agent string'
+    uaPlaceholder: 'Paste user agent here...'
+    browser: 'Browser'
+    engine: 'Rendering engine'
+    os: 'Operating system'
+    device: 'Device'
+    cpu: 'CPU'
+    name: 'Name'
+    version: 'Version'
+    model: 'Model'
+    type: 'Type'
+    vendor: 'Vendor'
+    architecture: 'Architecture'
+    noBrowserName: 'No browser name detected'
+    noBrowserVersion: 'No browser version detected'
+    noEngineName: 'No engine name detected'
+    noEngineVersion: 'No engine version detected'
+    noOsName: 'No OS name detected'
+    noOsVersion: 'No OS version detected'
+    noDeviceModel: 'No device model detected'
+    noDeviceType: 'No device type detected'
+    noDeviceVendor: 'No device vendor detected'
+    noCpuArch: 'No CPU architecture detected'
 
   numeronym-generator:
     title: Numeronym generator
     description: A numeronym is a word where a number is used to form an abbreviation. For example, "i18n" is a numeronym of "internationalization" where 18 stands for the number of letters between the first i and the last n in the word.
+    wordPlaceholder: 'Enter a word, e.g. "internationalization"'
+    resultPlaceholder: 'Your numeronym will be here, e.g. "i18n"'
 
   case-converter:
     title: Case converter
@@ -380,6 +595,16 @@ tools:
   html-entities:
     title: Escape HTML entities
     description: Escape or unescape HTML entities (replace characters like <,>, &, " and \' with their HTML version)
+    escapeCardTitle: 'Escape html entities'
+    escapeInputLabel: 'Your string :'
+    escapeInputPlaceholder: 'The string to escape'
+    escapeOutputLabel: 'Your string escaped :'
+    escapeOutputPlaceholder: 'Your string escaped'
+    unescapeCardTitle: 'Unescape html entities'
+    unescapeInputLabel: 'Your escaped string :'
+    unescapeInputPlaceholder: 'The string to unescape'
+    unescapeOutputLabel: 'Your string unescaped :'
+    unescapeOutputPlaceholder: 'Your string unescaped'
 
   json-prettify:
     title: JSON prettify and format
@@ -404,10 +629,28 @@ tools:
   mac-address-lookup:
     title: MAC address lookup
     description: Find the vendor and manufacturer of a device by its MAC address.
+    macLabel: 'MAC address'
+    macPlaceholder: 'Enter MAC address (e.g. 00:1A:2B:3C:4D:5E)...'
+    vendorInfo: 'Vendor information'
+    unknownVendor: 'Unknown vendor (no matching OUI)'
+    copyVendor: 'Copy vendor information'
+    copied: 'Vendor information copied to clipboard'
 
   mime-types:
     title: MIME types
     description: Convert MIME types to file extensions and vice-versa.
+    mimeToExtTitle: 'MIME type to extension'
+    mimeToExtDesc: 'Lookup file extension from MIME type'
+    mimeSelectPlaceholder: 'Select or enter MIME type (e.g. application/json)...'
+    extFoundPrefix: 'Found '
+    extFoundSuffix: ' associated extension(s):'
+    extToMimeTitle: 'Extension to MIME type'
+    extToMimeDesc: 'Lookup MIME type from file extension'
+    extSelectPlaceholder: 'Select or enter extension (e.g. json or .png)...'
+    mimeFoundPrefix: 'Found '
+    mimeFoundSuffix: ' associated MIME type(s):'
+    colMime: 'MIME type'
+    colExt: 'Extension'
 
   toml-to-json:
     title: TOML to JSON
@@ -416,14 +659,43 @@ tools:
   lorem-ipsum-generator:
     title: Lorem ipsum generator
     description: Lorem ipsum is a placeholder text commonly used to demonstrate the visual form of a document or a typeface without relying on meaningful content
+    paragraphs: 'Paragraphs'
+    sentencesPerParagraph: 'Sentences per paragraph'
+    wordsPerSentence: 'Words per sentence'
+    startWithLoremIpsum: 'Start with lorem ipsum ?'
+    asHtml: 'As html ?'
+    outputPlaceholder: 'Your lorem ipsum...'
+    copiedToast: 'Lorem ipsum copied to the clipboard'
 
   qrcode-generator:
     title: QR Code generator
     description: Generate and download a QR code for a URL (or just plain text), and customize the background and foreground colors.
+    textLabel: 'Text or URL to encode'
+    textPlaceholder: 'Enter text or URL to generate QR code...'
+    fgColor: 'Foreground color'
+    bgColor: 'Background color'
+    errorResistance: 'Error correction level'
+    low: 'Low (7%)'
+    medium: 'Medium (15%)'
+    quartile: 'Quartile (25%)'
+    high: 'High (30%)'
+    download: 'Download QR Code'
 
   wifi-qrcode-generator:
     title: WiFi QR Code generator
     description: Generate and download QR codes for quick connections to WiFi networks.
+    ssidLabel: 'Network name (SSID)'
+    ssidPlaceholder: 'Enter WiFi SSID...'
+    passwordLabel: 'Password'
+    passwordPlaceholder: 'Enter password (leave empty if none)...'
+    encryptionMethod: 'Encryption'
+    noPassword: 'No password'
+    hiddenSSID: 'Hidden SSID'
+    eapMethod: 'EAP method'
+    eapPhase2: 'EAP phase 2'
+    identityLabel: 'EAP identity'
+    identityPlaceholder: 'Enter EAP identity...'
+    anonymous: 'Anonymous EAP identity'
 
   xml-formatter:
     title: XML formatter
@@ -432,6 +704,14 @@ tools:
   temperature-converter:
     title: Temperature converter
     description: Degrees temperature conversions for Kelvin, Celsius, Fahrenheit, Rankine, Delisle, Newton, Réaumur, and Rømer.
+    kelvin: 'Kelvin'
+    celsius: 'Celsius'
+    fahrenheit: 'Fahrenheit'
+    rankine: 'Rankine'
+    delisle: 'Delisle'
+    newton: 'Newton'
+    reaumur: 'Réaumur'
+    romer: 'Rømer'
 
   chmod-calculator:
     title: Chmod calculator
@@ -450,6 +730,23 @@ tools:
   html-wysiwyg-editor:
     title: HTML WYSIWYG editor
     description: Online, feature-rich WYSIWYG HTML editor which generates the source code of the content immediately.
+    menu:
+      bold: 'Bold'
+      italic: 'Italic'
+      strike: 'Strike'
+      code: 'Inline code'
+      h1: 'Heading 1'
+      h2: 'Heading 2'
+      h3: 'Heading 3'
+      h4: 'Heading 4'
+      bulletList: 'Bullet list'
+      orderedList: 'Ordered list'
+      codeBlock: 'Code block'
+      blockquote: 'Blockquote'
+      hardBreak: 'Hard break'
+      clearFormat: 'Clear format'
+      undo: 'Undo'
+      redo: 'Redo'
 
   yaml-to-toml:
     title: YAML to TOML
@@ -474,10 +771,42 @@ tools:
   phone-parser-and-formatter:
     title: Phone parser and formatter
     description: Parse, validate and format phone numbers. Get information about the phone number, like the country code, type, etc.
+    phoneLabel: 'Phone number'
+    phonePlaceholder: 'Enter phone number (e.g. +86 13800138000)...'
+    defaultCountry: 'Default Country'
+    countryIso: 'Country ISO'
+    countryName: 'Country Name'
+    callingCode: 'Calling Code'
+    type: 'Number Type'
+    isValid: 'Valid'
+    isPossible: 'Possible'
+    international: 'International'
+    national: 'National'
+    e164: 'E.164'
+    rfc3966: 'RFC3966'
+    invalidPhone: 'Invalid phone number'
 
   ipv4-subnet-calculator:
     title: IPv4 subnet calculator
     description: Parse your IPv4 CIDR blocks and get all the info you need about your subnet.
+    ipLabel: 'IPv4 address with or without CIDR mask'
+    ipPlaceholder: 'Enter an IPv4 address (e.g. 192.168.0.1/24)...'
+    validationError: 'Unable to parse this IP address, please check format'
+    netmask: 'Subnet mask'
+    networkAddress: 'Network address'
+    networkMask: 'Network mask'
+    networkMaskBinary: 'Binary network mask'
+    cidrNotation: 'CIDR notation'
+    wildcardMask: 'Wildcard mask'
+    networkSize: 'Usable host count'
+    firstAddress: 'First address'
+    lastAddress: 'Last address'
+    broadcastAddress: 'Broadcast address'
+    noBroadcast: 'No broadcast address for this mask'
+    ipClass: 'IP class'
+    unknownClass: 'Unknown class'
+    prevBlock: 'Previous block'
+    nextBlock: 'Next block'
 
   og-meta-generator:
     title: Open graph meta generator
@@ -506,6 +835,19 @@ tools:
   device-information:
     title: Device information
     description: Get information about your current device (screen size, pixel-ratio, user agent, ...)
+    screen: 'Screen'
+    screenSize: 'Screen resolution'
+    orientation: 'Orientation'
+    orientationAngle: 'Orientation angle'
+    colorDepth: 'Color depth'
+    pixelRatio: 'Device pixel ratio'
+    windowSize: 'Window viewport size'
+    device: 'Device'
+    browserVendor: 'Browser vendor'
+    languages: 'Preferred languages'
+    platform: 'Platform'
+    userAgent: 'User Agent'
+    unknown: 'Unknown'
 
   pdf-signature-checker:
     title: PDF signature checker
@@ -573,6 +915,11 @@ tools:
   string-obfuscator:
     title: String obfuscator
     description: Obfuscate a string (like a secret, an IBAN, or a token) to make it shareable and identifiable without revealing its content.
+    inputPlaceholder: 'Enter string to obfuscate'
+    inputLabel: 'String to obfuscate:'
+    keepFirst: 'Keep first:'
+    keepLast: 'Keep last:'
+    keepSpaces: 'Keep spaces:'
 
   base-converter:
     title: Integer base converter
@@ -599,10 +946,24 @@ tools:
   ipv4-address-converter:
     title: IPv4 address converter
     description: Convert an IP address into decimal, binary, hexadecimal, or even an IPv6 representation of it.
+    ipLabel: 'IPv4 address'
+    ipPlaceholder: 'Enter an IPv4 address (e.g. 192.168.1.1)...'
+    correctIpPlaceholder: 'Valid IPv4 address'
+    invalidIp: 'Invalid IPv4 address'
+    decimal: 'Decimal'
+    hexadecimal: 'Hexadecimal'
+    binary: 'Binary'
+    ipv6: 'IPv6 mapped'
+    ipv6Short: 'IPv6 compact'
 
   text-statistics:
     title: Text statistics
     description: Get information about a text, the number of characters, the number of words, its size in bytes, ...
+    inputPlaceholder: 'Your text...'
+    characterCount: 'Character count'
+    wordCount: 'Word count'
+    lineCount: 'Line count'
+    byteSize: 'Byte size'
 
   text-to-nato-alphabet:
     title: Text to NATO alphabet
@@ -619,10 +980,25 @@ tools:
   ipv4-range-expander:
     title: IPv4 range expander
     description: Given a start and an end IPv4 address, this tool calculates a valid IPv4 subnet along with its CIDR notation.
+    startLabel: 'Start IPv4 address'
+    startPlaceholder: 'e.g. 192.168.1.1'
+    endLabel: 'End IPv4 address'
+    endPlaceholder: 'e.g. 192.168.1.254'
+    switchAddresses: 'Swap start and end addresses'
+    startAddress: 'Start address'
+    endAddress: 'End address'
+    addressesInRange: 'Total addresses in range'
+    invalidIp: 'Invalid IPv4 address'
+    invalidCombinationTitle: 'Invalid address range'
+    invalidCombinationDesc: 'End IP address must be greater than or equal to start IP address'
+    oldValue: 'Old value'
+    newValue: 'New value'
 
   text-diff:
     title: Text diff
     description: Compare two texts and see the differences between them.
+    originalText: 'original text'
+    modifiedText: 'modified text'
 
   otp-generator:
     title: OTP code generator

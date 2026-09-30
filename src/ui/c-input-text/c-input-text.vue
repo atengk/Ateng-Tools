@@ -35,7 +35,7 @@ const props = withDefaults(
   {
     value: '',
     id: generateRandomId,
-    placeholder: 'Input text',
+    placeholder: '',
     label: undefined,
     readonly: false,
     disabled: false,

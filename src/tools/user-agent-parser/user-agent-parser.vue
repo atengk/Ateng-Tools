@@ -1,15 +1,16 @@
 <script setup lang="ts">
+import { computed, ref } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { UAParser } from 'ua-parser-js';
 import { Adjustments, Browser, Cpu, Devices, Engine } from '@vicons/tabler';
 import UserAgentResultCards from './user-agent-result-cards.vue';
 import type { UserAgentResultSection } from './user-agent-parser.types';
 import { withDefaultOnError } from '@/utils/defaults';
 
+const { t } = useI18n();
+
 const ua = ref(navigator.userAgent as string);
 
-// If not input in the ua field is present return an empty object of type UAParser.IResult because otherwise
-// UAParser returns the values for the current Browser. This is confusing because results are shown for an empty
-// UA field value.
 function getUserAgentInfo(userAgent: string) {
   return userAgent.trim().length > 0
     ? UAParser(userAgent.trim())
@@ -17,97 +18,97 @@ function getUserAgentInfo(userAgent: string) {
 }
 const userAgentInfo = computed(() => withDefaultOnError(() => getUserAgentInfo(ua.value), undefined));
 
-const sections: UserAgentResultSection[] = [
+const sections = computed<UserAgentResultSection[]>(() => [
   {
-    heading: 'Browser',
+    heading: t('tools.user-agent-parser.browser', 'Browser'),
     icon: Browser,
     content: [
       {
-        label: 'Name',
+        label: t('tools.user-agent-parser.name', 'Name'),
         getValue: block => block?.browser.name,
-        undefinedFallback: 'No browser name available',
+        undefinedFallback: t('tools.user-agent-parser.noBrowserName', 'No browser name available'),
       },
       {
-        label: 'Version',
+        label: t('tools.user-agent-parser.version', 'Version'),
         getValue: block => block?.browser.version,
-        undefinedFallback: 'No browser version available',
+        undefinedFallback: t('tools.user-agent-parser.noBrowserVersion', 'No browser version available'),
       },
     ],
   },
   {
-    heading: 'Engine',
+    heading: t('tools.user-agent-parser.engine', 'Engine'),
     icon: Engine,
     content: [
       {
-        label: 'Name',
+        label: t('tools.user-agent-parser.name', 'Name'),
         getValue: block => block?.engine.name,
-        undefinedFallback: 'No engine name available',
+        undefinedFallback: t('tools.user-agent-parser.noEngineName', 'No engine name available'),
       },
       {
-        label: 'Version',
+        label: t('tools.user-agent-parser.version', 'Version'),
         getValue: block => block?.engine.version,
-        undefinedFallback: 'No engine version available',
+        undefinedFallback: t('tools.user-agent-parser.noEngineVersion', 'No engine version available'),
       },
     ],
   },
   {
-    heading: 'OS',
+    heading: t('tools.user-agent-parser.os', 'OS'),
     icon: Adjustments,
     content: [
       {
-        label: 'Name',
+        label: t('tools.user-agent-parser.name', 'Name'),
         getValue: block => block?.os.name,
-        undefinedFallback: 'No OS name available',
+        undefinedFallback: t('tools.user-agent-parser.noOsName', 'No OS name available'),
       },
       {
-        label: 'Version',
+        label: t('tools.user-agent-parser.version', 'Version'),
         getValue: block => block?.os.version,
-        undefinedFallback: 'No OS version available',
+        undefinedFallback: t('tools.user-agent-parser.noOsVersion', 'No OS version available'),
       },
     ],
   },
   {
-    heading: 'Device',
+    heading: t('tools.user-agent-parser.device', 'Device'),
     icon: Devices,
     content: [
       {
-        label: 'Model',
+        label: t('tools.user-agent-parser.model', 'Model'),
         getValue: block => block?.device.model,
-        undefinedFallback: 'No device model available',
+        undefinedFallback: t('tools.user-agent-parser.noDeviceModel', 'No device model available'),
       },
       {
-        label: 'Type',
+        label: t('tools.user-agent-parser.type', 'Type'),
         getValue: block => block?.device.type,
-        undefinedFallback: 'No device type available',
+        undefinedFallback: t('tools.user-agent-parser.noDeviceType', 'No device type available'),
       },
       {
-        label: 'Vendor',
+        label: t('tools.user-agent-parser.vendor', 'Vendor'),
         getValue: block => block?.device.vendor,
-        undefinedFallback: 'No device vendor available',
+        undefinedFallback: t('tools.user-agent-parser.noDeviceVendor', 'No device vendor available'),
       },
     ],
   },
   {
-    heading: 'CPU',
+    heading: t('tools.user-agent-parser.cpu', 'CPU'),
     icon: Cpu,
     content: [
       {
-        label: 'Architecture',
+        label: t('tools.user-agent-parser.architecture', 'Architecture'),
         getValue: block => block?.cpu.architecture,
-        undefinedFallback: 'No CPU architecture available',
+        undefinedFallback: t('tools.user-agent-parser.noCpuArch', 'No CPU architecture available'),
       },
     ],
   },
-];
+]);
 </script>
 
 <template>
   <div>
     <c-input-text
       v-model:value="ua"
-      label="User agent string"
+      :label="$t('tools.user-agent-parser.uaLabel', 'User agent string')"
       multiline
-      placeholder="Put your user-agent here..."
+      :placeholder="$t('tools.user-agent-parser.uaPlaceholder', 'Put your user-agent here...')"
       clearable
       raw-text
       rows="2"

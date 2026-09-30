@@ -76,7 +76,7 @@ const tools = computed<ToolCategory[]>(() => [
           </button>
 
           <router-link to="/" class="nav-brand-title-wrap">
-            <span class="page-title">{{ isHomePage ? '首页控制台' : 'Ateng-Tools' }}</span>
+            <span class="page-title">{{ isHomePage ? $t('home.breadcrumb.home', '首页控制台') : $t('home.brand', 'Ateng-Tools') }}</span>
           </router-link>
         </div>
 

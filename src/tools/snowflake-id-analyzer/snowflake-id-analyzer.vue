@@ -34,10 +34,10 @@ const epochOptions = SNOWFLAKE_EPOCH_PRESETS.map(preset => ({
   value: preset.epoch,
 }));
 
-const modeOptions = [
-  { label: '标准 Twitter (5位机房 + 5位机器 + 12位序列)', value: 'standard' },
-  { label: '精简模式 (10位机器节点 + 12位序列)', value: 'workerOnly' },
-];
+const modeOptions = computed(() => [
+  { label: t('tools.snowflake-id-analyzer.standardMode', '标准 Twitter (5位机房 + 5位机器 + 12位序列)'), value: 'standard' },
+  { label: t('tools.snowflake-id-analyzer.workerOnlyMode', '精简模式 (10位机器节点 + 12位序列)'), value: 'workerOnly' },
+]);
 
 // 2. 单条分析状态
 const sampleSingleId = '1702983748293849088';
@@ -58,7 +58,7 @@ const singleResult = computed(() => {
   } catch (err: any) {
     return {
       data: null,
-      error: err?.message || '解析失败',
+      error: err?.message || t('tools.snowflake-id-analyzer.parseFailed', '解析失败'),
     };
   }
 });
@@ -77,22 +77,22 @@ const batchResult = computed(() => {
   });
 });
 
-const batchColumns = [
-  { title: '雪花 ID (Raw ID)', key: 'rawId', ellipsis: true, sorter: 'default' },
-  { title: '生成时间 (Formatted Time)', key: 'formattedDateTime', sorter: 'default' },
-  { title: '数据中心 (Datacenter)', key: 'datacenterId', sorter: 'default' },
-  { title: '机器节点 (Worker)', key: 'workerId', sorter: (a: any, b: any) => a.workerId - b.workerId },
-  { title: '序列号 (Sequence)', key: 'sequence', sorter: (a: any, b: any) => a.sequence - b.sequence },
+const batchColumns = computed(() => [
+  { title: t('tools.snowflake-id-analyzer.colRawId', '雪花 ID (Raw ID)'), key: 'rawId', ellipsis: true, sorter: 'default' },
+  { title: t('tools.snowflake-id-analyzer.colTime', '生成时间 (Formatted Time)'), key: 'formattedDateTime', sorter: 'default' },
+  { title: t('tools.snowflake-id-analyzer.colDatacenter', '数据中心 (Datacenter)'), key: 'datacenterId', sorter: 'default' },
+  { title: t('tools.snowflake-id-analyzer.colWorker', '机器节点 (Worker)'), key: 'workerId', sorter: (a: any, b: any) => a.workerId - b.workerId },
+  { title: t('tools.snowflake-id-analyzer.colSequence', '序列号 (Sequence)'), key: 'sequence', sorter: (a: any, b: any) => a.sequence - b.sequence },
   {
-    title: '状态',
+    title: t('tools.snowflake-id-analyzer.colStatus', '状态'),
     key: 'isValid',
     render(row: any) {
       return row.isValid
-        ? '正常'
-        : `异常 (${row.errorMessage})`;
+        ? t('tools.snowflake-id-analyzer.statusNormal', '正常')
+        : `${t('tools.snowflake-id-analyzer.statusAbnormal', '异常')} (${row.errorMessage})`;
     },
   },
-];
+]);
 
 // 4. 反向生成器状态
 const genParams = reactive<SnowflakeGenerateParams>({
@@ -109,7 +109,7 @@ const generatedId = computed(() => {
       mode: bitMode.value,
     });
   } catch (err: any) {
-    return `生成失败: ${err?.message}`;
+    return `${t('tools.snowflake-id-analyzer.generateFailed', '生成失败')}: ${err?.message}`;
   }
 });
 
@@ -128,7 +128,7 @@ function loadSample() {
     <c-card mb-4>
       <div flex flex-wrap items-center justify-between gap-4>
         <div flex items-center gap-2>
-          <span font-semibold text-14px>纪元选择 (Epoch):</span>
+          <span font-semibold text-14px>{{ t('tools.snowflake-id-analyzer.epochLabel', '纪元选择 (Epoch):') }}</span>
           <n-select
             v-model:value="selectedEpochPreset"
             :options="epochOptions"
@@ -139,13 +139,13 @@ function loadSample() {
             v-if="selectedEpochPreset === 0"
             v-model:value="customEpoch"
             size="small"
-            placeholder="自定义时间戳 (ms)"
+            :placeholder="t('tools.snowflake-id-analyzer.customEpochPlaceholder', '自定义时间戳 (ms)')"
             style="width: 180px"
           />
         </div>
 
         <div flex items-center gap-2>
-          <span font-semibold text-14px>位分配规范:</span>
+          <span font-semibold text-14px>{{ t('tools.snowflake-id-analyzer.bitModeLabel', '位分配规范:') }}</span>
           <n-select
             v-model:value="bitMode"
             :options="modeOptions"
@@ -159,14 +159,14 @@ function loadSample() {
     <!-- 主功能 Tabs -->
     <n-tabs type="line" animated>
       <!-- Tab 1: 单条深度分析 -->
-      <n-tab-pane name="single" tab="单条深度分析 (Single Inspection)">
+      <n-tab-pane name="single" :tab="t('tools.snowflake-id-analyzer.tabSingle', '单条深度分析 (Single Inspection)')">
         <c-card mb-4>
           <div flex flex-col gap-3>
             <div flex items-center justify-between>
-              <label font-medium text-14px>请输入 64 位雪花 ID (Snowflake ID):</label>
+              <label font-medium text-14px>{{ t('tools.snowflake-id-analyzer.inputIdLabel', '请输入 64 位雪花 ID (Snowflake ID):') }}</label>
               <div flex gap-2>
-                <c-button size="small" @click="loadSample">载入示例</c-button>
-                <c-button size="small" @click="singleInputId = ''">清空</c-button>
+                <c-button size="small" @click="loadSample">{{ t('tools.snowflake-id-analyzer.loadSample', '载入示例') }}</c-button>
+                <c-button size="small" @click="singleInputId = ''">{{ t('tools.snowflake-id-analyzer.clear', '清空') }}</c-button>
               </div>
             </div>
             <n-input
@@ -187,15 +187,15 @@ function loadSample() {
         <!-- 解析详情 -->
         <template v-if="singleResult?.data">
           <!-- 64 位二进制视觉拆解色块 -->
-          <c-card mb-4 title="64 位二进制位分布 (Bit Layout Visualizer)">
+          <c-card mb-4 :title="t('tools.snowflake-id-analyzer.bitLayoutTitle', '64 位二进制位分布 (Bit Layout Visualizer)')">
             <div flex flex-col gap-2>
               <div flex flex-wrap gap-1 font-mono text-12px overflow-x-auto p-2 bg-gray-50 dark:bg-zinc-800 rounded>
                 <!-- 符号位 1 bit -->
-                <span p-1 bg-gray-200 dark:bg-zinc-700 rounded title="符号位 (1位，固定为0)">
+                <span p-1 bg-gray-200 dark:bg-zinc-700 rounded :title="t('tools.snowflake-id-analyzer.signBitTitle', '符号位 (1位，固定为0)')">
                   {{ singleResult.data.signBit }}
                 </span>
                 <!-- 时间戳 41 bit -->
-                <span p-1 bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200 rounded title="时间戳 (41位)">
+                <span p-1 bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200 rounded :title="t('tools.snowflake-id-analyzer.timestampTitle', '时间戳 (41位)')">
                   {{ singleResult.data.timestampBits }}
                 </span>
                 <!-- 机房 ID 5 bit (若 standard 模式) -->
@@ -207,39 +207,39 @@ function loadSample() {
                   dark:bg-amber-900
                   dark:text-amber-200
                   rounded
-                  title="数据中心 ID (5位)"
+                  :title="t('tools.snowflake-id-analyzer.datacenterTitle', '数据中心 ID (5位)')"
                 >
                   {{ singleResult.data.datacenterBits }}
                 </span>
                 <!-- 机器 ID 5位或10位 -->
-                <span p-1 bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200 rounded title="机器工作节点 ID">
+                <span p-1 bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200 rounded :title="t('tools.snowflake-id-analyzer.workerTitle', '机器工作节点 ID')">
                   {{ singleResult.data.workerBits }}
                 </span>
                 <!-- 序列号 12 bit -->
-                <span p-1 bg-cyan-100 text-cyan-800 dark:bg-cyan-900 dark:text-cyan-200 rounded title="递增序列号 (12位)">
+                <span p-1 bg-cyan-100 text-cyan-800 dark:bg-cyan-900 dark:text-cyan-200 rounded :title="t('tools.snowflake-id-analyzer.sequenceTitle', '递增序列号 (12位)')">
                   {{ singleResult.data.sequenceBits }}
                 </span>
               </div>
               <div flex flex-wrap items-center gap-4 text-12px text-gray-500>
                 <div flex items-center gap-1>
                   <span w-3 h-3 bg-gray-300 dark:bg-zinc-600 rounded inline-block />
-                  <span>符号位 (1 bit)</span>
+                  <span>{{ t('tools.snowflake-id-analyzer.legendSignBit', '符号位 (1 bit)') }}</span>
                 </div>
                 <div flex items-center gap-1>
                   <span w-3 h-3 bg-green-400 rounded inline-block />
-                  <span>相对时间戳 (41 bits)</span>
+                  <span>{{ t('tools.snowflake-id-analyzer.legendTimestamp', '相对时间戳 (41 bits)') }}</span>
                 </div>
                 <div v-if="bitMode === 'standard'" flex items-center gap-1>
                   <span w-3 h-3 bg-amber-400 rounded inline-block />
-                  <span>数据中心 (5 bits)</span>
+                  <span>{{ t('tools.snowflake-id-analyzer.legendDatacenter', '数据中心 (5 bits)') }}</span>
                 </div>
                 <div flex items-center gap-1>
                   <span w-3 h-3 bg-purple-400 rounded inline-block />
-                  <span>机器节点 ({{ bitMode === 'standard' ? '5' : '10' }} bits)</span>
+                  <span>{{ t('tools.snowflake-id-analyzer.legendWorker', '机器节点') }} ({{ bitMode === 'standard' ? '5' : '10' }} bits)</span>
                 </div>
                 <div flex items-center gap-1>
                   <span w-3 h-3 bg-cyan-400 rounded inline-block />
-                  <span>自增序列号 (12 bits)</span>
+                  <span>{{ t('tools.snowflake-id-analyzer.legendSequence', '自增序列号 (12 bits)') }}</span>
                 </div>
               </div>
             </div>
@@ -247,57 +247,57 @@ function loadSample() {
 
           <!-- 字段数值明细卡片 -->
           <div grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-4>
-            <c-card title="生成时间 (Creation Time)">
+            <c-card :title="t('tools.snowflake-id-analyzer.creationTimeTitle', '生成时间 (Creation Time)')">
               <div text-18px font-bold text-green-600 dark:text-green-400>
                 {{ singleResult.data.formattedDateTime }}
               </div>
               <div text-12px text-gray-400 mt-1>
-                绝对时间戳: {{ singleResult.data.absoluteTimestamp }} ms
+                {{ t('tools.snowflake-id-analyzer.absoluteTimestamp', '绝对时间戳:') }} {{ singleResult.data.absoluteTimestamp }} ms
               </div>
             </c-card>
 
-            <c-card title="机器工作节点 (Worker ID)">
+            <c-card :title="t('tools.snowflake-id-analyzer.workerNodeTitle', '机器工作节点 (Worker ID)')">
               <div text-18px font-bold text-purple-600 dark:text-purple-400>
                 {{ singleResult.data.workerId }}
               </div>
               <div text-12px text-gray-400 mt-1>
-                二进制: {{ singleResult.data.workerBits }}
+                {{ t('tools.snowflake-id-analyzer.binaryLabel', '二进制:') }} {{ singleResult.data.workerBits }}
               </div>
             </c-card>
 
-            <c-card title="自增序列号 (Sequence)">
+            <c-card :title="t('tools.snowflake-id-analyzer.sequenceNumberTitle', '自增序列号 (Sequence)')">
               <div text-18px font-bold text-cyan-600 dark:text-cyan-400>
                 {{ singleResult.data.sequence }}
               </div>
               <div text-12px text-gray-400 mt-1>
-                二进制: {{ singleResult.data.sequenceBits }} (0~4095)
+                {{ t('tools.snowflake-id-analyzer.binaryLabel', '二进制:') }} {{ singleResult.data.sequenceBits }} (0~4095)
               </div>
             </c-card>
 
-            <c-card v-if="singleResult.data.datacenterId !== null" title="数据中心 (Datacenter ID)">
+            <c-card v-if="singleResult.data.datacenterId !== null" :title="t('tools.snowflake-id-analyzer.datacenterIdTitle', '数据中心 (Datacenter ID)')">
               <div text-18px font-bold text-amber-600 dark:text-amber-400>
                 {{ singleResult.data.datacenterId }}
               </div>
               <div text-12px text-gray-400 mt-1>
-                二进制: {{ singleResult.data.datacenterBits }} (0~31)
+                {{ t('tools.snowflake-id-analyzer.binaryLabel', '二进制:') }} {{ singleResult.data.datacenterBits }} (0~31)
               </div>
             </c-card>
 
-            <c-card title="相对纪元偏移 (Delta Milliseconds)">
+            <c-card :title="t('tools.snowflake-id-analyzer.relativeDeltaTitle', '相对纪元偏移 (Delta Milliseconds)')">
               <div text-18px font-semibold>
                 +{{ singleResult.data.relativeTimestamp }} ms
               </div>
               <div text-12px text-gray-400 mt-1>
-                基于纪元: {{ singleResult.data.epoch }}
+                {{ t('tools.snowflake-id-analyzer.basedEpoch', '基于纪元:') }} {{ singleResult.data.epoch }}
               </div>
             </c-card>
 
-            <c-card title="完整 64 位二进制">
+            <c-card :title="t('tools.snowflake-id-analyzer.fullBinaryTitle', '完整 64 位二进制')">
               <div font-mono text-11px break-all>
                 {{ singleResult.data.binary }}
               </div>
               <c-button size="tiny" mt-2 @click="copy(singleResult.data.binary)">
-                复制二进制
+                {{ t('tools.snowflake-id-analyzer.copyBinary', '复制二进制') }}
               </c-button>
             </c-card>
           </div>
@@ -305,23 +305,23 @@ function loadSample() {
       </n-tab-pane>
 
       <!-- Tab 2: 批量分析 -->
-      <n-tab-pane name="batch" tab="多行批量分析 (Batch Inspection)">
+      <n-tab-pane name="batch" :tab="t('tools.snowflake-id-analyzer.tabBatch', '多行批量分析 (Batch Inspection)')">
         <c-card mb-4>
           <div flex flex-col gap-3>
             <div flex items-center justify-between>
-              <label font-medium text-14px>粘贴多个雪花 ID (每行一个):</label>
-              <c-button size="small" @click="batchInputText = sampleBatchText">载入批量示例</c-button>
+              <label font-medium text-14px>{{ t('tools.snowflake-id-analyzer.batchInputLabel', '粘贴多个雪花 ID (每行一个):') }}</label>
+              <c-button size="small" @click="batchInputText = sampleBatchText">{{ t('tools.snowflake-id-analyzer.loadBatchSample', '载入批量示例') }}</c-button>
             </div>
             <n-input
               v-model:value="batchInputText"
               type="textarea"
               :rows="5"
-              placeholder="每行一个 64 位雪花 ID"
+              :placeholder="t('tools.snowflake-id-analyzer.batchPlaceholder', '每行一个 64 位雪花 ID')"
             />
           </div>
         </c-card>
 
-        <c-card title="批量解析结果">
+        <c-card :title="t('tools.snowflake-id-analyzer.batchResultTitle', '批量解析结果')">
           <n-data-table
             :columns="batchColumns"
             :data="batchResult"
@@ -331,22 +331,22 @@ function loadSample() {
       </n-tab-pane>
 
       <!-- Tab 3: 反向生成器 -->
-      <n-tab-pane name="generator" tab="雪花 ID 生成器 (ID Generator)">
+      <n-tab-pane name="generator" :tab="t('tools.snowflake-id-analyzer.tabGenerator', '雪花 ID 生成器 (ID Generator)')">
         <c-card mb-4>
           <div grid grid-cols-1 md:grid-cols-2 gap-4>
             <div>
-              <label block text-13px font-medium mb-1>指定绝对时间戳 (ms):</label>
+              <label block text-13px font-medium mb-1>{{ t('tools.snowflake-id-analyzer.absoluteTimestampLabel', '指定绝对时间戳 (ms):') }}</label>
               <div flex gap-2>
                 <n-input-number
                   v-model:value="genParams.absoluteTimestamp"
                   style="width: 100%"
                 />
-                <c-button size="small" @click="setNowTimestamp">当前时间</c-button>
+                <c-button size="small" @click="setNowTimestamp">{{ t('tools.snowflake-id-analyzer.currentNow', '当前时间') }}</c-button>
               </div>
             </div>
 
             <div v-if="bitMode === 'standard'">
-              <label block text-13px font-medium mb-1>数据中心 ID (0~31):</label>
+              <label block text-13px font-medium mb-1>{{ t('tools.snowflake-id-analyzer.datacenterRangeLabel', '数据中心 ID (0~31):') }}</label>
               <n-input-number
                 v-model:value="genParams.datacenterId"
                 :min="0"
@@ -357,7 +357,7 @@ function loadSample() {
 
             <div>
               <label block text-13px font-medium mb-1>
-                机器工作节点 ID (0~{{ bitMode === 'standard' ? 31 : 1023 }}):
+                {{ t('tools.snowflake-id-analyzer.workerRangeLabel', '机器工作节点 ID') }} (0~{{ bitMode === 'standard' ? 31 : 1023 }}):
               </label>
               <n-input-number
                 v-model:value="genParams.workerId"
@@ -368,7 +368,7 @@ function loadSample() {
             </div>
 
             <div>
-              <label block text-13px font-medium mb-1>自增序列号 (0~4095):</label>
+              <label block text-13px font-medium mb-1>{{ t('tools.snowflake-id-analyzer.sequenceRangeLabel', '自增序列号 (0~4095):') }}</label>
               <n-input-number
                 v-model:value="genParams.sequence"
                 :min="0"
@@ -379,13 +379,13 @@ function loadSample() {
           </div>
         </c-card>
 
-        <c-card title="生成的 64 位雪花 ID">
+        <c-card :title="t('tools.snowflake-id-analyzer.generatedIdTitle', '生成的 64 位雪花 ID')">
           <div flex items-center justify-between gap-4>
             <span text-22px font-bold font-mono text-primary>
               {{ generatedId }}
             </span>
             <c-button size="medium" @click="copy(generatedId)">
-              {{ copied ? '已复制' : '复制 ID' }}
+              {{ copied ? t('common.copied', '已复制') : t('tools.snowflake-id-analyzer.copyId', '复制 ID') }}
             </c-button>
           </div>
         </c-card>

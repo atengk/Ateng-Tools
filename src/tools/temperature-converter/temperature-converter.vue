@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { useI18n } from 'vue-i18n';
 import _ from 'lodash';
 import {
   convertCelsiusToKelvin,
@@ -16,6 +17,8 @@ import {
   convertReaumurToKelvin,
   convertRomerToKelvin,
 } from './temperature-converter.models';
+
+const { t } = useI18n();
 
 type TemperatureScale = 'kelvin' | 'celsius' | 'fahrenheit' | 'rankine' | 'delisle' | 'newton' | 'reaumur' | 'romer';
 
@@ -83,6 +86,10 @@ const units = reactive<
         },
       });
 
+function getUnitTitle(key: string) {
+  return t(`tools.temperature-converter.${key}`, units[key]?.title || key);
+}
+
 function update(key: TemperatureScale) {
   const { ref: value, toKelvin } = units[key];
 
@@ -101,9 +108,9 @@ update('kelvin');
 
 <template>
   <div>
-    <n-input-group v-for="[key, { title, unit }] in Object.entries(units)" :key="key" mb-3 w-full>
-      <n-input-group-label style="width: 100px">
-        {{ title }}
+    <n-input-group v-for="[key, { unit }] in Object.entries(units)" :key="key" mb-3 w-full>
+      <n-input-group-label style="width: 120px">
+        {{ getUnitTitle(key) }}
       </n-input-group-label>
 
       <n-input-number
@@ -112,7 +119,7 @@ update('kelvin');
         @update:value="() => update(key as TemperatureScale)"
       />
 
-      <n-input-group-label style="width: 50px">
+      <n-input-group-label style="width: 60px">
         {{ unit }}
       </n-input-group-label>
     </n-input-group>
