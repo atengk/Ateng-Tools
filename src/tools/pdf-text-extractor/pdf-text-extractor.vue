@@ -11,7 +11,7 @@ import { extractPdfTextAndMetadata } from './pdf-text-extractor.service';
 import type { PdfExtractResult, PdfPageTextItem } from './pdf-text-extractor.types';
 
 const message = useMessage();
-const { copy } = useCopy();
+const { copy } = useCopy({ createToast: false });
 
 const file = ref<File | null>(null);
 const isLoading = ref(false);
@@ -141,42 +141,57 @@ const activePageItem = computed(() => {
     <div v-if="extractResult" flex flex-col gap-4>
       <!-- 顶栏快捷操作与概要 -->
       <n-card :bordered="true" size="small" class="action-card">
-        <div flex flex-col gap-3>
-          <div flex flex-wrap items-center justify-between gap-2>
-            <div flex flex-wrap items-center gap-2>
-              <span class="i-mdi-file-document-outline text-xl text-primary" />
-              <span font-bold text-base>{{ file?.name }}</span>
-              <n-tag size="small" type="info" round>
+        <div flex flex-col gap-2.5>
+          <!-- 第一行：文件名与统计标签，水平居中对齐 -->
+          <div flex flex-wrap items-center justify-center gap-2.5>
+            <div flex items-center gap-1.5 overflow-hidden>
+              <n-icon size="18" class="text-primary flex-shrink-0">
+                <span class="i-mdi-file-document-outline block" />
+              </n-icon>
+              <span font-bold text-sm truncate max-w-320px>{{ file?.name }}</span>
+            </div>
+
+            <div flex items-center gap-2 flex-shrink-0>
+              <n-tag size="small" type="info" round :bordered="false">
                 {{ extractResult.metadata.pageCount }} 页
               </n-tag>
-              <n-tag size="small" type="success" round>
+              <n-tag size="small" type="success" round :bordered="false">
                 {{ extractResult.totalChars }} 字符
               </n-tag>
-              <n-tag size="small" type="warning" round>
+              <n-tag size="small" type="warning" round :bordered="false">
                 {{ extractResult.totalWords }} 词
               </n-tag>
             </div>
+          </div>
 
-            <div flex flex-wrap items-center gap-2>
-              <n-button size="small" quaternary @click="showMetadata = !showMetadata">
-                {{ showMetadata ? '收起文档元数据' : '展开文档元数据' }}
-              </n-button>
-              <n-button size="small" type="primary" secondary @click="copyAllText">
-                <template #icon>
-                  <span class="i-mdi-content-copy" />
-                </template>
-                复制全文
-              </n-button>
-              <n-button size="small" type="info" secondary @click="downloadTextFile">
-                <template #icon>
-                  <span class="i-mdi-download" />
-                </template>
-                导出纯文本
-              </n-button>
-              <n-button size="small" tertiary type="error" @click="onClear">
-                重新选择
-              </n-button>
-            </div>
+          <!-- 第二行：操作按钮组，整行水平居中对齐 -->
+          <div flex flex-wrap items-center justify-center gap-2 pt-1 class="action-buttons-bar">
+            <n-button size="small" secondary @click="showMetadata = !showMetadata">
+              <template #icon>
+                <n-icon>
+                  <span :class="showMetadata ? 'i-mdi-chevron-up' : 'i-mdi-chevron-down'" class="block" />
+                </n-icon>
+              </template>
+              {{ showMetadata ? '收起文档元数据' : '展开文档元数据' }}
+            </n-button>
+            <n-button size="small" type="primary" secondary @click="copyAllText">
+              <template #icon>
+                <n-icon><span class="i-mdi-content-copy block" /></n-icon>
+              </template>
+              复制全文
+            </n-button>
+            <n-button size="small" type="info" secondary @click="downloadTextFile">
+              <template #icon>
+                <n-icon><span class="i-mdi-download block" /></n-icon>
+              </template>
+              导出纯文本
+            </n-button>
+            <n-button size="small" secondary type="error" @click="onClear">
+              <template #icon>
+                <n-icon><span class="i-mdi-refresh block" /></n-icon>
+              </template>
+              重新选择
+            </n-button>
           </div>
         </div>
       </n-card>
@@ -313,7 +328,7 @@ const activePageItem = computed(() => {
           />
           <n-button size="small" secondary type="primary" @click="copyPageText(activePageItem)">
             <template #icon>
-              <span class="i-mdi-content-copy" />
+              <n-icon><span class="i-mdi-content-copy block" /></n-icon>
             </template>
             复制本页文本 (第 {{ activePageItem.pageNumber }} 页)
           </n-button>
@@ -345,6 +360,9 @@ const activePageItem = computed(() => {
                 <div flex items-center gap-3>
                   <span text-xs text-gray-400>{{ page.charCount }} 字符 · {{ page.wordCount }} 词</span>
                   <n-button size="tiny" secondary type="primary" @click="copyPageText(page)">
+                    <template #icon>
+                      <n-icon><span class="i-mdi-content-copy block" /></n-icon>
+                    </template>
                     复制此页
                   </n-button>
                 </div>
