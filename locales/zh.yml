@@ -437,6 +437,12 @@ tools:
     stateOrProvinceName: '省/直辖市 (ST)'
     viewPemCert: '查看 PEM 证书'
 
+  pdf-text-extractor:
+    title: PDF 文本与元数据提取器
+    description: 提取 PDF 文档中包含的纯文本内容与详细元属性（作者、标题、创建工具、修改时间、页面尺寸等）。
+    uploadTitle: 将 PDF 文件拖拽至此处，或点击浏览选择
+    browseFiles: 浏览选择 PDF
+
   json-minify:
     title: JSON 压缩
     description: 通过删除不必要的空白来缩小和压缩JSON。

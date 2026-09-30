@@ -441,6 +441,12 @@ tools:
     stateOrProvinceName: 'State or province name'
     viewPemCert: 'View PEM cert'
 
+  pdf-text-extractor:
+    title: PDF Text & Metadata Extractor
+    description: Extract readable plain text page-by-page and inspect complete document metadata from any PDF file.
+    uploadTitle: Drag and drop a PDF file here, or click to browse
+    browseFiles: Browse PDF
+
   json-minify:
     title: JSON minify
     description: Minify and compress your JSON by removing unnecessary whitespace.

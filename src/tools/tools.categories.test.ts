@@ -8,10 +8,11 @@ import { describe, expect, it } from 'vitest';
 import { toolsByCategory } from './index';
 
 describe('tools category taxonomy', () => {
-  it('验证顶层 PDF 工具分类已存在并正确收纳 pdf-signature-checker', () => {
+  it('验证顶层 PDF 工具分类已存在并正确收纳 pdf-signature-checker 与 pdf-text-extractor', () => {
     const pdfCategory = toolsByCategory.find(cat => cat.name === 'PDF');
     expect(pdfCategory).toBeDefined();
     expect(pdfCategory?.components.some(tool => tool.path === '/pdf-signature-checker')).toBe(true);
+    expect(pdfCategory?.components.some(tool => tool.path === '/pdf-text-extractor')).toBe(true);
   });
 
   it('验证 Crypto 分类已彻底剥离 pdf-signature-checker 避免分类混淆', () => {
