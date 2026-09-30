@@ -232,6 +232,7 @@ const isCopyingBase64 = ref(false);
 
 // 处理后的实时预览图 URL 与体积预估
 const processedPreviewUrl = ref<string>('');
+const beforePreviewUrl = ref<string>('');
 const estimatedOutputSize = ref<number | null>(null);
 let estimateDebounceTimer: ReturnType<typeof setTimeout> | null = null;
 
@@ -576,6 +577,7 @@ function handleRotateClockwise() {
   const temp = targetWidth.value;
   targetWidth.value = targetHeight.value;
   targetHeight.value = temp;
+  updatePipelinePreview(true);
 }
 
 /**
@@ -587,6 +589,7 @@ function handleRotateCounterClockwise() {
   const temp = targetWidth.value;
   targetWidth.value = targetHeight.value;
   targetHeight.value = temp;
+  updatePipelinePreview(true);
 }
 
 /**
@@ -594,6 +597,7 @@ function handleRotateCounterClockwise() {
  */
 function handleToggleFlipH() {
   transform.value.flipHorizontal = !transform.value.flipHorizontal;
+  updatePipelinePreview(true);
 }
 
 /**
@@ -601,6 +605,7 @@ function handleToggleFlipH() {
  */
 function handleToggleFlipV() {
   transform.value.flipVertical = !transform.value.flipVertical;
+  updatePipelinePreview(true);
 }
 
 /**
@@ -611,6 +616,7 @@ function handleResetTransform() {
   targetWidth.value = baseVisualDimensions.value.width;
   targetHeight.value = baseVisualDimensions.value.height;
   message.info('已重置所有旋转与镜像变换');
+  updatePipelinePreview(true);
 }
 
 /**
@@ -875,11 +881,13 @@ function handlePaste(event: ClipboardEvent) {
 /**
  * 执行非破坏性渲染管线：更新实时预览与体积预估
  */
-function updatePipelinePreview() {
+function updatePipelinePreview(immediate = false) {
   if (estimateDebounceTimer) {
     clearTimeout(estimateDebounceTimer);
+    estimateDebounceTimer = null;
   }
-  estimateDebounceTimer = setTimeout(async () => {
+
+  const render = async () => {
     if (!rawImageElement.value || targetWidth.value <= 0 || targetHeight.value <= 0) {
       estimatedOutputSize.value = null;
       return;
@@ -905,13 +913,35 @@ function updatePipelinePreview() {
       processedPreviewUrl.value = URL.createObjectURL(blob);
       estimatedOutputSize.value = blob.size;
 
+      // 若处于差分对比模式，生成同尺寸但无损且无水印的 Before 原画质参考图
+      if (isCompareMode.value) {
+        const beforeCanvas = renderImagePipeline(rawImageElement.value, {
+          crop: appliedCrop.value || undefined,
+          transform: transform.value,
+          targetWidth: targetWidth.value,
+          targetHeight: targetHeight.value,
+        });
+        const beforeBlob = await exportCanvasToBlob(beforeCanvas, 'image/png', 1.0);
+        if (beforePreviewUrl.value) {
+          URL.revokeObjectURL(beforePreviewUrl.value);
+        }
+        beforePreviewUrl.value = URL.createObjectURL(beforeBlob);
+      }
+
       // 实时采样提取主题调色板
       paletteColors.value = extractColorPalette(canvas, paletteCount.value);
     }
     catch {
       estimatedOutputSize.value = null;
     }
-  }, 180);
+  };
+
+  if (immediate) {
+    render();
+  }
+  else {
+    estimateDebounceTimer = setTimeout(render, 180);
+  }
 }
 
 // 监听参数变化重新执行渲染管线
@@ -947,6 +977,13 @@ watch(
     }
   },
 );
+
+// 开启差分对比模式时立即刷新对比参考图
+watch(isCompareMode, (val) => {
+  if (val && imageSource.value) {
+    updatePipelinePreview(true);
+  }
+});
 
 /**
  * 执行最终导出并下载
@@ -1009,6 +1046,11 @@ function handleResetAll() {
   }
   if (processedPreviewUrl.value) {
     URL.revokeObjectURL(processedPreviewUrl.value);
+    processedPreviewUrl.value = '';
+  }
+  if (beforePreviewUrl.value) {
+    URL.revokeObjectURL(beforePreviewUrl.value);
+    beforePreviewUrl.value = '';
   }
   imageSource.value = null;
   rawImageElement.value = null;
@@ -1268,21 +1310,18 @@ onUnmounted(() => {
                 处理后 (After)
               </div>
 
-              <!-- 顶层：原图 (Before)，使用 clip-path 切割 -->
+              <!-- 顶层：原画质对比层 (Before)，使用 clip-path 切割 -->
               <div
                 class="compare-before-layer"
                 :style="{ clipPath: `polygon(0 0, ${splitPosition}% 0, ${splitPosition}% 100%, 0 100%)` }"
               >
                 <img
-                  :src="imageSource.dataUrl"
+                  :src="beforePreviewUrl || processedPreviewUrl || imageSource.dataUrl"
                   alt="before"
                   class="compare-image before-image"
-                  :style="{
-                    transform: `rotate(${transform.rotation}deg) scale(${transform.flipHorizontal ? -1 : 1}, ${transform.flipVertical ? -1 : 1})`,
-                  }"
                 >
                 <div class="compare-tag before-tag">
-                  原始图 (Before)
+                  原始画质 (Before)
                 </div>
               </div>
 
@@ -1302,9 +1341,6 @@ onUnmounted(() => {
             <div
               v-else
               class="standard-preview-container"
-              :style="{
-                transform: `rotate(${transform.rotation}deg) scale(${transform.flipHorizontal ? -1 : 1}, ${transform.flipVertical ? -1 : 1})`,
-              }"
             >
               <img
                 :src="processedPreviewUrl || imageSource.dataUrl"
@@ -2232,7 +2268,6 @@ onUnmounted(() => {
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 /* 交互式裁剪样式 */
