@@ -235,3 +235,25 @@ _避免使用 (Avoid)_: Zip Utility, File Packer, Batch Downloader
 用于将紧凑字符串（如 `1-3, 5, 8-12`）解析为确定性零基页码索引集合并提供边界与越界校验的语法解析器。
 _避免使用 (Avoid)_: Page String, Number List, Range Filter
 
+### PDF 加密与解密工具 (PDF Encrypt & Decrypt)
+
+**PDF Encrypt & Decrypt**:
+Ateng-Tools 中用于纯客户端在浏览器内存中对 PDF 文档进行口令加密、权限细粒度限制及解除密码保护的开发者工具。
+_避免使用 (Avoid)_: PDF Locker, PDF Password Remover, PDF Protector
+
+**User Password**:
+打开并浏览加密 PDF 文档内容所必需的访问口令。
+_避免使用 (Avoid)_: Open Password, Document Secret, View Key
+
+**Owner Password**:
+用于锁定并管控文档打印、复制、注释与装配等操作权限的高阶主控口令。
+_避免使用 (Avoid)_: Admin Password, Master Pin, Master Key
+
+**Access Permission Matrix**:
+在加密 PDF 内部定义的细粒度能力授权集合（涵盖高清/低清打印、文本与图像复制、内容修改、批注标注、表单填写及文档装配重组）。
+_避免使用 (Avoid)_: Security Rules, PDF Policies, Rights Config
+
+**Password Stripping**:
+在输入正确访问或管理密码后，客户端重构 PDF 二进制对象流并彻底移除安全加密字典（Encrypt Dictionary），生成免密文档的操作。
+_避免使用 (Avoid)_: PDF Cracking, Password Hack, Unlock File
+
