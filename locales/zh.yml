@@ -72,6 +72,10 @@ favoriteButton:
   add: '加入收藏'
 toolCard:
   new: '新'
+c-file-upload:
+  title: '将文件拖拽至此处，或点击选择文件'
+  or: '或'
+  browse: '浏览选择文件'
 search:
   label: '搜索'
   placeholder: '输入以搜索工具或指令...'
@@ -82,6 +86,7 @@ tools:
     converter: '转换器'
     web: Web
     images and videos: '图片和视频'
+    pdf: 'PDF 工具'
     development: '开发'
     network: '网络'
     math: '数学'
@@ -413,6 +418,24 @@ tools:
   pdf-signature-checker:
     title: PDF签名检查器
     description: '验证PDF文件的签名。签名的PDF文件包含一个或多个签名，可用于确定文件的内容在签名后是否已被更改。'
+    uploadTitle: '将 PDF 文件拖拽至此处，或点击选择文件'
+    browseFiles: '浏览选择文件'
+    noSignatures: '所选 PDF 文件中未检测到有效签名。'
+    signatureItemTitle: '签名 {n} 证书信息：'
+    certificate: '证书'
+    validityPeriod: '有效期'
+    issuedBy: '颁发者'
+    issuedTo: '使用者'
+    pemCertificate: 'PEM 证书'
+    notBefore: '生效时间 (Not Before)'
+    notAfter: '到期时间 (Not After)'
+    commonName: '通用名称 (CN)'
+    organizationName: '组织名称 (O)'
+    countryName: '国家/地区 (C)'
+    localityName: '城市/地点 (L)'
+    organizationalUnitName: '部门/单位 (OU)'
+    stateOrProvinceName: '省/直辖市 (ST)'
+    viewPemCert: '查看 PEM 证书'
 
   json-minify:
     title: JSON 压缩

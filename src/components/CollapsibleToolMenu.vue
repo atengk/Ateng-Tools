@@ -47,6 +47,9 @@ const categoryEmojiMap: Record<string, string> = {
   '图片和视频': '🖼️',
   'images and videos': '🖼️',
   'images & videos': '🖼️',
+  pdf: '📄',
+  'pdf 工具': '📄',
+  'pdf tools': '📄',
   web: '🌍',
   Web: '🌍',
 };

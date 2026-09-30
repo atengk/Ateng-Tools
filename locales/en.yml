@@ -72,6 +72,10 @@ favoriteButton:
   add: 'Add to favorites'
 toolCard:
   new: New
+c-file-upload:
+  title: 'Drag and drop files here, or click to select files'
+  or: 'or'
+  browse: 'Browse files'
 search:
   label: Search
   placeholder: 'Type to search a tool or a command...'
@@ -82,6 +86,7 @@ tools:
     converter: Converter
     web: Web
     images and videos: 'Images & Videos'
+    pdf: 'PDF Tools'
     development: Development
     network: Network
     math: Math
@@ -417,6 +422,24 @@ tools:
   pdf-signature-checker:
     title: PDF signature checker
     description: Verify the signatures of a PDF file. A signed PDF file contains one or more signatures that may be used to determine whether the contents of the file have been altered since the file was signed.
+    uploadTitle: 'Drag and drop a PDF file here, or click to select a file'
+    browseFiles: 'Browse files'
+    noSignatures: 'No signatures found in the provided file.'
+    signatureItemTitle: 'Signature {n} certificates :'
+    certificate: 'Certificate'
+    validityPeriod: 'Validity period'
+    issuedBy: 'Issued by'
+    issuedTo: 'Issued to'
+    pemCertificate: 'PEM certificate'
+    notBefore: 'Not before'
+    notAfter: 'Not after'
+    commonName: 'Common name'
+    organizationName: 'Organization name'
+    countryName: 'Country name'
+    localityName: 'Locality name'
+    organizationalUnitName: 'Organizational unit name'
+    stateOrProvinceName: 'State or province name'
+    viewPemCert: 'View PEM cert'
 
   json-minify:
     title: JSON minify

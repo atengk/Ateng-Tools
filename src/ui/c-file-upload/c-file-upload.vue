@@ -5,10 +5,12 @@ const props = withDefaults(defineProps<{
   multiple?: boolean
   accept?: string
   title?: string
+  buttonText?: string
 }>(), {
   multiple: false,
   accept: undefined,
-  title: 'Drag and drop files here, or click to select files',
+  title: undefined,
+  buttonText: undefined,
 });
 
 const emit = defineEmits<{
@@ -16,7 +18,11 @@ const emit = defineEmits<{
   (event: 'fileUpload', file: File): void
 }>();
 
+const { t } = useI18n();
 const { multiple } = toRefs(props);
+
+const displayTitle = computed(() => props.title ?? t('c-file-upload.title', '将文件拖拽至此处，或点击选择文件'));
+const displayButtonText = computed(() => props.buttonText ?? t('c-file-upload.browse', '浏览文件'));
 
 const isOverDropZone = ref(false);
 
@@ -75,20 +81,20 @@ function handleUpload(files: FileList | null | undefined) {
     >
     <slot>
       <span op-70>
-        {{ title }}
+        {{ displayTitle }}
       </span>
 
       <!-- separator -->
       <div my-4 w-full flex items-center justify-center op-70>
         <div class="h-1px max-w-100px flex-1 bg-gray-300 op-50" />
         <div class="mx-2 text-gray-400">
-          or
+          {{ $t('c-file-upload.or', '或') }}
         </div>
         <div class="h-1px max-w-100px flex-1 bg-gray-300 op-50" />
       </div>
 
       <c-button>
-        Browse files
+        {{ displayButtonText }}
       </c-button>
     </slot>
   </div>

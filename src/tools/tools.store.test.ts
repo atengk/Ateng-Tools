@@ -44,6 +44,14 @@ vi.mock('./index', () => ({
       icon: {},
       isNew: false,
     },
+    {
+      name: 'PDF Signature Checker',
+      path: '/pdf-signature-checker',
+      description: 'Verify signatures',
+      category: 'pdf',
+      icon: {},
+      isNew: false,
+    },
   ],
 }));
 
@@ -53,11 +61,12 @@ describe('tools.store', () => {
     localStorage.clear();
   });
 
-  it('能够正常载入全量工具与领域分类', () => {
+  it('能够正常载入全量工具与领域分类，包含新增的 PDF 分类', () => {
     const store = useToolStore();
-    expect(store.tools.length).toBe(3);
-    expect(store.toolsByCategory.length).toBe(2);
+    expect(store.tools.length).toBe(4);
+    expect(store.toolsByCategory.length).toBe(3);
     expect(store.newTools.length).toBe(1);
+    expect(store.tools.some(t => t.path === '/pdf-signature-checker' && t.category === 'pdf')).toBe(true);
   });
 
   it('支持将工具加入与移出收藏，且状态同步', () => {
