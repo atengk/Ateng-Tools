@@ -14,6 +14,7 @@ import { tool as regexMemo } from './regex-memo';
 import { tool as markdownToHtml } from './markdown-to-html';
 import { tool as pdfSignatureChecker } from './pdf-signature-checker';
 import { tool as pdfTextExtractor } from './pdf-text-extractor';
+import { tool as pdfEncryptDecrypt } from './pdf-encrypt-decrypt';
 import { tool as numeronymGenerator } from './numeronym-generator';
 import { tool as macAddressGenerator } from './mac-address-generator';
 import { tool as textToBinary } from './text-to-binary';
@@ -156,7 +157,7 @@ export const toolsByCategory: ToolCategory[] = [
   },
   {
     name: 'PDF',
-    components: [pdfSignatureChecker, pdfTextExtractor],
+    components: [pdfSignatureChecker, pdfTextExtractor, pdfEncryptDecrypt],
   },
   {
     name: 'Development',

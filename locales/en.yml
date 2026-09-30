@@ -447,6 +447,14 @@ tools:
     uploadTitle: Drag and drop a PDF file here, or click to browse
     browseFiles: Browse PDF
 
+  pdf-encrypt-decrypt:
+    title: PDF Encrypt & Decrypt
+    description: Protect PDF documents with user and owner passwords or decrypt password-protected PDFs.
+    uploadEncryptTitle: Drag and drop a PDF file here or browse
+    browseEncryptFiles: Browse PDF to Encrypt
+    uploadDecryptTitle: Drag and drop a password-protected PDF here or browse
+    browseDecryptFiles: Browse Encrypted PDF
+
   json-minify:
     title: JSON minify
     description: Minify and compress your JSON by removing unnecessary whitespace.

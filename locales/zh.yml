@@ -443,6 +443,14 @@ tools:
     uploadTitle: 将 PDF 文件拖拽至此处，或点击浏览选择
     browseFiles: 浏览选择 PDF
 
+  pdf-encrypt-decrypt:
+    title: PDF 加密与解密
+    description: 为 PDF 文档添加口令保护与权限控制，或解除已知密码限制并导出无保护文档。
+    uploadEncryptTitle: 将待加密的 PDF 拖拽至此处，或点击浏览选择
+    browseEncryptFiles: 浏览选择待加密 PDF
+    uploadDecryptTitle: 将受密码保护的 PDF 拖拽至此处，或点击浏览选择
+    browseDecryptFiles: 浏览选择加密 PDF
+
   json-minify:
     title: JSON 压缩
     description: 通过删除不必要的空白来缩小和压缩JSON。
