@@ -8,11 +8,16 @@
 import { useMessage } from 'naive-ui';
 import { computed, nextTick, onMounted, onUnmounted, ref, shallowRef, watch } from 'vue';
 import {
+  Camera,
   Certificate,
   Check,
+  ColorPicker,
   Columns,
+  Copy,
   Crop,
   Download,
+  Eye,
+  FileSearch,
   FileText,
   FlipHorizontal,
   FlipVertical,
@@ -22,12 +27,15 @@ import {
   InfoCircle,
   LayoutGrid,
   Link,
+  MapPin,
   Maximize,
+  Palette,
   Photo,
   Refresh,
   Rotate,
   RotateClockwise,
   Scale,
+  ShieldCheck,
   Typography,
   Unlink,
   Upload,
@@ -43,22 +51,28 @@ import {
   clampCropRegion,
   clampDimension,
   exportCanvasToBlob,
+  extractColorPalette,
+  formatExifSummary,
   generateExportFileName,
   getAspectRatioValue,
   loadImageFromBlobOrDataUrl,
+  parseExifMetadata,
   rasterizeSvgText,
   renderImagePipeline,
 } from './image-studio.service';
 import {
   type CropAspectRatio,
   type CropRegion,
+  type ExifMetadata,
   type ExportImageFormat,
   type ImageSourceInfo,
   MAX_SAFE_IMAGE_DIMENSION,
+  type PaletteColor,
   type StudioWatermarkConfig,
   type TransformOptions,
   type WatermarkAnchor,
 } from './image-studio.types';
+import { useCopy } from '@/composable/copy';
 import { formatBytes } from '@/utils/convert';
 
 const message = useMessage();
@@ -131,6 +145,17 @@ const watermarkConfig = ref<StudioWatermarkConfig>({
 const loadedLogoImage = shallowRef<HTMLImageElement | null>(null);
 const logoInputRef = ref<HTMLInputElement | null>(null);
 
+// 剪贴板复制 composable
+const { copy } = useCopy({ createToast: false });
+
+// EXIF 隐私透视与抽屉状态
+const exifData = ref<ExifMetadata>({ hasData: false });
+const isExifDrawerOpen = ref(false);
+
+// 主题调色板提取状态
+const paletteColors = ref<PaletteColor[]>([]);
+const paletteCount = ref(6);
+
 // 导出与压缩配置
 const exportFormat = ref<ExportImageFormat>('image/webp');
 const exportQuality = ref(90);
@@ -144,6 +169,86 @@ let estimateDebounceTimer: ReturnType<typeof setTimeout> | null = null;
 
 // 隐藏的原生文件输入框
 const fileInputRef = ref<HTMLInputElement | null>(null);
+
+/**
+ * 一键复制全部 EXIF 摘要报告
+ */
+function copyExifSummary() {
+  const summary = formatExifSummary(exifData.value);
+  copy(summary);
+  message.success('已复制完整 EXIF 摘要报告');
+}
+
+/**
+ * 复制单个 EXIF 属性值
+ */
+function copyFieldValue(label: string, value?: string | number) {
+  if (value === undefined || value === '') return;
+  copy(String(value));
+  message.success(`已复制 ${label}: ${value}`);
+}
+
+/**
+ * 重新提取当前画面的调色板
+ */
+function refreshPalette() {
+  if (rawImageElement.value) {
+    if (targetWidth.value > 0 && targetHeight.value > 0) {
+      try {
+        const canvas = renderImagePipeline(rawImageElement.value, {
+          crop: appliedCrop.value || undefined,
+          transform: transform.value,
+          targetWidth: Math.min(300, targetWidth.value),
+          targetHeight: Math.min(300, targetHeight.value),
+          watermark: watermarkConfig.value,
+          loadedLogoImage: loadedLogoImage.value,
+        });
+        paletteColors.value = extractColorPalette(canvas, paletteCount.value);
+        return;
+      }
+      catch {
+        // 降级使用原图提取
+      }
+    }
+    paletteColors.value = extractColorPalette(rawImageElement.value, paletteCount.value);
+  }
+}
+
+/**
+ * 复制单个 HEX 颜色代码
+ */
+function copyColorHex(hex: string) {
+  copy(hex);
+  message.success(`已复制 HEX 色值: ${hex}`);
+}
+
+/**
+ * 复制单个 RGB 颜色代码
+ */
+function copyColorRgb(rgb: string) {
+  copy(rgb);
+  message.success(`已复制 RGB 色值: ${rgb}`);
+}
+
+/**
+ * 复制全部调色板代码 (HEX)
+ */
+function copyAllPaletteHex() {
+  if (paletteColors.value.length === 0) return;
+  const list = paletteColors.value.map(c => c.hex).join(', ');
+  copy(list);
+  message.success('已复制全部 HEX 色代码');
+}
+
+/**
+ * 复制全部调色板代码 (RGB)
+ */
+function copyAllPaletteRgb() {
+  if (paletteColors.value.length === 0) return;
+  const list = paletteColors.value.map(c => c.rgb).join(', ');
+  copy(list);
+  message.success('已复制全部 RGB 色代码');
+}
 
 /**
  * 九宫格锚点选项定义
@@ -262,6 +367,16 @@ async function loadFile(file: File) {
 
     targetWidth.value = sourceInfo.originalWidth;
     targetHeight.value = sourceInfo.originalHeight;
+
+    // 异步零阻塞解析原图 EXIF 元数据
+    file.arrayBuffer().then((buf) => {
+      exifData.value = parseExifMetadata(buf);
+    }).catch(() => {
+      exifData.value = { hasData: false };
+    });
+
+    // 提取初始原图调色板
+    paletteColors.value = extractColorPalette(img, paletteCount.value);
 
     message.success(`成功载入图片 “${file.name}” (${sourceInfo.originalWidth} × ${sourceInfo.originalHeight})`);
 
@@ -671,6 +786,9 @@ function updatePipelinePreview() {
       }
       processedPreviewUrl.value = URL.createObjectURL(blob);
       estimatedOutputSize.value = blob.size;
+
+      // 实时采样提取主题调色板
+      paletteColors.value = extractColorPalette(canvas, paletteCount.value);
     }
     catch {
       estimatedOutputSize.value = null;
@@ -898,6 +1016,24 @@ onUnmounted(() => {
               {{ isCompareMode ? '关闭对比' : '差分对比' }}
             </n-button>
 
+            <!-- EXIF 透视入口 -->
+            <n-tooltip trigger="hover">
+              <template #trigger>
+                <n-button
+                  size="tiny"
+                  secondary
+                  :type="exifData.hasData ? 'info' : 'default'"
+                  @click="isExifDrawerOpen = true"
+                >
+                  <template #icon>
+                    <n-icon :component="FileSearch" />
+                  </template>
+                  EXIF 透视
+                </n-button>
+              </template>
+              {{ exifData.hasData ? '已检测到原图 EXIF 元数据，点击打开隐私透视抽屉' : '查看原图 EXIF 元数据与隐私检测' }}
+            </n-tooltip>
+
             <div class="toolbar-divider" />
 
             <n-button size="tiny" secondary type="primary" @click="triggerFileInput" title="更换新图片">
@@ -1117,6 +1253,22 @@ onUnmounted(() => {
               <span font-mono font-bold class="text-primary">
                 {{ baseVisualDimensions.width }} × {{ baseVisualDimensions.height }} px
               </span>
+            </div>
+
+            <!-- 查看原图 EXIF 快捷入口 -->
+            <div pt-1>
+              <n-button
+                size="tiny"
+                secondary
+                :type="exifData.hasData ? 'info' : 'default'"
+                block
+                @click="isExifDrawerOpen = true"
+              >
+                <template #icon>
+                  <n-icon :component="FileSearch" />
+                </template>
+                原图 EXIF 隐私透视 ({{ exifData.hasData ? '已解析' : '无元数据' }})
+              </n-button>
             </div>
           </div>
         </n-card>
@@ -1368,7 +1520,114 @@ onUnmounted(() => {
           </div>
         </n-card>
 
-        <!-- 卡片 4：尺寸缩放调节 -->
+        <!-- 卡片 4：主题调色板提取 (Color Palette Extractor) -->
+        <n-card size="small" :bordered="true">
+          <template #header>
+            <div flex items-center justify-between text-sm>
+              <div flex items-center gap-2>
+                <n-icon size="18" class="text-primary" :component="Palette" />
+                <span>主题调色板提取</span>
+              </div>
+              <!-- 色彩量化数量切换 -->
+              <div flex items-center gap-1.5>
+                <n-radio-group v-model:value="paletteCount" size="tiny" @update:value="refreshPalette">
+                  <n-radio-button :value="6">
+                    6 色
+                  </n-radio-button>
+                  <n-radio-button :value="8">
+                    8 色
+                  </n-radio-button>
+                </n-radio-group>
+              </div>
+            </div>
+          </template>
+
+          <div flex flex-col gap-3>
+            <!-- 色谱综合占比连续渐变色条 -->
+            <div
+              v-if="paletteColors.length > 0"
+              class="h-6 w-full rounded overflow-hidden flex shadow-inner border border-gray-200 dark:border-gray-700"
+            >
+              <div
+                v-for="color in paletteColors"
+                :key="color.hex"
+                class="h-full transition-all duration-300 relative group cursor-pointer"
+                :style="{
+                  width: `${color.percentage}%`,
+                  backgroundColor: color.hex,
+                }"
+                :title="`${color.hex} (${color.percentage}%) - 点击复制`"
+                @click="copyColorHex(color.hex)"
+              />
+            </div>
+
+            <!-- 色块卡片网格列表 (双列) -->
+            <div v-if="paletteColors.length > 0" grid grid-cols-2 gap-2>
+              <div
+                v-for="color in paletteColors"
+                :key="color.hex"
+                class="palette-swatch-card"
+                :title="`点击复制 HEX: ${color.hex}`"
+                @click="copyColorHex(color.hex)"
+              >
+                <!-- 纯色圆角微块 -->
+                <div
+                  class="palette-color-box"
+                  :style="{ backgroundColor: color.hex, color: color.textColor }"
+                >
+                  <span text-10px font-mono font-bold opacity-90>{{ color.percentage }}%</span>
+                </div>
+
+                <!-- 颜色信息 -->
+                <div flex flex-col justify-center flex-1 min-w-0 pr-1>
+                  <span font-mono text-xs font-bold truncate>{{ color.hex }}</span>
+                  <span font-mono text-10px class="text-gray-400" truncate>{{ color.rgb }}</span>
+                </div>
+
+                <!-- 快捷复制 RGB -->
+                <n-button
+                  size="tiny"
+                  quaternary
+                  circle
+                  title="复制 RGB 色值代码"
+                  @click.stop="copyColorRgb(color.rgb)"
+                >
+                  <template #icon>
+                    <n-icon size="13" :component="Copy" />
+                  </template>
+                </n-button>
+              </div>
+            </div>
+            <div v-else text-11px class="text-gray-400 text-center py-2">
+              暂无可用调色板数据
+            </div>
+
+            <!-- 快捷复制与刷新按钮组 (严格居中排布) -->
+            <div flex items-center justify-center gap-2 pt-1>
+              <n-button size="tiny" secondary @click="copyAllPaletteHex">
+                <template #icon>
+                  <n-icon :component="Copy" />
+                </template>
+                全部 HEX
+              </n-button>
+
+              <n-button size="tiny" secondary @click="copyAllPaletteRgb">
+                <template #icon>
+                  <n-icon :component="Copy" />
+                </template>
+                全部 RGB
+              </n-button>
+
+              <n-button size="tiny" quaternary @click="refreshPalette" title="重新从当前画面采样">
+                <template #icon>
+                  <n-icon :component="Refresh" />
+                </template>
+              </n-button>
+            </div>
+          </div>
+        </n-card>
+
+        <!-- 卡片 5：尺寸缩放调节 -->
         <n-card size="small" :bordered="true">
           <template #header>
             <div flex items-center justify-between text-sm>
@@ -1523,6 +1782,17 @@ onUnmounted(() => {
               </n-input>
             </div>
 
+            <!-- 隐私抹除安全标识 -->
+            <div flex items-center justify-between text-xs class="bg-emerald-50/70 dark:bg-emerald-950/40 p-2.5 rounded border border-emerald-200/60 dark:border-emerald-800/60 text-emerald-800 dark:text-emerald-200">
+              <div flex items-center gap-1.5>
+                <n-icon size="16" class="text-emerald-600 dark:text-emerald-400" :component="ShieldCheck" />
+                <span font-medium>已 100% 抹除 EXIF 与 GPS 敏感信息</span>
+              </div>
+              <n-tag size="tiny" type="success" :bordered="false" round>
+                安全保护
+              </n-tag>
+            </div>
+
             <!-- 导出按钮 (水平居中) -->
             <div flex items-center justify-center pt-1>
               <n-button
@@ -1543,6 +1813,142 @@ onUnmounted(() => {
         </n-card>
       </div>
     </div>
+
+    <!-- 原图 EXIF 隐私透视只读抽屉 (EXIF Inspector) -->
+    <n-drawer v-model:show="isExifDrawerOpen" :width="460" placement="right">
+      <n-drawer-content title="EXIF 隐私元数据透视" closable>
+        <!-- 隐私抹除保障提示横幅 -->
+        <div class="bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 rounded p-3 mb-4 flex items-start gap-2.5">
+          <n-icon size="18" class="text-emerald-600 dark:text-emerald-400 mt-0.5 shrink-0" :component="ShieldCheck" />
+          <div text-xs class="text-emerald-800 dark:text-emerald-200 leading-relaxed">
+            <div font-bold mb-0.5>
+              100% 纯客户端隐私抹除保障
+            </div>
+            本工具导出的所有图片文件（PNG/JPEG/WebP）均在浏览器本地内存中重新渲染生成，已自动且彻底抹除相机厂商、设备型号、拍摄参数及 GPS 地理位置等元数据，杜绝个人隐私泄露。
+          </div>
+        </div>
+
+        <!-- 空状态：无 EXIF 数据 -->
+        <div v-if="!exifData.hasData" class="py-12 flex flex-col items-center justify-center text-center">
+          <n-empty description="未检测到任何 EXIF 元数据">
+            <template #extra>
+              <div text-xs class="text-gray-400 max-w-280px mt-1 leading-normal">
+                原图可能为网页截图、已抹除隐私的照片，或文件格式不包含 EXIF 段。在公网分享此图片无隐私泄露风险。
+              </div>
+            </template>
+          </n-empty>
+        </div>
+
+        <!-- 详细 EXIF 元数据分类卡片 -->
+        <div v-else flex flex-col gap-4>
+          <!-- GPS 地理位置定位敏感卡片 (若存在 GPS) -->
+          <div
+            v-if="exifData.gps"
+            class="bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800 rounded p-3 text-xs flex flex-col gap-1.5"
+          >
+            <div flex items-center justify-between font-bold class="text-amber-800 dark:text-amber-200">
+              <div flex items-center gap-1.5>
+                <n-icon size="16" class="text-amber-600" :component="MapPin" />
+                <span>检测到 GPS 敏感定位数据！</span>
+              </div>
+              <n-tag size="tiny" type="warning" round :bordered="false">
+                高危敏感
+              </n-tag>
+            </div>
+            <div class="text-amber-700 dark:text-amber-300">
+              原图包含了拍摄时的精确物理坐标，直接分享原图极易暴露家庭住址或工作定位；使用本工具导出时已自动为您抹除。
+            </div>
+            <div class="bg-white/80 dark:bg-black/30 p-2 rounded flex items-center justify-between font-mono mt-1">
+              <span truncate :title="exifData.gps.formattedCoords">{{ exifData.gps.formattedCoords }}</span>
+              <n-button
+                size="tiny"
+                quaternary
+                type="primary"
+                @click="copyFieldValue('GPS 经纬度坐标', exifData.gps.formattedCoords)"
+              >
+                复制坐标
+              </n-button>
+            </div>
+            <div v-if="exifData.gps.altitude !== undefined" flex items-center justify-between text-11px class="text-gray-500">
+              <span>海拔高度：</span>
+              <span>{{ exifData.gps.altitude }} 米</span>
+            </div>
+          </div>
+
+          <!-- 设备与相机信息 -->
+          <n-card size="small" title="相机与设备" :bordered="true">
+            <n-descriptions :column="1" size="small" label-placement="left">
+              <n-descriptions-item label="设备厂商">
+                <span font-medium>{{ exifData.make || '未知' }}</span>
+              </n-descriptions-item>
+              <n-descriptions-item label="相机型号">
+                <span font-medium>{{ exifData.model || '未知' }}</span>
+              </n-descriptions-item>
+              <n-descriptions-item label="镜头型号">
+                <span>{{ exifData.lensModel || '未知' }}</span>
+              </n-descriptions-item>
+              <n-descriptions-item label="固件软件">
+                <span>{{ exifData.software || '未知' }}</span>
+              </n-descriptions-item>
+            </n-descriptions>
+          </n-card>
+
+          <!-- 拍摄曝光参数 -->
+          <n-card size="small" title="拍摄曝光参数" :bordered="true">
+            <n-descriptions :column="2" size="small" label-placement="left">
+              <n-descriptions-item label="快门速度">
+                <span font-mono font-bold>{{ exifData.exposureTime || '未知' }}</span>
+              </n-descriptions-item>
+              <n-descriptions-item label="光圈大小">
+                <span font-mono font-bold>{{ exifData.fNumber || '未知' }}</span>
+              </n-descriptions-item>
+              <n-descriptions-item label="ISO 感光度">
+                <span font-mono font-bold>{{ exifData.iso !== undefined ? exifData.iso : '未知' }}</span>
+              </n-descriptions-item>
+              <n-descriptions-item label="镜头焦距">
+                <span font-mono>{{ exifData.focalLength || '未知' }}</span>
+              </n-descriptions-item>
+              <n-descriptions-item v-if="exifData.imageWidth && exifData.imageHeight" label="原始尺寸" :span="2">
+                <span font-mono>{{ exifData.imageWidth }} × {{ exifData.imageHeight }} px</span>
+              </n-descriptions-item>
+            </n-descriptions>
+          </n-card>
+
+          <!-- 拍摄时间与版权信息 -->
+          <n-card size="small" title="时间与版权" :bordered="true">
+            <n-descriptions :column="1" size="small" label-placement="left">
+              <n-descriptions-item label="拍摄时间">
+                <span>{{ exifData.dateTimeOriginal || exifData.dateTime || '未知' }}</span>
+              </n-descriptions-item>
+              <n-descriptions-item v-if="exifData.artist" label="拍摄作者">
+                <span>{{ exifData.artist }}</span>
+              </n-descriptions-item>
+              <n-descriptions-item v-if="exifData.copyright" label="版权声明">
+                <span>{{ exifData.copyright }}</span>
+              </n-descriptions-item>
+            </n-descriptions>
+          </n-card>
+        </div>
+
+        <!-- 抽屉底部操作栏 (严格居中排布) -->
+        <template #footer>
+          <div flex items-center justify-center w-full>
+            <n-button
+              type="primary"
+              secondary
+              block
+              :disabled="!exifData.hasData"
+              @click="copyExifSummary"
+            >
+              <template #icon>
+                <n-icon :component="Copy" />
+              </template>
+              一键复制完整 EXIF 摘要报告
+            </n-button>
+          </div>
+        </template>
+      </n-drawer-content>
+    </n-drawer>
   </div>
 </template>
 
@@ -1830,5 +2236,37 @@ onUnmounted(() => {
 
 .studio-sidebar {
   width: 100%;
+}
+
+/* 主题调色板色块卡片 */
+.palette-swatch-card {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 8px;
+  background-color: var(--n-color-embedded);
+  border: 1px solid var(--n-border-color);
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  user-select: none;
+}
+
+.palette-swatch-card:hover {
+  border-color: var(--n-primary-color);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.palette-color-box {
+  width: 32px;
+  height: 32px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
+  flex-shrink: 0;
 }
 </style>

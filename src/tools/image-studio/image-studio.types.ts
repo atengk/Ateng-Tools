@@ -208,4 +208,87 @@ export interface RenderPipelineOptions {
   watermark?: StudioWatermarkConfig;
 }
 
+/**
+ * EXIF GPS 地理位置信息
+ */
+export interface ExifGpsInfo {
+  /** 纬度十进制数值 (如 39.9042) */
+  latitude?: number;
+  /** 纬度半球 ('N' | 'S') */
+  latitudeRef?: string;
+  /** 经度十进制数值 (如 116.4074) */
+  longitude?: number;
+  /** 经度半球 ('E' | 'W') */
+  longitudeRef?: string;
+  /** 海拔高度 (米) */
+  altitude?: number;
+  /** 海拔参考 (0=高于海平面, 1=低于海平面) */
+  altitudeRef?: number;
+  /** 格式化坐标显示字符串 (如 "39.9042° N, 116.4074° E") */
+  formattedCoords?: string;
+}
+
+/**
+ * EXIF 拍摄与设备元数据
+ */
+export interface ExifMetadata {
+  /** 是否解析出有效的 EXIF 元数据 */
+  hasData: boolean;
+  /** 设备制造厂商 (Make, 如 Apple, Canon, SONY) */
+  make?: string;
+  /** 相机型号 (Model, 如 iPhone 15 Pro, ILCE-7M4) */
+  model?: string;
+  /** 镜头型号 (LensModel) */
+  lensModel?: string;
+  /** 拍摄/处理软件 (Software) */
+  software?: string;
+  /** 修改时间 (DateTime) */
+  dateTime?: string;
+  /** 原始拍摄时间 (DateTimeOriginal) */
+  dateTimeOriginal?: string;
+  /** 快门曝光时间 (ExposureTime, 如 1/120s) */
+  exposureTime?: string;
+  /** 光圈数 (FNumber, 如 f/1.8) */
+  fNumber?: string;
+  /** ISO 感光度 (ISOSpeedRatings, 如 100) */
+  iso?: number;
+  /** 镜头焦距 (FocalLength, 如 24 mm) */
+  focalLength?: string;
+  /** 图像宽度 (PixelXDimension 或 IFD 宽度) */
+  imageWidth?: number;
+  /** 图像高度 (PixelYDimension 或 IFD 高度) */
+  imageHeight?: number;
+  /** 画面方向 (Orientation 1-8) */
+  orientation?: number;
+  /** 拍摄者/艺术家 (Artist) */
+  artist?: string;
+  /** 版权信息 (Copyright) */
+  copyright?: string;
+  /** 图像描述 (ImageDescription) */
+  imageDescription?: string;
+  /** GPS 地理位置信息 */
+  gps?: ExifGpsInfo;
+}
+
+/**
+ * 调色板色彩项
+ */
+export interface PaletteColor {
+  /** 十六进制颜色代码 (如 #3B82F6) */
+  hex: string;
+  /** RGB 格式代码 (如 rgb(59, 130, 246)) */
+  rgb: string;
+  /** 红色通道 (0-255) */
+  r: number;
+  /** 绿色通道 (0-255) */
+  g: number;
+  /** 蓝色通道 (0-255) */
+  b: number;
+  /** 像素占比百分比 (0 - 100) */
+  percentage: number;
+  /** 搭配前景色推荐 (#000000 或 #FFFFFF) */
+  textColor: string;
+}
+
+
 

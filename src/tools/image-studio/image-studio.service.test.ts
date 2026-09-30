@@ -13,10 +13,13 @@ import {
   calculateTransformedDimensions,
   clampCropRegion,
   clampDimension,
+  extractColorPaletteFromImageData,
+  formatExifSummary,
   generateExportFileName,
   getAspectRatioValue,
   getFormatExtension,
   normalizeRotationAngle,
+  parseExifMetadata,
 } from './image-studio.service';
 import { MAX_SAFE_IMAGE_DIMENSION, MIN_SAFE_IMAGE_DIMENSION } from './image-studio.types';
 
@@ -225,6 +228,215 @@ describe('image-studio.service', () => {
       });
     });
   });
+
+  describe('parseExifMetadata EXIF 隐私元数据二进制解析', () => {
+    it('对于过短或空的二进制数据，安全返回 hasData: false 且零崩溃', () => {
+      expect(parseExifMetadata(new ArrayBuffer(0))).toEqual({ hasData: false });
+      expect(parseExifMetadata(new ArrayBuffer(10))).toEqual({ hasData: false });
+    });
+
+    it('对于普通非 JPEG / 非 TIFF 二进制数据，安全返回 hasData: false', () => {
+      const buffer = new Uint8Array([0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A, 0, 0, 0, 0, 0, 0, 0, 0]);
+      expect(parseExifMetadata(buffer)).toEqual({ hasData: false });
+    });
+
+    it('对于标准含有 APP1 EXIF 段的 JPEG 数据，正确提取相机厂商、型号、ISO 与拍摄时间', () => {
+      const buffer = new ArrayBuffer(512);
+      const view = new DataView(buffer);
+
+      // 1. JPEG SOI
+      view.setUint8(0, 0xFF);
+      view.setUint8(1, 0xD8);
+
+      // 2. APP1 Marker (0xFFE1)
+      view.setUint8(2, 0xFF);
+      view.setUint8(3, 0xE1);
+      view.setUint16(4, 500, false); // 段长度
+
+      // 3. "Exif\0\0"
+      view.setUint8(6, 0x45); // 'E'
+      view.setUint8(7, 0x78); // 'x'
+      view.setUint8(8, 0x69); // 'i'
+      view.setUint8(9, 0x66); // 'f'
+      view.setUint8(10, 0x00);
+      view.setUint8(11, 0x00);
+
+      // TIFF 头部从 offset 12 开始
+      const tiffStart = 12;
+      // 'II' (Little-Endian)
+      view.setUint8(tiffStart, 0x49);
+      view.setUint8(tiffStart + 1, 0x49);
+      // Magic 42
+      view.setUint16(tiffStart + 2, 42, true);
+      // IFD0 偏移量：8
+      view.setUint32(tiffStart + 4, 8, true);
+
+      // IFD0 位于 tiffStart + 8 (20)
+      const ifd0 = tiffStart + 8;
+      view.setUint16(ifd0, 3, true); // 3 个 entries
+
+      // Entry 1: 0x010F Make ("Sony\0")
+      view.setUint16(ifd0 + 2, 0x010F, true);
+      view.setUint16(ifd0 + 4, 2, true); // ASCII
+      view.setUint32(ifd0 + 6, 5, true); // count 5
+      view.setUint32(ifd0 + 10, 80, true); // 偏移量相对 tiffStart = 80
+      const makeStr = 'Sony\0';
+      for (let i = 0; i < makeStr.length; i++) {
+        view.setUint8(tiffStart + 80 + i, makeStr.charCodeAt(i));
+      }
+
+      // Entry 2: 0x0110 Model ("A7M4\0")
+      view.setUint16(ifd0 + 14, 0x0110, true);
+      view.setUint16(ifd0 + 16, 2, true); // ASCII
+      view.setUint32(ifd0 + 18, 5, true);
+      view.setUint32(ifd0 + 22, 90, true); // 偏移量相对 tiffStart = 90
+      const modelStr = 'A7M4\0';
+      for (let i = 0; i < modelStr.length; i++) {
+        view.setUint8(tiffStart + 90 + i, modelStr.charCodeAt(i));
+      }
+
+      // Entry 3: 0x8769 ExifIFDPointer
+      view.setUint16(ifd0 + 26, 0x8769, true);
+      view.setUint16(ifd0 + 28, 4, true); // LONG
+      view.setUint32(ifd0 + 30, 1, true);
+      view.setUint32(ifd0 + 34, 120, true); // 偏移量相对 tiffStart = 120
+
+      // Exif SubIFD 位于 tiffStart + 120
+      const exifSub = tiffStart + 120;
+      view.setUint16(exifSub, 2, true); // 2 entries
+
+      // SubEntry 1: 0x8827 ISO = 800 (SHORT)
+      view.setUint16(exifSub + 2, 0x8827, true);
+      view.setUint16(exifSub + 4, 3, true); // SHORT
+      view.setUint32(exifSub + 6, 1, true);
+      view.setUint16(exifSub + 10, 800, true); // inline 存储值
+
+      // SubEntry 2: 0x9003 DateTimeOriginal ("2026:09:30 18:00:00\0")
+      view.setUint16(exifSub + 14, 0x9003, true);
+      view.setUint16(exifSub + 16, 2, true); // ASCII
+      view.setUint32(exifSub + 18, 20, true);
+      view.setUint32(exifSub + 22, 160, true); // 偏移量相对 tiffStart = 160
+      const dateStr = '2026:09:30 18:00:00\0';
+      for (let i = 0; i < dateStr.length; i++) {
+        view.setUint8(tiffStart + 160 + i, dateStr.charCodeAt(i));
+      }
+
+      const res = parseExifMetadata(buffer);
+      expect(res.hasData).toBe(true);
+      expect(res.make).toBe('Sony');
+      expect(res.model).toBe('A7M4');
+      expect(res.iso).toBe(800);
+      expect(res.dateTimeOriginal).toBe('2026:09:30 18:00:00');
+    });
+
+    it('formatExifSummary 对空数据生成友好安全提示', () => {
+      const summary = formatExifSummary({ hasData: false });
+      expect(summary).toContain('未检测到任何相机与拍摄信息');
+    });
+
+    it('formatExifSummary 对完整数据格式化生成多类别报告', () => {
+      const summary = formatExifSummary({
+        hasData: true,
+        make: 'Apple',
+        model: 'iPhone 15 Pro',
+        exposureTime: '1/120s',
+        fNumber: 'f/1.8',
+        iso: 100,
+        gps: {
+          formattedCoords: '39.9042° N, 116.4074° E',
+          altitude: 45.2,
+        },
+      });
+      expect(summary).toContain('【设备与器材】');
+      expect(summary).toContain('设备厂商：Apple');
+      expect(summary).toContain('相机型号：iPhone 15 Pro');
+      expect(summary).toContain('【曝光与参数】');
+      expect(summary).toContain('快门速度：1/120s');
+      expect(summary).toContain('【GPS 地理位置 (敏感隐私)】');
+      expect(summary).toContain('经纬度：39.9042° N, 116.4074° E');
+    });
+  });
+
+  describe('extractColorPaletteFromImageData 主题调色板提取纯函数', () => {
+    it('对空像素数组或零像素返回空数组', () => {
+      expect(extractColorPaletteFromImageData([], 0)).toEqual([]);
+      expect(extractColorPaletteFromImageData(new Uint8ClampedArray(0), 0)).toEqual([]);
+    });
+
+    it('对纯透明图像像素返回空数组', () => {
+      // 4 个像素，每个 alpha 为 0
+      const transparentData = [
+        255, 0, 0, 0,
+        0, 255, 0, 50,
+        0, 0, 255, 100,
+        100, 100, 100, 80,
+      ];
+      expect(extractColorPaletteFromImageData(transparentData, 4)).toEqual([]);
+    });
+
+    it('对纯单色图像提取出准确颜色代码与 100% 占比', () => {
+      // 10 个纯红像素 (255, 0, 0, 255)
+      const redPixels: number[] = [];
+      for (let i = 0; i < 10; i++) {
+        redPixels.push(255, 0, 0, 255);
+      }
+      const palette = extractColorPaletteFromImageData(redPixels, 10, 6);
+      expect(palette.length).toBe(1);
+      // 15-bit 量化后的纯红通道值为 255
+      expect(palette[0].r).toBe(255);
+      expect(palette[0].g).toBe(0);
+      expect(palette[0].b).toBe(0);
+      expect(palette[0].hex).toBe('#FF0000');
+      expect(palette[0].rgb).toBe('rgb(255, 0, 0)');
+      expect(palette[0].percentage).toBe(100);
+      expect(palette[0].textColor).toBe('#FFFFFF');
+    });
+
+    it('对包含红、蓝两种主色彩的图像提取出互斥的色彩且具备高对比文本色', () => {
+      const mixedPixels: number[] = [];
+      // 60 个纯红 (255, 0, 0, 255)
+      for (let i = 0; i < 60; i++) {
+        mixedPixels.push(255, 0, 0, 255);
+      }
+      // 40 个纯蓝 (0, 0, 255, 255)
+      for (let i = 0; i < 40; i++) {
+        mixedPixels.push(0, 0, 255, 255);
+      }
+      const palette = extractColorPaletteFromImageData(mixedPixels, 100, 6);
+      expect(palette.length).toBe(2);
+      expect(palette.map(p => p.hex)).toContain('#FF0000');
+      expect(palette.map(p => p.hex)).toContain('#0000FF');
+      expect(palette[0].percentage + palette[1].percentage).toBeCloseTo(100, 0);
+    });
+
+    it('多色彩图像能提取出 6 种主导代表色彩并计算百分比', () => {
+      const multiPixels: number[] = [];
+      // 生成 6 种完全不同色彩的像素块
+      const colors = [
+        [255, 0, 0],
+        [0, 255, 0],
+        [0, 0, 255],
+        [255, 255, 0],
+        [255, 0, 255],
+        [0, 255, 255],
+      ];
+      for (const [r, g, b] of colors) {
+        for (let i = 0; i < 20; i++) {
+          multiPixels.push(r, g, b, 255);
+        }
+      }
+
+      const palette = extractColorPaletteFromImageData(multiPixels, 120, 6);
+      expect(palette.length).toBe(6);
+      palette.forEach((color) => {
+        expect(color.hex).toMatch(/^#[0-9A-F]{6}$/);
+        expect(color.rgb).toMatch(/^rgb\(\d+,\s*\d+,\s*\d+\)$/);
+        expect(color.percentage).toBeGreaterThan(0);
+        expect(['#000000', '#FFFFFF']).toContain(color.textColor);
+      });
+    });
+  });
 });
+
 
 

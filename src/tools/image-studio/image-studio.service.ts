@@ -5,9 +5,12 @@
  * @since 2026-09-30
  */
 import {
+  type ExifGpsInfo,
+  type ExifMetadata,
   type ExportImageFormat,
   MAX_SAFE_IMAGE_DIMENSION,
   MIN_SAFE_IMAGE_DIMENSION,
+  type PaletteColor,
   type StudioWatermarkConfig,
   type WatermarkAnchor,
 } from './image-studio.types';
@@ -648,5 +651,603 @@ export function applyWatermarkToCanvas(
     ctx.restore();
   }
 }
+
+/**
+ * 健壮的二进制数据安全读取包装器 (防止越界崩溃)
+ */
+class SafeBinaryReader {
+  private view: DataView;
+  public littleEndian = false;
+  public byteLength: number;
+
+  constructor(buffer: ArrayBuffer | Uint8Array) {
+    if (buffer instanceof Uint8Array) {
+      this.view = new DataView(buffer.buffer, buffer.byteOffset, buffer.byteLength);
+    }
+    else {
+      this.view = new DataView(buffer);
+    }
+    this.byteLength = this.view.byteLength;
+  }
+
+  getUint8(offset: number): number {
+    if (offset < 0 || offset + 1 > this.byteLength) return 0;
+    return this.view.getUint8(offset);
+  }
+
+  getUint16(offset: number, littleEndian = this.littleEndian): number {
+    if (offset < 0 || offset + 2 > this.byteLength) return 0;
+    return this.view.getUint16(offset, littleEndian);
+  }
+
+  getUint32(offset: number, littleEndian = this.littleEndian): number {
+    if (offset < 0 || offset + 4 > this.byteLength) return 0;
+    return this.view.getUint32(offset, littleEndian);
+  }
+
+  getString(offset: number, length: number): string {
+    if (offset < 0 || length <= 0 || offset >= this.byteLength) return '';
+    const safeLen = Math.min(length, this.byteLength - offset);
+    let str = '';
+    for (let i = 0; i < safeLen; i++) {
+      const code = this.view.getUint8(offset + i);
+      if (code === 0) break;
+      str += String.fromCharCode(code);
+    }
+    return str.trim();
+  }
+}
+
+/**
+ * 纯客户端二进制零依赖解析图片中的 EXIF 拍摄与 GPS 隐私元数据
+ *
+ * @param buffer 图片文件二进制 ArrayBuffer 或 Uint8Array
+ * @returns 结构化的 ExifMetadata
+ */
+export function parseExifMetadata(buffer: ArrayBuffer | Uint8Array): ExifMetadata {
+  const emptyResult: ExifMetadata = { hasData: false };
+
+  try {
+    const reader = new SafeBinaryReader(buffer);
+    if (reader.byteLength < 14) {
+      return emptyResult;
+    }
+
+    let tiffStart = -1;
+
+    // 1. 检查是否为 JPEG (0xFF 0xD8)
+    if (reader.getUint8(0) === 0xFF && reader.getUint8(1) === 0xD8) {
+      let offset = 2;
+      while (offset < reader.byteLength - 4) {
+        if (reader.getUint8(offset) !== 0xFF) {
+          offset++;
+          continue;
+        }
+
+        const marker = reader.getUint8(offset + 1);
+
+        // APP1 (0xFFE1) 包含 EXIF 元数据
+        if (marker === 0xE1) {
+          const segLength = reader.getUint16(offset + 2, false);
+          // 检查 Exif 头部特征字符串 "Exif\0\0" (0x45 0x78 0x69 0x66 0x00 0x00)
+          if (
+            reader.getUint8(offset + 4) === 0x45
+            && reader.getUint8(offset + 5) === 0x78
+            && reader.getUint8(offset + 6) === 0x69
+            && reader.getUint8(offset + 7) === 0x66
+            && reader.getUint8(offset + 8) === 0x00
+            && reader.getUint8(offset + 9) === 0x00
+          ) {
+            tiffStart = offset + 10;
+            break;
+          }
+          offset += 2 + segLength;
+        }
+        else if (marker === 0xDA || marker === 0xD9) {
+          // SOS (Start of Scan) 或 EOI (End of Image)，停止段扫描
+          break;
+        }
+        else {
+          const segLength = reader.getUint16(offset + 2, false);
+          if (segLength < 2) break;
+          offset += 2 + segLength;
+        }
+      }
+    }
+    // 2. 检查是否直接为 TIFF 格式头部
+    else if (
+      (reader.getUint8(0) === 0x49 && reader.getUint8(1) === 0x49)
+      || (reader.getUint8(0) === 0x4D && reader.getUint8(1) === 0x4D)
+    ) {
+      tiffStart = 0;
+    }
+
+    if (tiffStart === -1 || tiffStart + 8 > reader.byteLength) {
+      return emptyResult;
+    }
+
+    // 3. 解析 TIFF Header 确定字节序 (II = Little Endian, MM = Big Endian)
+    const byteOrder = (reader.getUint8(tiffStart) << 8) | reader.getUint8(tiffStart + 1);
+    if (byteOrder === 0x4949) {
+      reader.littleEndian = true;
+    }
+    else if (byteOrder === 0x4D4D) {
+      reader.littleEndian = false;
+    }
+    else {
+      return emptyResult;
+    }
+
+    // 固定魔数 42
+    if (reader.getUint16(tiffStart + 2) !== 42) {
+      return emptyResult;
+    }
+
+    const firstIfdOffset = reader.getUint32(tiffStart + 4);
+    if (firstIfdOffset <= 0 || tiffStart + firstIfdOffset >= reader.byteLength) {
+      return emptyResult;
+    }
+
+    const result: ExifMetadata = { hasData: false };
+
+    // 读取单个 Tag 值的通用函数
+    const readTagValue = (entryOffset: number): any => {
+      const type = reader.getUint16(entryOffset + 2);
+      const count = reader.getUint32(entryOffset + 4);
+      const rawValueOrOffset = reader.getUint32(entryOffset + 8);
+
+      // Type 2: ASCII 字符串
+      if (type === 2) {
+        const strOffset = count <= 4 ? entryOffset + 8 : tiffStart + rawValueOrOffset;
+        return reader.getString(strOffset, count);
+      }
+      // Type 3: SHORT (2 字节无符号整数)
+      if (type === 3) {
+        return reader.getUint16(entryOffset + 8);
+      }
+      // Type 4: LONG (4 字节无符号整数)
+      if (type === 4) {
+        return rawValueOrOffset;
+      }
+      // Type 5: RATIONAL (分子 / 分母)
+      if (type === 5) {
+        const valOffset = tiffStart + rawValueOrOffset;
+        const num = reader.getUint32(valOffset);
+        const den = reader.getUint32(valOffset + 4);
+        return den !== 0 ? num / den : 0;
+      }
+      return null;
+    };
+
+    // 读取度分秒三元组 RATIONAL
+    const readRationalTriplet = (entryOffset: number): [number, number, number] | null => {
+      const type = reader.getUint16(entryOffset + 2);
+      const count = reader.getUint32(entryOffset + 4);
+      const rawValueOrOffset = reader.getUint32(entryOffset + 8);
+      if (type !== 5 || count < 3) return null;
+
+      const valOffset = tiffStart + rawValueOrOffset;
+      const degNum = reader.getUint32(valOffset);
+      const degDen = reader.getUint32(valOffset + 4);
+      const minNum = reader.getUint32(valOffset + 8);
+      const minDen = reader.getUint32(valOffset + 12);
+      const secNum = reader.getUint32(valOffset + 16);
+      const secDen = reader.getUint32(valOffset + 20);
+
+      const deg = degDen !== 0 ? degNum / degDen : 0;
+      const min = minDen !== 0 ? minNum / minDen : 0;
+      const sec = secDen !== 0 ? secNum / secDen : 0;
+      return [deg, min, sec];
+    };
+
+    let exifSubIfdOffset = 0;
+    let gpsSubIfdOffset = 0;
+
+    // 解析 IFD0
+    const ifd0Entries = reader.getUint16(tiffStart + firstIfdOffset);
+    for (let i = 0; i < ifd0Entries; i++) {
+      const entryOffset = tiffStart + firstIfdOffset + 2 + i * 12;
+      if (entryOffset + 12 > reader.byteLength) break;
+
+      const tag = reader.getUint16(entryOffset);
+      switch (tag) {
+        case 0x010F: // Make
+          result.make = readTagValue(entryOffset);
+          break;
+        case 0x0110: // Model
+          result.model = readTagValue(entryOffset);
+          break;
+        case 0x0112: // Orientation
+          result.orientation = readTagValue(entryOffset);
+          break;
+        case 0x0131: // Software
+          result.software = readTagValue(entryOffset);
+          break;
+        case 0x0132: // DateTime
+          result.dateTime = readTagValue(entryOffset);
+          break;
+        case 0x010E: // ImageDescription
+          result.imageDescription = readTagValue(entryOffset);
+          break;
+        case 0x013B: // Artist
+          result.artist = readTagValue(entryOffset);
+          break;
+        case 0x8298: // Copyright
+          result.copyright = readTagValue(entryOffset);
+          break;
+        case 0x8769: // Exif SubIFD Pointer
+          exifSubIfdOffset = reader.getUint32(entryOffset + 8);
+          break;
+        case 0x8825: // GPS SubIFD Pointer
+          gpsSubIfdOffset = reader.getUint32(entryOffset + 8);
+          break;
+      }
+    }
+
+    // 解析 Exif SubIFD
+    if (exifSubIfdOffset > 0 && tiffStart + exifSubIfdOffset < reader.byteLength) {
+      const exifEntries = reader.getUint16(tiffStart + exifSubIfdOffset);
+      for (let i = 0; i < exifEntries; i++) {
+        const entryOffset = tiffStart + exifSubIfdOffset + 2 + i * 12;
+        if (entryOffset + 12 > reader.byteLength) break;
+
+        const tag = reader.getUint16(entryOffset);
+        switch (tag) {
+          case 0x829A: { // ExposureTime (快门)
+            const exp = readTagValue(entryOffset);
+            if (typeof exp === 'number' && exp > 0) {
+              if (exp < 1) {
+                result.exposureTime = `1/${Math.round(1 / exp)}s`;
+              }
+              else {
+                result.exposureTime = `${Number(exp.toFixed(1))}s`;
+              }
+            }
+            break;
+          }
+          case 0x829D: { // FNumber (光圈)
+            const fn = readTagValue(entryOffset);
+            if (typeof fn === 'number' && fn > 0) {
+              result.fNumber = `f/${Number(fn.toFixed(1))}`;
+            }
+            break;
+          }
+          case 0x8827: // ISOSpeedRatings
+            result.iso = readTagValue(entryOffset);
+            break;
+          case 0x9003: // DateTimeOriginal
+            result.dateTimeOriginal = readTagValue(entryOffset);
+            break;
+          case 0x920A: { // FocalLength (焦距)
+            const fl = readTagValue(entryOffset);
+            if (typeof fl === 'number' && fl > 0) {
+              result.focalLength = `${Number(fl.toFixed(1))} mm`;
+            }
+            break;
+          }
+          case 0xA434: // LensModel (镜头型号)
+            result.lensModel = readTagValue(entryOffset);
+            break;
+          case 0xA002: // PixelXDimension
+            result.imageWidth = readTagValue(entryOffset);
+            break;
+          case 0xA003: // PixelYDimension
+            result.imageHeight = readTagValue(entryOffset);
+            break;
+        }
+      }
+    }
+
+    // 解析 GPS SubIFD
+    if (gpsSubIfdOffset > 0 && tiffStart + gpsSubIfdOffset < reader.byteLength) {
+      const gpsEntries = reader.getUint16(tiffStart + gpsSubIfdOffset);
+      const gps: ExifGpsInfo = {};
+
+      let latTriplet: [number, number, number] | null = null;
+      let lonTriplet: [number, number, number] | null = null;
+
+      for (let i = 0; i < gpsEntries; i++) {
+        const entryOffset = tiffStart + gpsSubIfdOffset + 2 + i * 12;
+        if (entryOffset + 12 > reader.byteLength) break;
+
+        const tag = reader.getUint16(entryOffset);
+        switch (tag) {
+          case 0x0001: // GPSLatitudeRef
+            gps.latitudeRef = readTagValue(entryOffset);
+            break;
+          case 0x0002: // GPSLatitude
+            latTriplet = readRationalTriplet(entryOffset);
+            break;
+          case 0x0003: // GPSLongitudeRef
+            gps.longitudeRef = readTagValue(entryOffset);
+            break;
+          case 0x0004: // GPSLongitude
+            lonTriplet = readRationalTriplet(entryOffset);
+            break;
+          case 0x0005: // GPSAltitudeRef
+            gps.altitudeRef = reader.getUint8(entryOffset + 8);
+            break;
+          case 0x0006: { // GPSAltitude
+            const alt = readTagValue(entryOffset);
+            if (typeof alt === 'number') {
+              gps.altitude = Number(alt.toFixed(1));
+            }
+            break;
+          }
+        }
+      }
+
+      // 计算十进制经纬度
+      if (latTriplet) {
+        const decLat = latTriplet[0] + latTriplet[1] / 60 + latTriplet[2] / 3600;
+        gps.latitude = Number((gps.latitudeRef === 'S' ? -decLat : decLat).toFixed(5));
+      }
+      if (lonTriplet) {
+        const decLon = lonTriplet[0] + lonTriplet[1] / 60 + lonTriplet[2] / 3600;
+        gps.longitude = Number((gps.longitudeRef === 'W' ? -decLon : decLon).toFixed(5));
+      }
+
+      if (gps.latitude !== undefined && gps.longitude !== undefined) {
+        const latRef = gps.latitudeRef || (gps.latitude >= 0 ? 'N' : 'S');
+        const lonRef = gps.longitudeRef || (gps.longitude >= 0 ? 'E' : 'W');
+        gps.formattedCoords = `${Math.abs(gps.latitude).toFixed(4)}° ${latRef}, ${Math.abs(gps.longitude).toFixed(4)}° ${lonRef}`;
+      }
+
+      if (Object.keys(gps).length > 0) {
+        result.gps = gps;
+      }
+    }
+
+    // 只要提取出任意一项有效信息，即标记 hasData: true
+    const hasAnyField = Boolean(
+      result.make
+      || result.model
+      || result.lensModel
+      || result.software
+      || result.dateTime
+      || result.dateTimeOriginal
+      || result.exposureTime
+      || result.fNumber
+      || result.iso
+      || result.focalLength
+      || result.gps
+      || result.artist
+      || result.copyright,
+    );
+
+    result.hasData = hasAnyField;
+    return result;
+  }
+  catch {
+    return emptyResult;
+  }
+}
+
+/**
+ * 将结构化 EXIF 元数据格式化为用户可一键复制的整洁多行摘要报告
+ *
+ * @param exif EXIF 元数据对象
+ * @returns 格式化排版后的多行文本
+ */
+export function formatExifSummary(exif: ExifMetadata): string {
+  if (!exif.hasData) {
+    return '【EXIF 元数据】\n未检测到任何相机与拍摄信息（可能为截图、已抹除隐私元数据或非 JPEG 格式）';
+  }
+
+  const sections: string[] = [];
+
+  // 设备与器材
+  const devLines: string[] = [];
+  if (exif.make) devLines.push(`设备厂商：${exif.make}`);
+  if (exif.model) devLines.push(`相机型号：${exif.model}`);
+  if (exif.lensModel) devLines.push(`镜头型号：${exif.lensModel}`);
+  if (exif.software) devLines.push(`固件软件：${exif.software}`);
+  if (devLines.length > 0) {
+    sections.push(`【设备与器材】\n${devLines.join('\n')}`);
+  }
+
+  // 拍摄曝光参数
+  const expLines: string[] = [];
+  if (exif.exposureTime) expLines.push(`快门速度：${exif.exposureTime}`);
+  if (exif.fNumber) expLines.push(`光圈大小：${exif.fNumber}`);
+  if (exif.iso) expLines.push(`ISO 感光度：${exif.iso}`);
+  if (exif.focalLength) expLines.push(`焦距：${exif.focalLength}`);
+  if (exif.imageWidth && exif.imageHeight) {
+    expLines.push(`原始尺寸：${exif.imageWidth} × ${exif.imageHeight} px`);
+  }
+  if (expLines.length > 0) {
+    sections.push(`【曝光与参数】\n${expLines.join('\n')}`);
+  }
+
+  // 拍摄时间与作者
+  const timeLines: string[] = [];
+  if (exif.dateTimeOriginal) timeLines.push(`拍摄时间：${exif.dateTimeOriginal}`);
+  if (exif.dateTime && exif.dateTime !== exif.dateTimeOriginal) timeLines.push(`修改时间：${exif.dateTime}`);
+  if (exif.artist) timeLines.push(`作者：${exif.artist}`);
+  if (exif.copyright) timeLines.push(`版权声明：${exif.copyright}`);
+  if (timeLines.length > 0) {
+    sections.push(`【时间与版权】\n${timeLines.join('\n')}`);
+  }
+
+  // GPS 地理位置
+  if (exif.gps) {
+    const gpsLines: string[] = [];
+    if (exif.gps.formattedCoords) gpsLines.push(`经纬度：${exif.gps.formattedCoords}`);
+    if (exif.gps.altitude !== undefined) {
+      gpsLines.push(`海拔高度：${exif.gps.altitude} 米`);
+    }
+    if (gpsLines.length > 0) {
+      sections.push(`【GPS 地理位置 (敏感隐私)】\n${gpsLines.join('\n')}`);
+    }
+  }
+
+  return sections.join('\n\n');
+}
+
+/**
+ * 纯函数：基于图像像素阵列提取 6~8 种主导代表色彩并计算占比与前景色
+ *
+ * @param pixelData RGBA 像素数据数组
+ * @param totalPixels 像素总数
+ * @param colorCount 提取的色彩数量 (默认 6 种，最多 8 种)
+ * @returns 调色板数组
+ */
+export function extractColorPaletteFromImageData(
+  pixelData: Uint8ClampedArray | number[],
+  totalPixels: number,
+  colorCount = 6,
+): PaletteColor[] {
+  if (!pixelData || totalPixels <= 0) {
+    return [];
+  }
+
+  const targetCount = Math.max(2, Math.min(8, colorCount));
+  // 采样步长控制：若像素点过多，等距采样控制在约 10000 像素内，保持毫秒级性能
+  const step = Math.max(1, Math.floor(totalPixels / 10000));
+
+  // 15-bit RGB 量化桶：(r>>3)<<10 | (g>>3)<<5 | (b>>3)，每个通道 32 级
+  const buckets = new Map<number, { count: number; sumR: number; sumG: number; sumB: number }>();
+  let validPixelCount = 0;
+
+  for (let i = 0; i < totalPixels; i += step) {
+    const idx = i * 4;
+    const a = pixelData[idx + 3];
+    // 忽略半透明与全透明像素
+    if (a < 128) continue;
+
+    const r = pixelData[idx];
+    const g = pixelData[idx + 1];
+    const b = pixelData[idx + 2];
+
+    const key = ((r >> 3) << 10) | ((g >> 3) << 5) | (b >> 3);
+    let entry = buckets.get(key);
+    if (!entry) {
+      entry = { count: 0, sumR: 0, sumG: 0, sumB: 0 };
+      buckets.set(key, entry);
+    }
+    entry.count++;
+    entry.sumR += r;
+    entry.sumG += g;
+    entry.sumB += b;
+    validPixelCount++;
+  }
+
+  if (validPixelCount === 0 || buckets.size === 0) {
+    return [];
+  }
+
+  // 按频次从大到小排序候选桶
+  const sortedCandidates = Array.from(buckets.values())
+    .sort((a, b) => b.count - a.count)
+    .map(b => ({
+      count: b.count,
+      r: Math.round(b.sumR / b.count),
+      g: Math.round(b.sumG / b.count),
+      b: Math.round(b.sumB / b.count),
+    }));
+
+  // 计算感知色彩距离 (加权欧式距离)
+  const calcDistance = (
+    c1: { r: number; g: number; b: number },
+    c2: { r: number; g: number; b: number },
+  ): number => {
+    const dr = c1.r - c2.r;
+    const dg = c1.g - c2.g;
+    const db = c1.b - c2.b;
+    return Math.sqrt(0.299 * dr * dr + 0.587 * dg * dg + 0.114 * db * db);
+  };
+
+  // 多样性筛选：避免选出的颜色过于趋同 (例如一堆极其接近的深黑或浅灰)
+  const selected: Array<{ count: number; r: number; g: number; b: number }> = [];
+
+  const tryPickWithThreshold = (threshold: number) => {
+    for (const cand of sortedCandidates) {
+      if (selected.length >= targetCount) break;
+      if (selected.includes(cand)) continue;
+
+      const isDiverse = selected.every(s => calcDistance(s, cand) >= threshold);
+      if (isDiverse) {
+        selected.push(cand);
+      }
+    }
+  };
+
+  // 1. 优先严格色差 (>= 32)
+  tryPickWithThreshold(32);
+
+  // 2. 若数量未达到要求，放宽阈值 (>= 18) 填充
+  if (selected.length < targetCount) {
+    tryPickWithThreshold(18);
+  }
+
+  // 3. 若仍未达到要求，直接顺序补齐未入选的高频颜色
+  if (selected.length < targetCount) {
+    for (const cand of sortedCandidates) {
+      if (selected.length >= targetCount) break;
+      if (!selected.includes(cand)) {
+        selected.push(cand);
+      }
+    }
+  }
+
+  // 计算选出颜色的总权重以便计算各自的百分比
+  const totalSelectedCount = selected.reduce((sum, item) => sum + item.count, 0);
+
+  return selected.map((item) => {
+    const hex = `#${[item.r, item.g, item.b]
+      .map(v => v.toString(16).padStart(2, '0'))
+      .join('')
+      .toUpperCase()}`;
+    const rgb = `rgb(${item.r}, ${item.g}, ${item.b})`;
+
+    // 计算相对亮度决定高对比度前景色 (W3C 亮度公式)
+    const luminance = 0.299 * item.r + 0.587 * item.g + 0.114 * item.b;
+    const textColor = luminance > 140 ? '#000000' : '#FFFFFF';
+
+    const percentage = totalSelectedCount > 0
+      ? Number(((item.count / totalSelectedCount) * 100).toFixed(1))
+      : 0;
+
+    return {
+      hex,
+      rgb,
+      r: item.r,
+      g: item.g,
+      b: item.b,
+      percentage,
+      textColor,
+    };
+  });
+}
+
+/**
+ * 从 HTMLImageElement 或 HTMLCanvasElement 中提取主题调色板
+ *
+ * @param sourceImage HTMLImageElement 或 HTMLCanvasElement
+ * @param colorCount 提取的色彩数量 (默认 6 种)
+ * @returns 调色板数组
+ */
+export function extractColorPalette(
+  sourceImage: HTMLImageElement | HTMLCanvasElement,
+  colorCount = 6,
+): PaletteColor[] {
+  try {
+    const offscreenCanvas = document.createElement('canvas');
+    // 缩放到 100x100 采样画布，包含 10000 个采样像素
+    const sampleSize = 100;
+    offscreenCanvas.width = sampleSize;
+    offscreenCanvas.height = sampleSize;
+    const ctx = offscreenCanvas.getContext('2d');
+    if (!ctx) return [];
+
+    ctx.drawImage(sourceImage, 0, 0, sampleSize, sampleSize);
+    const imgData = ctx.getImageData(0, 0, sampleSize, sampleSize);
+    return extractColorPaletteFromImageData(imgData.data, sampleSize * sampleSize, colorCount);
+  }
+  catch {
+    return [];
+  }
+}
+
 
 
