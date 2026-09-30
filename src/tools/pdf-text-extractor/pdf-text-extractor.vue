@@ -141,47 +141,49 @@ const activePageItem = computed(() => {
     <div v-if="extractResult" flex flex-col gap-4>
       <!-- 顶栏快捷操作与概要 -->
       <n-card :bordered="true" size="small" class="action-card">
-        <div flex flex-wrap items-center justify-between gap-3>
-          <div flex items-center gap-2>
-            <span class="i-mdi-file-document-outline text-xl text-primary" />
-            <span font-bold>{{ file?.name }}</span>
-            <n-tag size="small" type="info" round>
-              {{ extractResult.metadata.pageCount }} 页
-            </n-tag>
-            <n-tag size="small" type="success" round>
-              {{ extractResult.totalChars }} 字符
-            </n-tag>
-            <n-tag size="small" type="warning" round>
-              {{ extractResult.totalWords }} 词
-            </n-tag>
-          </div>
+        <div flex flex-col gap-3>
+          <div flex flex-wrap items-center justify-between gap-2>
+            <div flex flex-wrap items-center gap-2>
+              <span class="i-mdi-file-document-outline text-xl text-primary" />
+              <span font-bold text-base>{{ file?.name }}</span>
+              <n-tag size="small" type="info" round>
+                {{ extractResult.metadata.pageCount }} 页
+              </n-tag>
+              <n-tag size="small" type="success" round>
+                {{ extractResult.totalChars }} 字符
+              </n-tag>
+              <n-tag size="small" type="warning" round>
+                {{ extractResult.totalWords }} 词
+              </n-tag>
+            </div>
 
-          <div flex flex-wrap items-center gap-2>
-            <n-button size="small" quaternary @click="showMetadata = !showMetadata">
-              {{ showMetadata ? '收起元数据' : '展开元数据' }}
-            </n-button>
-            <n-button size="small" type="primary" secondary @click="copyAllText">
-              <template #icon>
-                <span class="i-mdi-content-copy" />
-              </template>
-              复制全文
-            </n-button>
-            <n-button size="small" type="info" secondary @click="downloadTextFile">
-              <template #icon>
-                <span class="i-mdi-download" />
-              </template>
-              下载 TXT
-            </n-button>
-            <n-button size="small" tertiary type="error" @click="onClear">
-              重新上传
-            </n-button>
+            <div flex flex-wrap items-center gap-2>
+              <n-button size="small" quaternary @click="showMetadata = !showMetadata">
+                {{ showMetadata ? '收起文档元数据' : '展开文档元数据' }}
+              </n-button>
+              <n-button size="small" type="primary" secondary @click="copyAllText">
+                <template #icon>
+                  <span class="i-mdi-content-copy" />
+                </template>
+                复制全文
+              </n-button>
+              <n-button size="small" type="info" secondary @click="downloadTextFile">
+                <template #icon>
+                  <span class="i-mdi-download" />
+                </template>
+                导出纯文本
+              </n-button>
+              <n-button size="small" tertiary type="error" @click="onClear">
+                重新选择
+              </n-button>
+            </div>
           </div>
         </div>
       </n-card>
 
       <!-- 文档元数据面板 -->
       <n-collapse-transition :show="showMetadata">
-        <n-card title="文档属性与元数据 (Metadata)" size="small" :bordered="true">
+        <n-card title="文档属性与元数据信息" size="small" :bordered="true">
           <n-grid cols="1 s:2 m:3 l:4" :x-gap="16" :y-gap="12">
             <n-grid-item>
               <div class="meta-label">
@@ -209,7 +211,7 @@ const activePageItem = computed(() => {
             </n-grid-item>
             <n-grid-item>
               <div class="meta-label">
-                PDF 规范版本
+                规范格式版本
               </div>
               <div class="meta-value">
                 {{ extractResult.metadata.pdfVersion }}
@@ -217,7 +219,7 @@ const activePageItem = computed(() => {
             </n-grid-item>
             <n-grid-item>
               <div class="meta-label">
-                创建程序 (Creator)
+                创建程序
               </div>
               <div class="meta-value">
                 {{ extractResult.metadata.creator }}
@@ -225,7 +227,7 @@ const activePageItem = computed(() => {
             </n-grid-item>
             <n-grid-item>
               <div class="meta-label">
-                制作工具 (Producer)
+                制作工具
               </div>
               <div class="meta-value">
                 {{ extractResult.metadata.producer }}
@@ -257,7 +259,7 @@ const activePageItem = computed(() => {
             </n-grid-item>
             <n-grid-item>
               <div class="meta-label">
-                关键字
+                文档关键字
               </div>
               <div class="meta-value">
                 {{ extractResult.metadata.keywords }}
@@ -319,7 +321,7 @@ const activePageItem = computed(() => {
 
         <n-card size="small" :bordered="true" class="page-content-card">
           <div mb-2 flex items-center justify-between text-xs text-gray-400>
-            <span>尺寸：{{ activePageItem.width }} × {{ activePageItem.height }} pt</span>
+            <span>页面规格尺寸：{{ activePageItem.width }} × {{ activePageItem.height }} 点</span>
             <span>字符数：{{ activePageItem.charCount }} 字 · 词数：{{ activePageItem.wordCount }} 词</span>
           </div>
           <n-input

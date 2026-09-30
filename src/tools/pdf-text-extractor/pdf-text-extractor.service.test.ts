@@ -96,7 +96,7 @@ describe('pdf-text-extractor.service', () => {
       expect(result.metadata.author).toBe('Ateng');
       expect(result.metadata.subject).toBe('单测');
       expect(result.metadata.pageCount).toBe(2);
-      expect(result.metadata.pageDimensions).toContain('500.0 × 700.0 pt');
+      expect(result.metadata.pageDimensions).toContain('500.0 × 700.0 点');
 
       // 4. 验证逐页提取
       expect(result.pages.length).toBe(2);

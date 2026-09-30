@@ -146,7 +146,7 @@ export async function extractPdfTextAndMetadata(data: ArrayBuffer | Uint8Array):
     const viewport = page.getViewport({ scale: 1.0 });
 
     if (pageNum === 1) {
-      firstPageDimensions = `${viewport.width.toFixed(1)} × ${viewport.height.toFixed(1)} pt`;
+      firstPageDimensions = `${viewport.width.toFixed(1)} × ${viewport.height.toFixed(1)} 点`;
     }
 
     const textContent = await page.getTextContent();
