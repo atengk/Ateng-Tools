@@ -5,13 +5,24 @@
  * @since 2026-09-30
  */
 
-import pdfjsLib from 'pdfjs-dist';
+import * as pdfjsDist from 'pdfjs-dist';
 import pdfjsWorker from 'pdfjs-dist/build/pdf.worker.js?url';
 import type { PdfDocumentMetadata, PdfExtractResult, PdfPageTextItem } from './pdf-text-extractor.types';
 
-// 在真实浏览器生产与开发环境中配置 workerSrc
-if (typeof window !== 'undefined' && !navigator?.userAgent?.includes('jsdom') && pdfjsLib.GlobalWorkerOptions) {
-  pdfjsLib.GlobalWorkerOptions.workerSrc = pdfjsWorker;
+/**
+ * 惰性获取并安全初始化兼容各运行时的 pdfjs 实例
+ */
+export function getPdfjs(): typeof import('pdfjs-dist') {
+  const lib: any = (pdfjsDist as any).default?.getDocument ? (pdfjsDist as any).default : pdfjsDist;
+
+  // 在真实浏览器生产与开发环境中配置 workerSrc
+  if (typeof window !== 'undefined' && !navigator?.userAgent?.includes('jsdom') && lib?.GlobalWorkerOptions) {
+    if (!lib.GlobalWorkerOptions.workerSrc) {
+      lib.GlobalWorkerOptions.workerSrc = pdfjsWorker;
+    }
+  }
+
+  return lib;
 }
 
 /**
@@ -112,6 +123,7 @@ export async function extractPdfTextAndMetadata(data: ArrayBuffer | Uint8Array):
   const bytes = data instanceof Uint8Array ? data : new Uint8Array(data);
 
   // 1. 初始化文档载入任务
+  const pdfjsLib = getPdfjs();
   const loadingTask = pdfjsLib.getDocument({
     data: bytes,
     isEvalSupported: false,

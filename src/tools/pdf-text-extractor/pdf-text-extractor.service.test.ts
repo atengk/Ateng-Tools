@@ -8,19 +8,20 @@
 import { createRequire } from 'module';
 import { beforeAll, describe, expect, it } from 'vitest';
 import { PDFDocument } from 'pdf-lib';
-import pdfjsLib from 'pdfjs-dist';
 import {
   buildPageTextFromItems,
   countWords,
   extractPdfTextAndMetadata,
   formatPdfDate,
+  getPdfjs,
 } from './pdf-text-extractor.service';
 
 const require = createRequire(import.meta.url);
 
 describe('pdf-text-extractor.service', () => {
   beforeAll(() => {
-    pdfjsLib.GlobalWorkerOptions.workerSrc = require.resolve('pdfjs-dist/build/pdf.worker.js');
+    const pdfjs = getPdfjs();
+    pdfjs.GlobalWorkerOptions.workerSrc = require.resolve('pdfjs-dist/build/pdf.worker.js');
   });
 
   describe('formatPdfDate', () => {
