@@ -1,3 +1,4 @@
+<script setup lang="ts">
 import * as monaco from 'monaco-editor';
 import { useI18n } from 'vue-i18n';
 import { useStyleStore } from '@/stores/style.store';
