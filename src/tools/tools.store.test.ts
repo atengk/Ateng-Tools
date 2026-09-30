@@ -1,3 +1,4 @@
+// @vitest-environment jsdom
 /**
  * 针对工具核心状态管理与分类筛选逻辑的单元测试
  *

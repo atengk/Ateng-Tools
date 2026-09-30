@@ -558,6 +558,13 @@ tools:
     splitRange: 范围拆分
     watermarkStamp: 水印印章
 
+  image-studio:
+    title: 图片处理工作台
+    description: 全能纯客户端图片处理工作台，支持格式转换、自由/等比缩放、画质压缩、SVG 光栅化与剪贴板一键粘贴。
+    uploadTitle: 将图片拖拽至此处，或点击浏览选择
+    browseFiles: 浏览选择图片 (支持 PNG/JPG/WebP/SVG)
+
+
   json-minify:
     title: JSON 压缩
     description: 通过删除不必要的空白来缩小和压缩JSON。

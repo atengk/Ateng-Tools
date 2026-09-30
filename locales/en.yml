@@ -562,6 +562,13 @@ tools:
     splitRange: Split Range
     watermarkStamp: Watermark Stamp
 
+  image-studio:
+    title: Image Studio
+    description: All-in-one client-side image workbench featuring format conversion, scaling, quality compression, SVG rasterization, and clipboard pasting.
+    uploadTitle: Drag and drop an image here, or click to browse
+    browseFiles: Browse image (PNG/JPG/WebP/SVG supported)
+
+
   json-minify:
     title: JSON minify
     description: Minify and compress your JSON by removing unnecessary whitespace.
