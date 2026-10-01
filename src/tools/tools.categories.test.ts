@@ -1,29 +1,113 @@
+// @vitest-environment jsdom
 /**
- * 针对顶层工具分类拓扑结构与关键工具归属的断言测试
+ * 针对全站规范八大工具分类拓扑结构与关键工具归属的断言测试
  *
  * @author Ateng
- * @since 2026-09-30
+ * @since 2026-10-01
  */
 import { describe, expect, it } from 'vitest';
-import { toolsByCategory } from './index';
+import { tools, toolsByCategory } from './index';
+import type { ToolCategoryKey } from './tools.types';
 
 describe('tools category taxonomy', () => {
-  it('验证顶层 PDF 工具分类已存在并正确收纳 pdf-signature-checker 与 pdf-text-extractor', () => {
-    const pdfCategory = toolsByCategory.find(cat => cat.name === 'PDF');
-    expect(pdfCategory).toBeDefined();
-    expect(pdfCategory?.components.some(tool => tool.path === '/pdf-signature-checker')).toBe(true);
-    expect(pdfCategory?.components.some(tool => tool.path === '/pdf-text-extractor')).toBe(true);
-  });
+  const EXPECTED_CATEGORIES: ToolCategoryKey[] = [
+    'dev',
+    'converter',
+    'security',
+    'network',
+    'text',
+    'pdf',
+    'media',
+    'calc',
+  ];
 
-  it('验证 Crypto 分类已彻底剥离 pdf-signature-checker 避免分类混淆', () => {
-    const cryptoCategory = toolsByCategory.find(cat => cat.name === 'Crypto');
-    expect(cryptoCategory).toBeDefined();
-    expect(cryptoCategory?.components.some(tool => tool.path === '/pdf-signature-checker')).toBe(false);
-  });
-
-  it('验证全量分类名称具有唯一性', () => {
+  it('验证全站恰好包含规范八大核心领域分类且名称唯一', () => {
     const categoryNames = toolsByCategory.map(cat => cat.name);
-    const uniqueNames = new Set(categoryNames);
-    expect(categoryNames.length).toBe(uniqueNames.size);
+    expect(categoryNames).toHaveLength(EXPECTED_CATEGORIES.length);
+    expect(new Set(categoryNames).size).toBe(EXPECTED_CATEGORIES.length);
+    expect(categoryNames).toEqual(EXPECTED_CATEGORIES);
+  });
+
+  it('验证全站工具总数保持一致且无重复或遗漏', () => {
+    const flatToolCount = tools.length;
+    const categorySum = toolsByCategory.reduce((sum, cat) => sum + cat.components.length, 0);
+    expect(flatToolCount).toBe(categorySum);
+    expect(flatToolCount).toBe(101);
+
+    const allPaths = tools.map(t => t.path);
+    expect(new Set(allPaths).size).toBe(flatToolCount);
+  });
+
+  it('验证历史碎片微分类（Data/Math/Measurement）已彻底整合消除', () => {
+    const categoryNames = toolsByCategory.map(cat => String(cat.name).toLowerCase());
+    expect(categoryNames).not.toContain('data');
+    expect(categoryNames).not.toContain('math');
+    expect(categoryNames).not.toContain('measurement');
+    expect(categoryNames).not.toContain('crypto');
+    expect(categoryNames).not.toContain('web');
+    expect(categoryNames).not.toContain('development');
+  });
+
+  it('验证安全凭证与认证工具已归拢至 security 分类', () => {
+    const securityCategory = toolsByCategory.find(cat => cat.name === 'security');
+    expect(securityCategory).toBeDefined();
+    const paths = securityCategory!.components.map(t => t.path);
+    expect(paths).toContain('/jwt-parser');
+    expect(paths).toContain('/otp-generator');
+    expect(paths).toContain('/basic-auth-generator');
+    expect(paths).toContain('/token-generator');
+    expect(paths).toContain('/rsa-key-pair-generator');
+  });
+
+  it('验证差异对比与富文本编辑工具已归拢至 text 分类', () => {
+    const textCategory = toolsByCategory.find(cat => cat.name === 'text');
+    expect(textCategory).toBeDefined();
+    const paths = textCategory!.components.map(t => t.path);
+    expect(paths).toContain('/text-diff');
+    expect(paths).toContain('/json-diff');
+    expect(paths).toContain('/html-wysiwyg-editor');
+    expect(paths).toContain('/slugify-string');
+  });
+
+  it('验证复杂结构与原数据类工具已归拢至 converter 分类', () => {
+    const converterCategory = toolsByCategory.find(cat => cat.name === 'converter');
+    expect(converterCategory).toBeDefined();
+    const paths = converterCategory!.components.map(t => t.path);
+    expect(paths).toContain('/config-converter');
+    expect(paths).toContain('/table-converter');
+    expect(paths).toContain('/json-to-csv');
+    expect(paths).toContain('/phone-parser-and-formatter');
+    expect(paths).toContain('/iban-validator-and-parser');
+  });
+
+  it('验证代码基准构建工具已迁入 dev 分类', () => {
+    const devCategory = toolsByCategory.find(cat => cat.name === 'dev');
+    expect(devCategory).toBeDefined();
+    const paths = devCategory!.components.map(t => t.path);
+    expect(paths).toContain('/benchmark-builder');
+    expect(paths).toContain('/mybatis-sql-converter');
+    expect(paths).toContain('/cron-simulator');
+    expect(paths).toContain('/snowflake-id-analyzer');
+  });
+
+  it('验证数学与生活度量工具已整合至 calc 分类', () => {
+    const calcCategory = toolsByCategory.find(cat => cat.name === 'calc');
+    expect(calcCategory).toBeDefined();
+    const paths = calcCategory!.components.map(t => t.path);
+    expect(paths).toContain('/math-evaluator');
+    expect(paths).toContain('/temperature-converter');
+    expect(paths).toContain('/chronometer');
+    expect(paths).toContain('/percentage-calculator');
+  });
+
+  it('验证 PDF 与图形多媒体分类工具完整', () => {
+    const pdfCategory = toolsByCategory.find(cat => cat.name === 'pdf');
+    expect(pdfCategory?.components.map(t => t.path)).toContain('/pdf-studio');
+    expect(pdfCategory?.components.map(t => t.path)).toContain('/pdf-signature-checker');
+
+    const mediaCategory = toolsByCategory.find(cat => cat.name === 'media');
+    expect(mediaCategory?.components.map(t => t.path)).toContain('/image-studio');
+    expect(mediaCategory?.components.map(t => t.path)).toContain('/qrcode-generator');
   });
 });
+

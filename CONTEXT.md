@@ -171,6 +171,14 @@ _避免使用 (Avoid)_: Sponsor Banner, Promo Header
 左侧侧边栏中按领域分组的层级导航菜单，默认保持全折叠状态以呈现极简清爽视野，且具备在进入具体工具路由时智能感知并自动展开定位目标分类的能力。
 _避免使用 (Avoid)_: Tree Menu, Tool List, Category Accordion
 
+**Canonical Tool Taxonomy**:
+Ateng-Tools 全站规范化的八大核心领域分类拓扑体系（涵盖 `dev` 开发运维、`converter` 格式转换、`security` 加密安全、`network` 网络与 Web、`text` 文本与内容、`pdf` PDF 工具、`media` 图形多媒体、`calc` 计算与度量），用于统一全站工具发现、侧边栏导航、首页过滤标签及多语言国际化映射。
+_避免使用 (Avoid)_: Tool Grouping, Type Hierarchy, Classification Scheme
+
+**Tool Category Key**:
+工具分类在底层 TypeScript 类型契约及多语言命名空间中的唯一强类型小写枚举标识符（如 `dev`、`converter`、`security`、`network`、`text`、`pdf`、`media`、`calc`）。
+_避免使用 (Avoid)_: Category ID, Type Tag, Section Name
+
 ### 图片处理工作台 (Image Studio)
 
 **Image Studio**:

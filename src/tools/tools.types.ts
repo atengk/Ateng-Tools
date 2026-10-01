@@ -1,5 +1,15 @@
 import type { Component } from 'vue';
 
+export type ToolCategoryKey =
+  | 'dev'
+  | 'converter'
+  | 'security'
+  | 'network'
+  | 'text'
+  | 'pdf'
+  | 'media'
+  | 'calc';
+
 export interface Tool {
   name: string
   path: string
@@ -13,8 +23,9 @@ export interface Tool {
 }
 
 export interface ToolCategory {
-  name: string
+  name: ToolCategoryKey | string
   components: Tool[]
 }
 
-export type ToolWithCategory = Tool & { category: string };
+export type ToolWithCategory = Tool & { category: ToolCategoryKey | string };
+

@@ -6,12 +6,13 @@ home:
     badge: 'Ateng-Tools Developer Toolbox'
     architecture: '100% Client-Side Safe Architecture'
     title: 'Handy, private, client-side tools for developers'
-    description: 'All conversions, encryption, and formatting take place entirely in your browser sandbox memory. No data is sent to external servers. Handcrafted collection of 78+ developer tools.'
+    description: 'All conversions, encryption, and formatting take place entirely in your browser sandbox memory. No data is sent to external servers. Handcrafted collection of 100+ developer tools.'
     stats:
       total: 'Tools included:'
       new: 'Newly added:'
       privacy: 'Privacy guaranteed:'
       privacyValue: '100% Zero-Leak'
+      unit: 'tools'
   filter:
     all: 'All Tools'
     current: 'Current category:'
@@ -148,17 +149,22 @@ tools:
 
   categories:
     favorite-tools: 'Your favorite tools'
-    crypto: Crypto
+    dev: Development
     converter: Converter
-    web: Web
-    images and videos: 'Images & Videos'
+    security: Security
+    network: 'Network & Web'
+    text: 'Text & Content'
     pdf: 'PDF Tools'
+    media: 'Media & Graphic'
+    calc: 'Math & Measurement'
+    # Legacy aliases
+    crypto: Security
     development: Development
-    network: Network
-    math: Math
-    measurement: Measurement
-    text: Text
-    data: Data
+    web: 'Network & Web'
+    'images and videos': 'Media & Graphic'
+    math: 'Math & Measurement'
+    measurement: 'Math & Measurement'
+    data: Converter
 
   password-strength-analyser:
     title: Password strength analyser
