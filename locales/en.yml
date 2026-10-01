@@ -369,6 +369,15 @@ tools:
     paste: Paste
     clear: Clear
 
+  data-storage-converter:
+    title: Data storage & bandwidth converter
+    description: Real-time decimal (SI) and binary (IEC) storage unit conversions, network bandwidth rate calculations, and download transfer time estimator.
+
+  bitwise-calculator:
+    title: Bitwise & byte calculator
+    description: Real-time HEX/DEC/BIN multi-base conversion for 8/16/32/64-bit integers with interactive 0/1 bitfield toggles and bitwise logic operations.
+
+
 
   benchmark-builder:
     title: Benchmark builder

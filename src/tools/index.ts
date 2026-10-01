@@ -102,7 +102,8 @@ import { tool as websocketAndSseClient } from './websocket-and-sse-client';
 import { tool as configConverter } from './config-converter';
 import { tool as cronSimulator } from './cron-simulator';
 import { tool as tableConverter } from './table-converter';
-
+import { tool as dataStorageConverter } from './data-storage-converter';
+import { tool as bitwiseCalculator } from './bitwise-calculator';
 
 export const toolsByCategory: ToolCategory[] = [
   {
@@ -244,6 +245,8 @@ export const toolsByCategory: ToolCategory[] = [
       percentageCalculator,
       chronometer,
       temperatureConverter,
+      dataStorageConverter,
+      bitwiseCalculator,
     ],
   },
 ];

@@ -32,7 +32,7 @@ describe('tools category taxonomy', () => {
     const flatToolCount = tools.length;
     const categorySum = toolsByCategory.reduce((sum, cat) => sum + cat.components.length, 0);
     expect(flatToolCount).toBe(categorySum);
-    expect(flatToolCount).toBe(101);
+    expect(flatToolCount).toBe(103);
 
     const allPaths = tools.map(t => t.path);
     expect(new Set(allPaths).size).toBe(flatToolCount);
@@ -90,14 +90,17 @@ describe('tools category taxonomy', () => {
     expect(paths).toContain('/snowflake-id-analyzer');
   });
 
-  it('验证数学与生活度量工具已整合至 calc 分类', () => {
+  it('验证数学与生活度量工具已整合至 calc 分类，并成功扩充两款新工具达到 7 款', () => {
     const calcCategory = toolsByCategory.find(cat => cat.name === 'calc');
     expect(calcCategory).toBeDefined();
     const paths = calcCategory!.components.map(t => t.path);
+    expect(paths).toHaveLength(7);
     expect(paths).toContain('/math-evaluator');
     expect(paths).toContain('/temperature-converter');
     expect(paths).toContain('/chronometer');
     expect(paths).toContain('/percentage-calculator');
+    expect(paths).toContain('/data-storage-converter');
+    expect(paths).toContain('/bitwise-calculator');
   });
 
   it('验证 PDF 与图形多媒体分类工具完整', () => {

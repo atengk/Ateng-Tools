@@ -367,6 +367,15 @@ tools:
     paste: 粘贴
     clear: 清空
 
+  data-storage-converter:
+    title: 数据存储与网络速率换算器
+    description: 纯客户端十进制 (SI) 与二进制 (IEC) 存储单位联动换算、网络宽带传输速率换算及文件下载耗时推演计算器。
+
+  bitwise-calculator:
+    title: 位运算与字节透视计算器
+    description: 支持 8/16/32/64 位多进制 HEX/DEC/BIN 实时同步解析，提供交互式 0/1 位图网格即时翻转与标准位逻辑运算。
+
+
 
   benchmark-builder:
     title: 基准生成器
