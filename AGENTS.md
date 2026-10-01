@@ -75,9 +75,6 @@ src/tools/<tool-name>/
 - **严格停留在本地工作区 (Working Tree Review Gate)**：
   - 任务或单工具开发完成后，代码必须严格停留在本地工作区供用户在浏览器中通过 Vite 热更新审阅。
   - **未获得用户明确发出的“开启进入下一个工单”或显式提交指令前，严禁自主执行 `git commit`、严禁 `git push`、严禁关闭 GitHub Issue**。
-- **免全量构建与免语法检查**：
-  - 单工具开发完成后无需运行昂贵的 `pnpm build`，亦无需运行 `pnpm typecheck`（由用户在浏览器界面中直观审核视觉与功能）。
-  - 只需运行相关模块的纯函数单元测试（`pnpm vitest run <path-to-test>`）验证业务逻辑正确性。
 - **显式授权后原子闭环**：
   - 收到用户确认验收与推进指令后，方可执行精准路径暂存（严禁 `git add .`）、遵循 Conventional Commits 规范原子化提交、推送到 `main` 分支并通过 `gh issue close <number>` 闭环工单。
 
