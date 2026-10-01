@@ -52,8 +52,9 @@ src/tools/<tool-name>/
 - **仅维护中文与英文双语 (zh / en Only)**：
   - 全站新功能开发与存量维护**仅维护 `locales/zh.yml` 与 `locales/en.yml` 两份核心语言文件**。
   - **严禁花费精力修改或同步其他小语种文件**（如 `de.yml`、`es.yml`、`fr.yml`、`no.yml`、`pt.yml`、`uk.yml`、`vi.yml` 等）。
-- **工具词条同步**：
-  - 新增小工具时，必须在 `locales/zh.yml` 与 `locales/en.yml` 的 `tools.<tool-name>` 命名空间下同步声明 `title`（标题）与 `description`（简述）。
+- **工具词条全量闭环 (Exhaustive i18n Keys)**：
+  - 新增或重构小工具时，必须在 `locales/zh.yml` 与 `locales/en.yml` 的 `tools.<tool-name>` 命名空间下 **100% 同步声明工具涉及的全部交互词条**（包括 `title`、`description`、输入占位符、操作按钮、统计标签与提示文案）。
+  - **严禁只声明标题描述而遗漏内部交互键**，杜绝页面在运行时暴露裸 key 占位符（如 `tools.<tool-name>.*`）或中英残缺。
 
 ---
 
@@ -82,13 +83,21 @@ src/tools/<tool-name>/
 
 ## 7. 前端 UI 与交互技术标准 (UI & Interaction Standards)
 
+- **设计令牌单一真理源 (Design Tokens SSoT)**：
+  - 全站颜色与排版必须严格消费 `src/styles/tokens.ts` 单一真理源或 UnoCSS 对应预设类（如 `text-primary`、`bg-surface`、`border-base`），**严禁在组件与样式中硬编码未经授权的 Hex 颜色字面量（如遗留绿色 `#18a058` 或冷黑灰）**。
+  - 严格遵循 8px 控件圆角与 12px 容器圆角的标准化几何基线。
+- **双栏布局抗溢出与代码块折行 (Layout Anti-Overflow)**：
+  - Grid / Flex 双栏布局中的左右分栏容器**必须显式添加 `min-w-0`**，防止子元素无界膨胀撑破栅格。
+  - 展示长文本、代码、SQL 或大哈希的卡片容器必须声明 `min-w-0` 或 `overflow-hidden`。
+  - `<n-code>` 必须显式开启 `word-wrap`（自适应断词折行），并在横向超长场景下外部包裹滚动容器（`<div class="overflow-x-auto max-w-full">` 或 `<n-scrollbar>`），严防内容穿透卡片右侧边界。
 - **全域标准矢量图标库**：
   - 统一强制使用 `@vicons/tabler` 原生 SVG 组件，配合 Naive UI `<n-icon :component="Icon" />` 挂载。
-  - **严禁直接使用未经预设配置的 CSS 伪类图标（如 `i-mdi-*`）**，避免产生无色占位、样式丢失与排版基线坍塌。
+  - **严禁直接使用未经预设配置的 CSS 伪类图标（如 `i-mdi-*` / `~icons/mdi/*`）**，避免产生无色占位、样式丢失与打包冗余。
+- **全局受管上下文桥接与消息分流 (Context Bridge & Toast)**：
+  - Vue 组件内部优先使用标准 Composition API（`useMessage()`、`useDialog()` 等）；非组件上下文（路由守卫、Pinia Actions、全局异常处理）统一通过全局桥接器 `window.$message` / `window.$dialog` / `window.$loadingBar` 安全发起调用。
+  - 使用复制能力时统一调用 `useCopy({ createToast: false })` 拦截底层自动弹窗，统一由业务组件层弹出单一语义化中文 Toast，杜绝双重弹窗干扰。
 - **按钮排版与基线对齐**：
   - 工具操作栏按钮组必须保持水平居中（`justify-center`）排布。
   - 所有按钮内的图标与文本必须保持像素级垂直居中对齐，维持整洁呼吸感。
-- **防重复提示机制 (Toast Hygiene)**：
-  - 使用复制能力时统一调用 `useCopy({ createToast: false })` 拦截底层自动弹窗，统一由业务组件层弹出单一语义化中文 Toast，杜绝双重弹窗干扰。
 - **全域深度中文本地化**：
   - 页面标题、按钮文字、属性标签、统计单位（如“页”、“字符”、“词”）及操作反馈统一采用规范中文，严禁残留未翻译英文或西文标点括号。
