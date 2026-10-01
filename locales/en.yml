@@ -1082,4 +1082,131 @@ tools:
     title: Mock Data Generator
     description: Visually design mock data schemas (ID, names, phones, emails, amounts, dates) and generate batch dummy records exported as JSON, SQL INSERT, or CSV.
 
+  p2p-file-transfer:
+    title: P2P File Transfer
+    description: Cross-device peer-to-peer file transfer and clipboard sync via WebRTC without uploading to any server.
+    status:
+      idle: Disconnected
+      connecting: Connecting...
+      connected: Connected
+      disconnected: Disconnected
+      error: Error
+    role:
+      host: Host
+      client: Client
+    roomCode: Room Code
+    roomUrl: Direct Share Link
+    scanQrTip: Scan the QR code with your phone camera or browser to connect directly
+    waitingClient: Waiting for peer device to connect...
+    connectedDevice: Connected Peer
+    deviceType: Device Type
+    deviceOs: Operating System
+    deviceBrowser: Browser
+    latency: Latency
+    disconnect: Disconnect
+    recreateRoom: Recreate Room
+    copyLink: Copy Direct Link
+    copied: Direct link copied to clipboard
+    connectionRequestTitle: Connection Request
+    connectionRequestDesc: Device [{device}] is requesting to establish a P2P connection. Allow?
+    autoTrust: Auto-trust and allow for this session
+    allow: Allow
+    reject: Reject
+    rejectedToast: Connection request rejected
+    connectedToast: P2P direct connection established
+    disconnectedToast: Connection to peer closed
+    joinRoom: Joining room...
+    joinSuccess: Connected to host successfully
+    peerError: An error occurred during connection. Please check network or reload.
+    howToUse: Quick Guide
+    usageStep1: 1. Scan the QR code on the left with your mobile camera or browser (or share the direct link)
+    usageStep2: 2. Host computer will receive an incoming connection prompt; click "Allow"
+    usageStep3: 3. An end-to-end DTLS encrypted P2P channel is established for instant data transfer
+    airgapUsagePreTip: Air-gapped mode consumes zero network traffic. Both devices need to open this tool page in advance (supports offline PWA or LAN access).
+    airgapUsageStep1: "1. Create Offer: One device (e.g. PC) chooses 'Initiate Invitation' to generate an encrypted offline Offer QR code or copy string."
+    airgapUsageStep2: "2. Parse & Answer: The other device (e.g. Mobile) scans or pastes the Offer to generate an Answer QR code."
+    airgapUsageStep3: "3. Complete Pairing: The initiator scans or pastes the Answer credentials to establish an instant direct encrypted channel."
+    customSignaling: Custom Signaling Server (Advanced)
+    customSignalingDesc: Uses PeerJS public cloud by default. You can configure a private PeerServer for isolated LANs.
+    signalingHost: Host
+    signalingPort: Port
+    signalingPath: Path
+    signalingSecure: Enable HTTPS/WSS (Secure)
+    saveConfig: Save & Reconnect
+    resetConfig: Reset to Default
+    textTab: Text Notes
+    textPlaceholder: Enter text, code snippet, or link to send instantly...
+    sendText: Send Note
+    pasteAndSend: Paste & Send
+    copyText: Copy Text
+    textCopied: Text copied to clipboard
+    emptyTextWarning: Content cannot be empty
+    clearHistory: Clear Notes
+    noNotes: No notes yet. Enter text or paste above to sync instantly with peer.
+    receivedTextToast: New note received from peer
+    myDevice: Me
+    remoteDeviceLabel: Remote
+    filesTab: File Transfer
+    uploadAreaTitle: Drag and drop files here, or click to browse
+    uploadAreaSub: Supports photos, videos, archives, APKs and any file format
+    selectFiles: Select Files
+    autoDownload: Auto-download received files
+    activeTransfers: Transfer Queue
+    receivedFiles: Received Files
+    noTransfers: No active transfers
+    noReceivedFiles: No received files yet
+    saveFile: Download
+    fileReadyToast: File [{name}] received successfully
+    fileSendSuccessToast: File [{name}] sent successfully
+    cancelTransfer: Cancel
+    transferCancelled: Transfer task cancelled
+    sendingTag: Sending
+    receivingTag: Receiving
+    fileSize: File Size
+    transferSpeed: Transfer Speed
+    clearReceived: Clear List
+    capturePhoto: Capture / Photo Album
+    batchDownloadZip: Download All as ZIP
+    preview: Preview
+    previewModalTitle: File Preview - {name}
+    previewNotSupported: In-browser preview is not supported for this file format, please download to view
+    reconnect: Reconnect
+    connectionLostTip: Connection to peer lost. You can try reconnecting.
+    packagingZip: Packaging ZIP archive...
+    zipPackagingSuccess: ZIP archive created and downloading started
+    noFilesToZip: No received files available to package
+    quickSendNote: Quick Send
+    connectionMode: Connection Mode
+    modeRelay: Cloud Signaling (Recommended)
+    modeAirGap: Air-Gapped Offline (No Internet)
+    airgapRolePrompt: Select Air-Gap Pairing Role
+    airgapHostRole: Initiator (Create Connection / Generate Offer)
+    airgapClientRole: Receiver (Scan & Generate Answer)
+    createOfferBtn: Generate Offline Offer
+    offerGenerating: Gathering local ICE candidates and generating Offer...
+    offerQrTitle: Scan this Offer QR code with the peer device
+    copyOfferText: Copy Offer Code
+    offerCopied: Offer code copied to clipboard
+    pasteOfferPrompt: Paste or Scan Initiator's Offer
+    offerInputPlaceholder: Paste the generated Offer string...
+    generateAnswerBtn: Parse Offer & Generate Answer
+    answerGenerating: Parsing Offer and generating Answer...
+    answerQrTitle: Scan this Answer QR code with the initiator device
+    copyAnswerText: Copy Answer Code
+    answerCopied: Answer code copied to clipboard
+    pasteAnswerPrompt: Paste or Scan Receiver's Answer
+    answerInputPlaceholder: Paste the generated Answer string...
+    completeAirgapConnect: Complete Handshake
+    airgapConnectedToast: Air-Gapped WebRTC direct connection established!
+    invalidSdpError: Failed to parse SDP payload. Please ensure full string was copied.
+    scanWithCamera: Scan with Camera
+    cameraScanTitle: Scan Screen QR Code
+    cameraPermissionError: Cannot access camera device. Please use text copy & paste.
+    cameraScanning: Align QR code within the frame...
+    switchModeWarning: Switching connection mode will disconnect current session. Continue?
+
+
+
+
+
 

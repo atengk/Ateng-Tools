@@ -309,5 +309,28 @@ _避免使用 (Avoid)_: Crash Guard, Exception Catch, Error Boundary Component
 将 PWA 网页清单与移动端 WebMeta 声明严格绑定至全站设计令牌单一真理源（`tokens.colors.primary.DEFAULT` 与 `tokens.colors.slate[50]`）的契约规则。
 _避免使用 (Avoid)_: Meta Hardcoding, PWA Color Patch, Standalone Manifest Config
 
+### P2P 局域网快传 (P2P File Transfer)
+
+**P2P File Transfer**:
+Ateng-Tools 中用于纯客户端跨设备（手机与电脑、电脑与电脑）点对点文件与文本即时传输的开发者工具，基于 WebRTC DataChannel 实现，支持扫码秒连与端到端加密直连。
+_避免使用 (Avoid)_: Web AirDrop, Snapdrop Clone, File Sync, File Server
+
+**Signaling Broker**:
+负责在对等端建立 WebRTC 通信前转发房间信标、SDP Offer/Answer 及 ICE 候选者等握手元数据的轻量中继模块；连接一旦建立即刻脱困，绝不触碰任何文件数据载荷。
+_避免使用 (Avoid)_: File Relay, Transfer Server, Signaling Server
+
+**Air-Gapped Exchange**:
+在完全无外网或严格内网环境中，通过双向二维码动态扫描或剪贴板文本导入导出完成 SDP 握手的无服务端 WebRTC 建立模式。
+_避免使用 (Avoid)_: Offline Sync, Local Hack, Manual Pair
+
+**Chunked Stream Transceiver**:
+基于浏览器 File API 与 WebRTC DataChannel，将待发文件切片为 16KB~64KB 顺序数据块，并结合 `bufferedAmountLowThreshold` 背压流控进行安全投送与流式重组的传输引擎。
+_避免使用 (Avoid)_: File Slicer, Binary Pump, Chunk Buffer
+
+**Transfer Session**:
+两个对等端设备之间成功建立的经过 DTLS 加密的独立通信生命周期，包含对端设备指纹、网络连接状态、待发/接收任务队列与双向数据通道。
+_避免使用 (Avoid)_: Peer Room, Connection Context, Socket Pair
+
+
 
 

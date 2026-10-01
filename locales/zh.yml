@@ -1078,4 +1078,131 @@ tools:
     title: Mock 随机业务数据生成器
     description: 可视化定义自增主键、姓名、手机号、邮箱、金额、日期等多种业务字段，批量生成测试数据并导出为 JSON、SQL INSERT 或 CSV 表格。
 
+  p2p-file-transfer:
+    title: P2P 局域网快传
+    description: 基于 WebRTC 的跨设备点对点免流量直传工具，支持手机扫码秒连、文件互传与便签同步。
+    status:
+      idle: 未连接
+      connecting: 连接中...
+      connected: 已连接
+      disconnected: 已断开
+      error: 连接异常
+    role:
+      host: 主机端 (Host)
+      client: 接入端 (Client)
+    roomCode: 房间取件码
+    roomUrl: 跨端直达链接
+    scanQrTip: 使用手机相机或浏览器扫描二维码快速直连
+    waitingClient: 等待对端设备接入中...
+    connectedDevice: 当前通信对端
+    deviceType: 设备类型
+    deviceOs: 操作系统
+    deviceBrowser: 浏览器
+    latency: 网络延迟
+    disconnect: 断开连接
+    recreateRoom: 重新创建房间
+    copyLink: 复制直连地址
+    copied: 房间直连地址已复制至剪贴板
+    connectionRequestTitle: 设备接入授权申请
+    connectionRequestDesc: 发现设备【{device}】申请接入通信直连，是否允许？
+    autoTrust: 本次会话自动信任并允许
+    allow: 允许接入
+    reject: 拒绝
+    rejectedToast: 已拒绝设备接入请求
+    connectedToast: 已成功与对端建立直连通道
+    disconnectedToast: 与对端设备的连接已断开
+    joinRoom: 正在加入房间...
+    joinSuccess: 成功接入主机房间
+    peerError: 连接过程中出现错误，请检查网络或刷新重试
+    howToUse: 快速上手指引
+    usageStep1: 1. 使用手机相机或浏览器扫描左侧二维码打开网页（或复制直达链接）
+    usageStep2: 2. 电脑端屏幕将弹出设备接入确认申请，点击“允许接入”
+    usageStep3: 3. 即刻打通端到端 DTLS 加密高速直传通道，畅享免流量极速快传
+    airgapUsagePreTip: 离线气隙模式全程不消耗任何网络流量；两端设备需预先在浏览器中打开本工具页面（支持 PWA 离线应用或局域网访问）。
+    airgapUsageStep1: 1. 发起邀请 (Offer)：一台设备（如电脑）选择“发起邀请”，生成离线加密 Offer 二维码或复制凭证
+    airgapUsageStep2: 2. 解析并应答 (Answer)：另一台设备（如手机）使用摄像头扫码或粘贴 Offer，生成 Answer 应答二维码
+    airgapUsageStep3: 3. 完成配对：发起端使用摄像头扫描或粘贴对端的 Answer 凭证，双方即刻打通加密直连
+    customSignaling: 自定义信令配置 (高级)
+    customSignalingDesc: 默认使用 PeerJS 官方云信令。内网隔离环境可配置私有 PeerServer 服务。
+    signalingHost: 信令主机 (Host)
+    signalingPort: 端口 (Port)
+    signalingPath: 路径 (Path)
+    signalingSecure: 启用 HTTPS/WSS (Secure)
+    saveConfig: 保存并重连
+    resetConfig: 恢复默认云信令
+    textTab: 文本便签
+    textPlaceholder: 输入要即时发送给对端的文本、代码或链接...
+    sendText: 发送便签
+    pasteAndSend: 粘贴并发送
+    copyText: 复制内容
+    textCopied: 文本已成功复制至剪贴板
+    emptyTextWarning: 文本内容不能为空
+    clearHistory: 清空便签
+    noNotes: 暂无便签，输入文本或点击快捷粘贴即可即时同步至对端
+    receivedTextToast: 收到来自对端的新便签
+    myDevice: 我
+    remoteDeviceLabel: 对端
+    filesTab: 文件互传
+    uploadAreaTitle: 拖拽文件至此处，或点击浏览选择文件
+    uploadAreaSub: 支持图片、视频、压缩包、安装包与任意格式文件
+    selectFiles: 选取文件
+    autoDownload: 接收完毕自动触发下载
+    activeTransfers: 传输队列
+    receivedFiles: 已接收文件
+    noTransfers: 当前无进行中的传输任务
+    noReceivedFiles: 暂未接收到任何文件
+    saveFile: 保存下载
+    fileReadyToast: 文件【{name}】已成功接收并就绪
+    fileSendSuccessToast: 文件【{name}】已发送完毕
+    cancelTransfer: 取消
+    transferCancelled: 传输任务已取消
+    sendingTag: 发送中
+    receivingTag: 接收中
+    fileSize: 文件大小
+    transferSpeed: 传输速度
+    clearReceived: 清空列表
+    capturePhoto: 拍照 / 相册上传
+    batchDownloadZip: 打包下载全部 (ZIP)
+    preview: 预览
+    previewModalTitle: 文件预览 - {name}
+    previewNotSupported: 当前文件格式暂不支持在线预览，请下载查看
+    reconnect: 重新连接
+    connectionLostTip: 与对端设备的连接已断开，可尝试重新建立直连
+    packagingZip: 正在生成 ZIP 压缩包...
+    zipPackagingSuccess: ZIP 压缩包已生成并开始下载
+    noFilesToZip: 当前无已接收文件可打包
+    quickSendNote: 快速发送
+    connectionMode: 连接模式
+    modeRelay: 云信令模式 (推荐)
+    modeAirGap: 纯离线气隙模式 (无公网)
+    airgapRolePrompt: 请选择离线配对角色
+    airgapHostRole: 发起端 (创建连接 / 生成 Offer)
+    airgapClientRole: 接收端 (扫码导入 / 生成 Answer)
+    createOfferBtn: 生成离线 Offer 凭证
+    offerGenerating: 正在生成本地 ICE 候选与 Offer 凭证...
+    offerQrTitle: 请使用对端设备扫描此 Offer 二维码
+    copyOfferText: 复制 Offer 凭证
+    offerCopied: Offer 凭证已复制至剪贴板
+    pasteOfferPrompt: 粘贴或扫描发起端 Offer 凭证
+    offerInputPlaceholder: 粘贴发起端生成的 Offer 字符串...
+    generateAnswerBtn: 解析 Offer 并生成 Answer
+    answerGenerating: 正在解析 Offer 并生成 Answer...
+    answerQrTitle: 请使用发起端扫描此 Answer 二维码
+    copyAnswerText: 复制 Answer 凭证
+    answerCopied: Answer 凭证已复制至剪贴板
+    pasteAnswerPrompt: 粘贴或扫描接收端生成的 Answer 凭证
+    answerInputPlaceholder: 粘贴接收端生成的 Answer 字符串...
+    completeAirgapConnect: 确认完成握手直连
+    airgapConnectedToast: 纯离线气隙 WebRTC 直连建立成功！
+    invalidSdpError: SDP 凭证解析失败，请确认凭证内容完整
+    scanWithCamera: 摄像头扫码
+    cameraScanTitle: 扫描屏幕二维码
+    cameraPermissionError: 无法访问摄像头设备，请使用文本复制粘贴方式
+    cameraScanning: 请将二维码置于取景框中...
+    switchModeWarning: 切换模式将断开当前正在进行的连接，是否继续？
+
+
+
+
+
 
