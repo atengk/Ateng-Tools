@@ -1064,3 +1064,12 @@ tools:
   text-to-binary:
     title: Text to ASCII binary
     description: Convert text to its ASCII binary representation and vice-versa.
+
+  cidr-calculator:
+    title: CIDR Supernetting Calculator
+    description: Aggregate multiple IPv4 CIDR blocks into minimal supernets, detect overlapping conflicts, and calculate wildcard masks and host matrices.
+
+  har-analyzer:
+    title: HAR Log Analyzer
+    description: Client-side offline HTTP Archive (.har) analyzer with interactive waterfall timeline, request/response headers, payload, and timing breakdown.
+

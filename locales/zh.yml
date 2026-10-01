@@ -1060,3 +1060,12 @@ tools:
   text-to-binary:
     title: 文本到 ASCII 二进制
     description: 将文本转换为其 ASCII 二进制表示形式，反之亦然。
+
+  cidr-calculator:
+    title: CIDR 聚合与无类子网合并器
+    description: 自动计算并合并多个 IPv4 CIDR 网段为最小超网集合，检测网段重叠与冲突，生成通配符掩码与可用主机矩阵。
+
+  har-analyzer:
+    title: HAR 网络抓包日志离线分析器
+    description: 纯前端离线解析浏览器 DevTools 导出的 .har 抓包归档文件，可视化时序甘特瀑布流，深度透视请求标头、载荷与响应正文。
+

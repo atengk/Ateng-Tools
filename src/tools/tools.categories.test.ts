@@ -32,7 +32,7 @@ describe('tools category taxonomy', () => {
     const flatToolCount = tools.length;
     const categorySum = toolsByCategory.reduce((sum, cat) => sum + cat.components.length, 0);
     expect(flatToolCount).toBe(categorySum);
-    expect(flatToolCount).toBe(107);
+    expect(flatToolCount).toBe(109);
 
     const allPaths = tools.map(t => t.path);
     expect(new Set(allPaths).size).toBe(flatToolCount);
@@ -119,6 +119,17 @@ describe('tools category taxonomy', () => {
     expect(mediaPaths).toContain('/qrcode-generator');
     expect(mediaPaths).toContain('/barcode-generator');
     expect(mediaPaths).toContain('/favicon-generator');
+  });
+
+  it('验证网络与 Web 分类扩充抓包日志分析与 CIDR 聚合计算器达到 18 款', () => {
+    const networkCategory = toolsByCategory.find(cat => cat.name === 'network');
+    expect(networkCategory).toBeDefined();
+    const paths = networkCategory!.components.map(t => t.path);
+    expect(paths).toHaveLength(18);
+    expect(paths).toContain('/har-analyzer');
+    expect(paths).toContain('/cidr-calculator');
+    expect(paths).toContain('/ipv4-subnet-calculator');
+    expect(paths).toContain('/url-encoder');
   });
 });
 

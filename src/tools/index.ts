@@ -108,6 +108,8 @@ import { tool as barcodeGenerator } from './barcode-generator';
 import { tool as faviconGenerator } from './favicon-generator';
 import { tool as fileChecksum } from './file-checksum';
 import { tool as x509CertificateInspector } from './x509-certificate-inspector';
+import { tool as harAnalyzer } from './har-analyzer';
+import { tool as cidrCalculator } from './cidr-calculator';
 
 export const toolsByCategory: ToolCategory[] = [
   {
@@ -205,6 +207,8 @@ export const toolsByCategory: ToolCategory[] = [
       macAddressLookup,
       macAddressGenerator,
       ipv6UlaGenerator,
+      harAnalyzer,
+      cidrCalculator,
     ],
   },
   {
