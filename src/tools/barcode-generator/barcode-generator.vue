@@ -12,7 +12,7 @@ import {
   Copy,
   Download,
   FileCode,
-  Sparkles,
+  Wand,
 } from '@vicons/tabler';
 import type { BarcodeFormat, BarcodeRenderOptions } from './barcode-generator.types';
 import { generateBarcodeSvg } from './barcode-generator.service';
@@ -153,7 +153,7 @@ function handleDownloadPng() {
                 />
                 <n-button secondary @click="handleFillSample">
                   <template #icon>
-                    <n-icon :component="Sparkles" />
+                    <n-icon :component="Wand" />
                   </template>
                   示例
                 </n-button>

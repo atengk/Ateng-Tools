@@ -14,7 +14,7 @@ import {
   Download,
   FileZip,
   Photo,
-  Sparkles,
+  Wand,
 } from '@vicons/tabler';
 import type { GeneratedIconItem } from './favicon-generator.types';
 import {
@@ -299,7 +299,7 @@ function handleCopyManifest() {
             </span>
             <n-button secondary size="small" @click="loadSampleImage">
               <template #icon>
-                <n-icon :component="Sparkles" />
+                <n-icon :component="Wand" />
               </template>
               重置示例图片
             </n-button>
