@@ -45,10 +45,17 @@ Ateng-Tools 包含 100+ 个离线开发工具，此前的分类结构直接继�
   `export type ToolCategoryKey = 'dev' | 'converter' | 'security' | 'network' | 'text' | 'pdf' | 'media' | 'calc';`
 - 在 `locales/zh.yml` 与 `locales/en.yml` 的 `tools.categories.<key>` 命名空间下全面建立规范双语映射，侧栏 Emoji 映射表基于小写 Key 进行映射。
 
+### 5. 分类演进边界与准入门槛 (Taxonomy Admission Gate)
+经过第二轮方案问辩推演，确立以下演进防御原则：
+- **暂不拆分独立数据库分类**：全站现有 4 款数据库与 SQL 相关工具（MyBatis SQL 日志还原、DDL 转实体、SQL 格式化、表格转 SQL），目前分布在 `dev`（21 款）与 `converter`（25 款）中，体量均处于健康的 20+ 黄金容量区间，暂不单独抽离子大类，避免造成小分类碎片化。
+- **暂不前瞻性预设 AI/大模型分类**：遵循“工具有其所，成群方立项”原则，纯客户端离线 AI 辅助工具目前尚未形成规模（仅 WebSocket/SSE 客户端具备流式聚合特性），坚决避免过早开辟空壳分类。
+- **设立全站分类准入门槛 (Taxonomy Admission Gate)**：未来若需增设新顶层分类，目标专业垂直领域必须在纯客户端能够支撑**至少 3 款及以上高内聚小工具**，且其心智模型与现有八大领域清晰正交，方可通过架构评估升格为新分类。
+
 ## 后果与影响
 - **正面影响**：
   - 彻底均衡各分类工具承载量，消除 2 个工具的单薄分类与 24 个工具的重度臃肿分类；
   - 建立一致直观的心智模型，同类型工具（如所有的 Diff、所有的格式转换、所有的凭证安全工具）零散落；
-  - 分类 Key 遵循规范标识符命名，提升代码类型安全度与扩展性。
+  - 分类 Key 遵循规范标识符命名，提升代码类型安全度与扩展性；
+  - 制度化设立分类准入门槛，防止未来顶层分类无序膨胀与退化。
 - **代价与权衡**：
   - 需同步调整 `src/tools/index.ts`、`src/tools/tools.types.ts`、`src/tools/tools.store.ts`、`src/composable/category.ts`、相关测试用例及双语语言包文件。

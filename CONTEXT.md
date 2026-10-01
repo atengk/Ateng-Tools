@@ -179,6 +179,10 @@ _避免使用 (Avoid)_: Tool Grouping, Type Hierarchy, Classification Scheme
 工具分类在底层 TypeScript 类型契约及多语言命名空间中的唯一强类型小写枚举标识符（如 `dev`、`converter`、`security`、`network`、`text`、`pdf`、`media`、`calc`）。
 _避免使用 (Avoid)_: Category ID, Type Tag, Section Name
 
+**Taxonomy Admission Gate**:
+Ateng-Tools 全站增设新顶层工具分类的硬性准入规则与防御门禁：仅当目标专业垂直领域在纯客户端能够支撑至少 3 款及以上高内聚小工具，且其心智模型与现有八大领域清晰正交时，方可通过架构评估升格为新分类，杜绝随意增设导致分类单薄与碎片化。
+_避免使用 (Avoid)_: Category Filter Rule, Taxonomy Policy, Group Barrier
+
 ### 图片处理工作台 (Image Studio)
 
 **Image Studio**:
