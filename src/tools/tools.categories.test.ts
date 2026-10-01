@@ -32,7 +32,7 @@ describe('tools category taxonomy', () => {
     const flatToolCount = tools.length;
     const categorySum = toolsByCategory.reduce((sum, cat) => sum + cat.components.length, 0);
     expect(flatToolCount).toBe(categorySum);
-    expect(flatToolCount).toBe(103);
+    expect(flatToolCount).toBe(105);
 
     const allPaths = tools.map(t => t.path);
     expect(new Set(allPaths).size).toBe(flatToolCount);
@@ -103,14 +103,19 @@ describe('tools category taxonomy', () => {
     expect(paths).toContain('/bitwise-calculator');
   });
 
-  it('验证 PDF 与图形多媒体分类工具完整', () => {
+  it('验证 PDF 与图形多媒体分类工具完整，media 扩充两款新工具达到 7 款', () => {
     const pdfCategory = toolsByCategory.find(cat => cat.name === 'pdf');
     expect(pdfCategory?.components.map(t => t.path)).toContain('/pdf-studio');
     expect(pdfCategory?.components.map(t => t.path)).toContain('/pdf-signature-checker');
 
     const mediaCategory = toolsByCategory.find(cat => cat.name === 'media');
-    expect(mediaCategory?.components.map(t => t.path)).toContain('/image-studio');
-    expect(mediaCategory?.components.map(t => t.path)).toContain('/qrcode-generator');
+    expect(mediaCategory).toBeDefined();
+    const mediaPaths = mediaCategory!.components.map(t => t.path);
+    expect(mediaPaths).toHaveLength(7);
+    expect(mediaPaths).toContain('/image-studio');
+    expect(mediaPaths).toContain('/qrcode-generator');
+    expect(mediaPaths).toContain('/barcode-generator');
+    expect(mediaPaths).toContain('/favicon-generator');
   });
 });
 

@@ -375,6 +375,14 @@ tools:
     title: 位运算与字节透视计算器
     description: 支持 8/16/32/64 位多进制 HEX/DEC/BIN 实时同步解析，提供交互式 0/1 位图网格即时翻转与标准位逻辑运算。
 
+  barcode-generator:
+    title: 条形码生成器
+    description: 支持 Code 128、EAN-13、EAN-8、UPC-A、Code 39、ITF-14 等标准一维条码生成，提供纯客户端矢量 SVG 与高清 PNG 导出。
+
+  favicon-generator:
+    title: Favicon 网站图标全套打包器
+    description: 纯客户端重采样生成 16×16 至 512×512 全规格图标，一键合成多层 favicon.ico 并打包 site.webmanifest 与 ZIP 归档。
+
 
 
   benchmark-builder:

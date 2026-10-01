@@ -104,6 +104,8 @@ import { tool as cronSimulator } from './cron-simulator';
 import { tool as tableConverter } from './table-converter';
 import { tool as dataStorageConverter } from './data-storage-converter';
 import { tool as bitwiseCalculator } from './bitwise-calculator';
+import { tool as barcodeGenerator } from './barcode-generator';
+import { tool as faviconGenerator } from './favicon-generator';
 
 export const toolsByCategory: ToolCategory[] = [
   {
@@ -233,6 +235,8 @@ export const toolsByCategory: ToolCategory[] = [
       imageStudio,
       qrCodeGenerator,
       wifiQrCodeGenerator,
+      barcodeGenerator,
+      faviconGenerator,
       svgPlaceholderGenerator,
       cameraRecorder,
     ],

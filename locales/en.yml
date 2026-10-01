@@ -377,6 +377,14 @@ tools:
     title: Bitwise & byte calculator
     description: Real-time HEX/DEC/BIN multi-base conversion for 8/16/32/64-bit integers with interactive 0/1 bitfield toggles and bitwise logic operations.
 
+  barcode-generator:
+    title: Barcode Generator
+    description: Generate standard 1D barcodes including Code 128, EAN-13, EAN-8, UPC-A, Code 39, and ITF-14 with pure client-side SVG and PNG export.
+
+  favicon-generator:
+    title: Favicon Generator & Packager
+    description: Pure client-side resampling for web icons from 16x16 to 512x512, packing multi-resolution favicon.ico, site.webmanifest, and ZIP archive.
+
 
 
   benchmark-builder:
