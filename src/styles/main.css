@@ -1,0 +1,121 @@
+/**
+ * 全站全局样式与排版基础设施 (Global Styles & Typography Baseline)
+ * 包含 CSS 变量、系统级中文字体栈、平滑抗锯齿、主题过渡动效与极简细滚动条
+ *
+ * @author Ateng
+ * @since 2026-10-01
+ */
+
+:root {
+  --color-primary: #2563eb;
+  --color-primary-hover: #3b82f6;
+  --color-primary-pressed: #1d4ed8;
+  --color-primary-faded: rgba(37, 99, 235, 0.12);
+  --color-focus-ring: rgba(37, 99, 235, 0.2);
+
+  --surface-0: #f8fafc;
+  --surface-1: #ffffff;
+  --surface-2: #f1f5f9;
+  --border-color: #e2e8f0;
+
+  --text-base: #0f172a;
+  --text-muted: #64748b;
+
+  --font-sans: system-ui, -apple-system, 'Segoe UI', Roboto, 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', 'Noto Sans SC', sans-serif;
+  --font-mono: 'JetBrains Mono', 'Fira Code', ui-monospace, Menlo, Monaco, Consolas, 'PingFang SC', monospace;
+
+  --radius-control: 8px;
+  --radius-container: 12px;
+}
+
+.dark {
+  --color-primary: #2563eb;
+  --color-primary-hover: #3b82f6;
+  --color-primary-pressed: #1d4ed8;
+  --color-primary-faded: rgba(37, 99, 235, 0.16);
+  --color-focus-ring: rgba(59, 130, 246, 0.3);
+
+  --surface-0: #0f172a;
+  --surface-1: #1e293b;
+  --surface-2: #334155;
+  --border-color: #334155;
+
+  --text-base: rgba(255, 255, 255, 0.92);
+  --text-muted: #94a3b8;
+}
+
+html,
+body,
+button,
+input,
+textarea,
+select {
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+code,
+kbd,
+samp,
+pre,
+.font-mono,
+.monospace {
+  font-family: var(--font-mono);
+}
+
+body {
+  line-height: 1.6;
+  letter-spacing: normal;
+}
+
+/* 亮暗模式切换平滑过渡 */
+html,
+body,
+.n-layout,
+.n-card,
+.n-layout-sider,
+.n-layout-header,
+.top-navbar,
+.brand-header {
+  transition: background-color 0.25s ease, border-color 0.25s ease;
+}
+
+/* 现代极简细滚动条 (Firefox) */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #cbd5e1 transparent;
+}
+
+.dark * {
+  scrollbar-color: #475569 transparent;
+}
+
+/* 现代极简细滚动条 (WebKit / Chromium) */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: #cbd5e1;
+  border-radius: 9999px;
+  transition: background-color 0.2s ease;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background-color: #94a3b8;
+}
+
+.dark ::-webkit-scrollbar-thumb {
+  background-color: #475569;
+}
+
+.dark ::-webkit-scrollbar-thumb:hover {
+  background-color: #64748b;
+}

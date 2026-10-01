@@ -1,5 +1,6 @@
 import { defineThemes } from '../theme/theme.models';
 import { appThemes } from '../theme/themes';
+import { surfaceTokens } from '@/styles/tokens';
 
 const sizes = {
   small: {
@@ -20,13 +21,13 @@ export const { useTheme } = defineThemes({
   dark: {
     sizes,
 
-    backgroundColor: '#333333',
-    borderColor: '#333333',
-    dropdownShadow: 'rgba(0, 0, 0, 0.2) 0px 8px 24px',
+    backgroundColor: surfaceTokens.dark.surface2,
+    borderColor: surfaceTokens.dark.border,
+    dropdownShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.4), 0 4px 6px -4px rgba(0, 0, 0, 0.4)',
 
     option: {
       hover: {
-        backgroundColor: '#444444',
+        backgroundColor: surfaceTokens.dark.surface1,
       },
       active: {
         textColor: appThemes.dark.primary.color,
@@ -34,19 +35,19 @@ export const { useTheme } = defineThemes({
     },
 
     focus: {
-      backgroundColor: '#1ea54c1a',
+      backgroundColor: surfaceTokens.dark.surface1,
     },
   },
   light: {
     sizes,
 
-    backgroundColor: '#ffffff',
-    borderColor: '#e0e0e69e',
-    dropdownShadow: 'rgba(149, 157, 165, 0.2) 0px 8px 24px',
+    backgroundColor: surfaceTokens.light.surface2,
+    borderColor: surfaceTokens.light.border,
+    dropdownShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1)',
 
     option: {
       hover: {
-        backgroundColor: '#eee',
+        backgroundColor: surfaceTokens.light.surface1,
       },
       active: {
         textColor: appThemes.light.primary.color,
@@ -54,7 +55,7 @@ export const { useTheme } = defineThemes({
     },
 
     focus: {
-      backgroundColor: '#ffffff',
+      backgroundColor: surfaceTokens.light.surface1,
     },
   },
 });

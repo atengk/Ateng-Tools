@@ -219,7 +219,7 @@ function onUpdateFavoriteTools() {
   .hero-title {
     font-size: 24px;
     font-weight: 800;
-    letter-spacing: -0.02em;
+    letter-spacing: normal;
     margin: 0 0 10px;
     color: v-bind('theme.textColorBase');
   }

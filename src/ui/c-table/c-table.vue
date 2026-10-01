@@ -39,7 +39,7 @@ const headers = computed(() => {
 <template>
   <div class="relative overflow-x-auto rounded">
     <table class="w-full border-collapse text-left text-sm text-gray-500 dark:text-gray-400" role="table" :aria-label="description">
-      <thead v-if="!hideHeaders" class="bg-#ffffff uppercase text-gray-700 dark:bg-#333333 dark:text-gray-400" border-b="1px solid dark:transparent #efeff5">
+      <thead v-if="!hideHeaders" class="bg-#ffffff uppercase text-gray-700 dark:bg-#334155 dark:text-gray-300" border-b="1px solid dark:transparent #e2e8f0">
         <tr>
           <th v-for="header in headers" :key="header.key" scope="col" class="px-6 py-3 text-xs">
             {{ header.label }}
@@ -48,7 +48,7 @@ const headers = computed(() => {
       </thead>
       <tbody>
         <tr
-          v-for="(row, i) in data" :key="i" border-b="1px solid dark:#282828 #efeff5" class="bg-white dark:bg-#232323"
+          v-for="(row, i) in data" :key="i" border-b="1px solid dark:#334155 #e2e8f0" class="bg-white dark:bg-#1e293b"
           :class="{
             'important:border-b-none': i === data.length - 1,
           }"

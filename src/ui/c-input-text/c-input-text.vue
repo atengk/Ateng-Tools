@@ -256,7 +256,7 @@ defineExpose({
     background-color: v-bind('theme.backgroundColor');
     color: transparent;
     border: 1px solid v-bind('theme.borderColor');
-    border-radius: 4px;
+    border-radius: 8px;
     padding: 0 4px 0 12px;
     transition: border-color 0.2s ease-in-out;
 
@@ -307,7 +307,7 @@ defineExpose({
 
     &:focus-within {
       border-color: v-bind('appTheme.primary.color');
-
+      box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.2);
       background-color: v-bind('theme.focus.backgroundColor');
     }
   }

@@ -1,11 +1,11 @@
 import { defineThemes } from '../theme/theme.models';
-import { appThemes } from '../theme/themes';
+import { surfaceTokens } from '@/styles/tokens';
 
 export const { useTheme } = defineThemes({
   dark: {
-    background: appThemes.dark.background,
+    background: surfaceTokens.dark.surface1,
   },
   light: {
-    background: appThemes.light.background,
+    background: surfaceTokens.light.surface1,
   },
 });

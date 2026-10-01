@@ -214,7 +214,7 @@ const tools = computed<ToolCategory[]>(() => [
         font-weight: 700;
         line-height: 1.2;
         color: v-bind('themeVars.textColorBase');
-        letter-spacing: -0.01em;
+        letter-spacing: normal;
       }
 
       .brand-badge {

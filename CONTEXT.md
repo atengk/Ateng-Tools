@@ -269,3 +269,22 @@ _避免使用 (Avoid)_: Security Rules, PDF Policies, Rights Config
 在输入正确访问或管理密码后，客户端重构 PDF 二进制对象流并彻底移除安全加密字典（Encrypt Dictionary），生成免密文档的操作。
 _避免使用 (Avoid)_: PDF Cracking, Password Hack, Unlock File
 
+### 全局设计系统与排版规范 (Design System & Typography)
+
+**Canonical Design Token**:
+Ateng-Tools 全站通用的设计令牌单一真理源，以 Tailwind Blue (`#2563eb`) 为品牌主色，严格绑定状态悬浮（`#3b82f6`）、按下（`#1d4ed8`）与半透明浅底（`rgba(37, 99, 235, 0.12)`），并在 Naive UI、UnoCSS 与组件层保持 100% 映射一致。
+_避免使用 (Avoid)_: Custom Color, Theme Constant, Style Variable, Hex Literal
+
+**Surface Elevation Hierarchy**:
+全站界面在亮暗模式下的三层结构表面与边框分级体系（Surface 0 底板背景、Surface 1 主卡片与导航区、Surface 2 输入框与悬浮弹层），暗色模式基于 Slate 系列（`#0f172a` / `#1e293b` / `#334155`）构建高品质视觉纵深。
+_避免使用 (Avoid)_: Dark Layer, Background Depth, Color Level
+
+**Chinese Typography Stack**:
+优先保障中文字符清晰度、笔画呼吸感与等宽代码排版的全局字体栈契约，包含高质量现代系统中文黑体与知名编程等宽字体，严禁对中文字体套用负字间距。
+_避免使用 (Avoid)_: Font List, System Font, Typography Preset
+
+**Component Geometry Rhythm**:
+全站容器组件（12px 圆角 + 微投影）与操作控件（8px 圆角 + 聚焦外环环绕）的标准化几何尺度与交互基线。
+_避免使用 (Avoid)_: Border Radius Rule, Component Shape, Corner Scale
+
+

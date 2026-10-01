@@ -1,20 +1,21 @@
 import { defineThemes } from '../theme/theme.models';
+import { surfaceTokens } from '@/styles/tokens';
 
 export const { useTheme } = defineThemes({
   dark: {
-    backgroundColor: '#333333',
-    borderColor: '#333333',
+    backgroundColor: surfaceTokens.dark.surface2,
+    borderColor: surfaceTokens.dark.border,
 
     focus: {
-      backgroundColor: '#1ea54c1a',
+      backgroundColor: surfaceTokens.dark.surface1,
     },
   },
   light: {
-    backgroundColor: '#ffffff',
-    borderColor: '#e0e0e69e',
+    backgroundColor: surfaceTokens.light.surface2,
+    borderColor: surfaceTokens.light.border,
 
     focus: {
-      backgroundColor: '#ffffff',
+      backgroundColor: surfaceTokens.light.surface1,
     },
   },
 });
