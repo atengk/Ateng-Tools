@@ -2,6 +2,7 @@
 import { useStorage } from '@vueuse/core';
 import { useThemeVars } from 'naive-ui';
 import { RouterLink, useRoute, useRouter } from 'vue-router';
+import { ChevronRight as IconChevronRight } from '@vicons/tabler';
 import MenuIconItem from './MenuIconItem.vue';
 import type { Tool, ToolCategory } from '@/tools/tools.types';
 import { useToolStore } from '@/tools/tools.store';
@@ -189,7 +190,7 @@ const menuOptions = computed(() =>
               class="arrow-icon"
               :class="{ expanded: !isCollapsed }"
             >
-              <icon-mdi-chevron-right />
+              <n-icon size="14" :component="IconChevronRight" />
             </span>
           </button>
         </div>

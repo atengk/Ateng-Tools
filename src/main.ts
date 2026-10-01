@@ -14,10 +14,13 @@ import { naive } from './plugins/naive.plugin';
 import App from './App.vue';
 import router from './router';
 import { i18nPlugin } from './plugins/i18n.plugin';
+import { setupErrorHandler } from './utils/errorHandler';
 
 registerSW();
 
 const app = createApp(App);
+
+setupErrorHandler(app);
 
 app.use(createPinia());
 app.use(createHead());

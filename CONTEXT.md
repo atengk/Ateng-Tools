@@ -287,4 +287,27 @@ _避免使用 (Avoid)_: Font List, System Font, Typography Preset
 全站容器组件（12px 圆角 + 微投影）与操作控件（8px 圆角 + 聚焦外环环绕）的标准化几何尺度与交互基线。
 _避免使用 (Avoid)_: Border Radius Rule, Component Shape, Corner Scale
 
+### 全局基础设施与交互韧性规范 (Global Infrastructure & Interaction Resilience)
+
+**Global Context Bridge**:
+在根组件挂载期向 `window` 注入受管 Naive UI 实例引用（`$message`、`$dialog`、`$notification`、`$loadingBar`）的桥接器，确保无 Vue 上下文环境（路由前置守卫、Pinia Store、全局异常拦截器）能够安全发起弹窗与进度控制。
+_避免使用 (Avoid)_: Global Window Hack, UI Helper, Window Naive
+
+**Progressive Navigation Feedback**:
+在路由切换生命周期中，结合 `loadingBar` 启动/完成/异常，以及 `scrollBehavior` 智能顶置复位的全局路由交互增强机制。
+_避免使用 (Avoid)_: Route Spinner, Top Bar Loader, Page Scroll Fix
+
+**Canonical Tabler Iconography**:
+全域强制使用 `@vicons/tabler` 原生 SVG 组件，杜绝遗留 `icon-mdi-*` 伪类组件与非标图标集合的矢量图标资产标准。
+_避免使用 (Avoid)_: MDI Icons, Unocss Icons, Custom SVG
+
+**Defensive Error Interception**:
+通过 `app.config.errorHandler` 在应用层统一捕获未受控运行时异常，结合 `$message.error` 进行语义化中文反馈并防范页面白屏崩溃的全局韧性防线。
+_避免使用 (Avoid)_: Crash Guard, Exception Catch, Error Boundary Component
+
+**Manifest Theme Synchronization**:
+将 PWA 网页清单与移动端 WebMeta 声明严格绑定至全站设计令牌单一真理源（`tokens.colors.primary.DEFAULT` 与 `tokens.colors.slate[50]`）的契约规则。
+_避免使用 (Avoid)_: Meta Hardcoding, PWA Color Patch, Standalone Manifest Config
+
+
 

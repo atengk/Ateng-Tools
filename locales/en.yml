@@ -311,6 +311,7 @@ tools:
     inputLabel: Raw MyBatis Logs
     inputPlaceholder: Paste your MyBatis logs with Preparing and Parameters lines here...
     outputLabel: Executable SQL
+    statementCount: "{count} statements"
     copyAll: Copy All SQL
     copySuccess: Copy SQL
     copy: Copy

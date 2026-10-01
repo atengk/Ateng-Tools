@@ -133,7 +133,7 @@ async function pasteLogs() {
       :class="styleStore.isSmallScreen ? 'grid-cols-1' : 'grid-cols-2'"
     >
       <!-- Left Panel: Raw Log Input -->
-      <div flex flex-col gap-2>
+      <div flex flex-col gap-2 min-w-0>
         <div flex items-center justify-between>
           <span font-medium text-gray-700 dark:text-gray-300>
             {{ t('tools.mybatis-sql-converter.inputLabel', 'Raw MyBatis Logs') }}
@@ -152,7 +152,7 @@ async function pasteLogs() {
       </div>
 
       <!-- Right Panel: Restored SQL Output -->
-      <div flex flex-col gap-3>
+      <div flex flex-col gap-3 min-w-0>
         <!-- Header status and batch copy -->
         <div flex items-center justify-between>
           <div flex items-center gap-2>
@@ -183,7 +183,7 @@ async function pasteLogs() {
         />
 
         <!-- Secondary: Individual statement cards when multiple queries exist -->
-        <div v-if="restoreResult.statements.length > 1" mt-2 flex flex-col gap-3>
+        <div v-if="restoreResult.statements.length > 1" mt-2 flex flex-col gap-3 min-w-0>
           <div text-13px font-semibold text-gray-500>
             {{ t('tools.mybatis-sql-converter.individualStatements', 'Individual Statements') }} ({{ restoreResult.statements.length }})
           </div>
@@ -192,6 +192,7 @@ async function pasteLogs() {
             v-for="stmt in restoreResult.statements"
             :key="stmt.id"
             size="small"
+            class="min-w-0 overflow-hidden"
           >
             <div mb-2 flex items-center justify-between>
               <div flex items-center gap-2>
@@ -207,11 +208,14 @@ async function pasteLogs() {
                 {{ t('tools.mybatis-sql-converter.copy', 'Copy') }}
               </c-button>
             </div>
-            <n-code
-              :code="options.prettify && stmt.prettifiedSql ? stmt.prettifiedSql : stmt.restoredSql"
-              language="sql"
-              :trim="false"
-            />
+            <div class="overflow-x-auto max-w-full">
+              <n-code
+                :code="options.prettify && stmt.prettifiedSql ? stmt.prettifiedSql : stmt.restoredSql"
+                language="sql"
+                :trim="false"
+                word-wrap
+              />
+            </div>
           </c-card>
         </div>
       </div>

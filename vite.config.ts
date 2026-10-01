@@ -16,6 +16,7 @@ import { VitePWA } from 'vite-plugin-pwa';
 import markdown from 'vite-plugin-vue-markdown';
 import svgLoader from 'vite-svg-loader';
 import { configDefaults } from 'vitest/config';
+import { brandTokens, surfaceTokens } from './src/styles/tokens';
 
 // https://vitejs.dev/config/
 export default defineConfig(({ command }) => {
@@ -77,8 +78,8 @@ export default defineConfig(({ command }) => {
         lang: 'zh-CN',
         start_url: `${baseUrl}?utm_source=pwa&utm_medium=pwa`,
         orientation: 'any',
-        theme_color: '#2563eb',
-        background_color: '#f8fafc',
+        theme_color: brandTokens.primary,
+        background_color: surfaceTokens.light.surface0,
         icons: [
           {
             src: '/favicon-16x16.png',

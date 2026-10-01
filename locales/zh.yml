@@ -309,6 +309,7 @@ tools:
     inputLabel: 原始 MyBatis 日志
     inputPlaceholder: 在此粘贴包含 Preparing 和 Parameters 的控制台日志...
     outputLabel: 还原后可执行 SQL
+    statementCount: "共 {count} 条语句"
     copyAll: 复制全部 SQL
     copySuccess: 复制 SQL
     copy: 复制

@@ -36,6 +36,29 @@ const router = createRouter({
     ...(config.app.env === 'development' ? demoRoutes : []),
     { path: '/:pathMatch(.*)*', name: 'NotFound', component: NotFound },
   ],
+  scrollBehavior(to, from, savedPosition) {
+    if (savedPosition) {
+      return savedPosition;
+    }
+    if (to.hash) {
+      return { el: to.hash, behavior: 'smooth' };
+    }
+    return { top: 0, behavior: 'smooth' };
+  },
+});
+
+router.beforeEach((to, from, next) => {
+  window.$loadingBar?.start();
+  next();
+});
+
+router.afterEach(() => {
+  window.$loadingBar?.finish();
+});
+
+router.onError((error) => {
+  console.error('[Router Error]:', error);
+  window.$loadingBar?.error();
 });
 
 export default router;

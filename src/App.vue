@@ -1,9 +1,10 @@
 <script setup lang="ts">
 import { RouterView, useRoute } from 'vue-router';
-import { NGlobalStyle, NMessageProvider, NNotificationProvider, darkTheme, dateZhCN, zhCN } from 'naive-ui';
+import { NDialogProvider, NGlobalStyle, NLoadingBarProvider, NMessageProvider, NNotificationProvider, darkTheme, dateZhCN, zhCN } from 'naive-ui';
 import { darkThemeOverrides, lightThemeOverrides } from './themes';
 import { layouts } from './layouts';
 import { useStyleStore } from './stores/style.store';
+import AppGlobalBridge from './components/AppGlobalBridge.vue';
 
 const route = useRoute();
 const layout = computed(() => route?.meta?.layout ?? layouts.base);
@@ -31,13 +32,19 @@ syncRef(
     :date-locale="naiveDateLocale"
   >
     <NGlobalStyle />
-    <NMessageProvider placement="bottom">
-      <NNotificationProvider placement="bottom-right">
-        <component :is="layout">
-          <RouterView />
-        </component>
-      </NNotificationProvider>
-    </NMessageProvider>
+    <NLoadingBarProvider>
+      <NDialogProvider>
+        <NNotificationProvider placement="bottom-right">
+          <NMessageProvider placement="bottom">
+            <AppGlobalBridge>
+              <component :is="layout">
+                <RouterView />
+              </component>
+            </AppGlobalBridge>
+          </NMessageProvider>
+        </NNotificationProvider>
+      </NDialogProvider>
+    </NLoadingBarProvider>
   </n-config-provider>
 </template>
 
