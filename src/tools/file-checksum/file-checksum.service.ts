@@ -79,6 +79,24 @@ export function computeBufferHash(
 }
 
 /**
+ * 安全读取 Blob/File 切片为 ArrayBuffer (优先原生 arrayBuffer，降级 FileReader)
+ *
+ * @param blob 二进制 Blob 切片
+ * @returns ArrayBuffer 实例
+ */
+export async function readBlobChunkAsArrayBuffer(blob: Blob): Promise<ArrayBuffer> {
+  if (typeof blob.arrayBuffer === 'function') {
+    return await blob.arrayBuffer();
+  }
+  return new Promise<ArrayBuffer>((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result as ArrayBuffer);
+    reader.onerror = () => reject(reader.error ?? new Error('读取数据切片失败'));
+    reader.readAsArrayBuffer(blob);
+  });
+}
+
+/**
  * 基于 HTML5 Blob 分块流式计算哈希摘要，防止大文件溢出主内存
  *
  * @param file 待校验文件对象
@@ -117,7 +135,7 @@ export async function computeChunkedFileHash(
 
     const end = Math.min(offset + chunkSize, totalBytes);
     const slice = file.slice(offset, end);
-    const arrayBuffer = await slice.arrayBuffer();
+    const arrayBuffer = await readBlobChunkAsArrayBuffer(slice);
     const u8 = new Uint8Array(arrayBuffer);
     const wa = uint8ArrayToWordArray(u8);
 
