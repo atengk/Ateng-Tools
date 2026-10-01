@@ -1073,3 +1073,12 @@ tools:
     title: HAR Log Analyzer
     description: Client-side offline HTTP Archive (.har) analyzer with interactive waterfall timeline, request/response headers, payload, and timing breakdown.
 
+  nginx-config-generator:
+    title: Nginx Config Generator
+    description: Modular visual configuration for reverse proxies, SPA fallback, CORS headers, SSL/HTTPS redirection, and Gzip caching with real-time nginx.conf preview.
+
+  mock-data-generator:
+    title: Mock Data Generator
+    description: Visually design mock data schemas (ID, names, phones, emails, amounts, dates) and generate batch dummy records exported as JSON, SQL INSERT, or CSV.
+
+

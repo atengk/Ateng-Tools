@@ -32,7 +32,7 @@ describe('tools category taxonomy', () => {
     const flatToolCount = tools.length;
     const categorySum = toolsByCategory.reduce((sum, cat) => sum + cat.components.length, 0);
     expect(flatToolCount).toBe(categorySum);
-    expect(flatToolCount).toBe(109);
+    expect(flatToolCount).toBe(111);
 
     const allPaths = tools.map(t => t.path);
     expect(new Set(allPaths).size).toBe(flatToolCount);
@@ -83,14 +83,17 @@ describe('tools category taxonomy', () => {
     expect(paths).toContain('/iban-validator-and-parser');
   });
 
-  it('验证代码基准构建工具已迁入 dev 分类', () => {
+  it('验证代码基准构建工具已迁入 dev 分类，并扩充 Nginx 配置生成与 Mock 数据生成达到 23 款', () => {
     const devCategory = toolsByCategory.find(cat => cat.name === 'dev');
     expect(devCategory).toBeDefined();
     const paths = devCategory!.components.map(t => t.path);
+    expect(paths).toHaveLength(23);
     expect(paths).toContain('/benchmark-builder');
     expect(paths).toContain('/mybatis-sql-converter');
     expect(paths).toContain('/cron-simulator');
     expect(paths).toContain('/snowflake-id-analyzer');
+    expect(paths).toContain('/nginx-config-generator');
+    expect(paths).toContain('/mock-data-generator');
   });
 
   it('验证数学与生活度量工具已整合至 calc 分类，并成功扩充两款新工具达到 7 款', () => {

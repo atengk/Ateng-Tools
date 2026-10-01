@@ -110,6 +110,8 @@ import { tool as fileChecksum } from './file-checksum';
 import { tool as x509CertificateInspector } from './x509-certificate-inspector';
 import { tool as harAnalyzer } from './har-analyzer';
 import { tool as cidrCalculator } from './cidr-calculator';
+import { tool as nginxConfigGenerator } from './nginx-config-generator';
+import { tool as mockDataGenerator } from './mock-data-generator';
 
 export const toolsByCategory: ToolCategory[] = [
   {
@@ -136,6 +138,8 @@ export const toolsByCategory: ToolCategory[] = [
       websocketAndSseClient,
       cronSimulator,
       benchmarkBuilder,
+      nginxConfigGenerator,
+      mockDataGenerator,
     ],
   },
   {

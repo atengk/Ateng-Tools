@@ -1069,3 +1069,12 @@ tools:
     title: HAR 网络抓包日志离线分析器
     description: 纯前端离线解析浏览器 DevTools 导出的 .har 抓包归档文件，可视化时序甘特瀑布流，深度透视请求标头、载荷与响应正文。
 
+  nginx-config-generator:
+    title: Nginx 配置可视化生成器
+    description: 模块化可视化配置反向代理、SPA 路由回退、跨域 CORS、SSL/HTTPS 强推与 Gzip 缓存，实时生成标准 nginx.conf 配置文件。
+
+  mock-data-generator:
+    title: Mock 随机业务数据生成器
+    description: 可视化定义自增主键、姓名、手机号、邮箱、金额、日期等多种业务字段，批量生成测试数据并导出为 JSON、SQL INSERT 或 CSV 表格。
+
+
