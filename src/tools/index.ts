@@ -106,6 +106,8 @@ import { tool as dataStorageConverter } from './data-storage-converter';
 import { tool as bitwiseCalculator } from './bitwise-calculator';
 import { tool as barcodeGenerator } from './barcode-generator';
 import { tool as faviconGenerator } from './favicon-generator';
+import { tool as fileChecksum } from './file-checksum';
+import { tool as x509CertificateInspector } from './x509-certificate-inspector';
 
 export const toolsByCategory: ToolCategory[] = [
   {
@@ -180,6 +182,8 @@ export const toolsByCategory: ToolCategory[] = [
       jwtParser,
       otpCodeGeneratorAndValidator,
       basicAuthGenerator,
+      fileChecksum,
+      x509CertificateInspector,
     ],
   },
   {

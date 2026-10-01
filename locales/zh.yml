@@ -383,6 +383,14 @@ tools:
     title: Favicon 网站图标全套打包器
     description: 纯客户端重采样生成 16×16 至 512×512 全规格图标，一键合成多层 favicon.ico 并打包 site.webmanifest 与 ZIP 归档。
 
+  file-checksum:
+    title: 文件校验与哈希比对器
+    description: 纯客户端流式分块计算 MD5、SHA-1、SHA-256、SHA-384、SHA-512 大文件哈希，支持参考指纹即时匹配与双文件差异比对。
+
+  x509-certificate-inspector:
+    title: X.509 SSL 证书与 CSR 解析器
+    description: 纯客户端离线解析 PEM 格式 SSL 证书与证书签名请求 (CSR)，深入透视使用者、签发者、有效期限、SAN 备用域名与公钥参数。
+
 
 
   benchmark-builder:

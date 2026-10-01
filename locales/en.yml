@@ -385,6 +385,14 @@ tools:
     title: Favicon Generator & Packager
     description: Pure client-side resampling for web icons from 16x16 to 512x512, packing multi-resolution favicon.ico, site.webmanifest, and ZIP archive.
 
+  file-checksum:
+    title: File Checksum & Hash Verifier
+    description: Streamed chunked calculation of MD5, SHA-1, SHA-256, SHA-384, and SHA-512 hashes for large files with instant reference matching and dual-file comparison.
+
+  x509-certificate-inspector:
+    title: X.509 Certificate & CSR Inspector
+    description: Pure client-side offline parser for PEM SSL certificates and CSR requests, inspecting Subject, Issuer, Validity period, SAN domains, and Public Key parameters.
+
 
 
   benchmark-builder:

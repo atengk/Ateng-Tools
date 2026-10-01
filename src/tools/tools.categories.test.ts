@@ -32,7 +32,7 @@ describe('tools category taxonomy', () => {
     const flatToolCount = tools.length;
     const categorySum = toolsByCategory.reduce((sum, cat) => sum + cat.components.length, 0);
     expect(flatToolCount).toBe(categorySum);
-    expect(flatToolCount).toBe(105);
+    expect(flatToolCount).toBe(107);
 
     const allPaths = tools.map(t => t.path);
     expect(new Set(allPaths).size).toBe(flatToolCount);
@@ -48,15 +48,18 @@ describe('tools category taxonomy', () => {
     expect(categoryNames).not.toContain('development');
   });
 
-  it('验证安全凭证与认证工具已归拢至 security 分类', () => {
+  it('验证安全凭证与认证工具已归拢至 security 分类，扩充大文件校验与证书解析达到 15 款', () => {
     const securityCategory = toolsByCategory.find(cat => cat.name === 'security');
     expect(securityCategory).toBeDefined();
     const paths = securityCategory!.components.map(t => t.path);
+    expect(paths).toHaveLength(15);
     expect(paths).toContain('/jwt-parser');
     expect(paths).toContain('/otp-generator');
     expect(paths).toContain('/basic-auth-generator');
     expect(paths).toContain('/token-generator');
     expect(paths).toContain('/rsa-key-pair-generator');
+    expect(paths).toContain('/file-checksum');
+    expect(paths).toContain('/x509-certificate-inspector');
   });
 
   it('验证差异对比与富文本编辑工具已归拢至 text 分类', () => {
