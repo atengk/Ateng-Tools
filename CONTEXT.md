@@ -331,6 +331,25 @@ _避免使用 (Avoid)_: File Slicer, Binary Pump, Chunk Buffer
 两个对等端设备之间成功建立的经过 DTLS 加密的独立通信生命周期，包含对端设备指纹、网络连接状态、待发/接收任务队列与双向数据通道。
 _避免使用 (Avoid)_: Peer Room, Connection Context, Socket Pair
 
+### HTTP 客户端 (HTTP Client)
+
+**HTTP Client**:
+Ateng-Tools 中用于纯客户端轻量级 HTTP 接口调试与测试的开发者工具，支持多请求方法、参数与请求体构建、鉴权认证、实时响应分析与 cURL 语法双向导入导出。
+_避免使用 (Avoid)_: Postman Clone, Mini Postman, Web Postman, Request Builder, API Tester
+
+**Request Spec**:
+在 HTTP 客户端中用于描述单次 HTTP 请求全部要素的结构化数据契约模型，包含请求方法、目标 URL、查询参数、请求头、鉴权凭据与请求体。
+_避免使用 (Avoid)_: Request Object, Fetch Param, HTTP Config
+
+**Response Snapshot**:
+客户端发起请求后捕获的响应结果快照，包含 HTTP 状态码、耗时统计（毫秒）、响应体尺寸、响应头字典以及结构化或原始响应体内容。
+_避免使用 (Avoid)_: Response DTO, HTTP Result, Output Chunk
+
+**CORS Diagnostic Guard**:
+在纯客户端请求遭遇跨域资源共享（CORS）策略拦截或网络失败时，负责智能诊断异常类型、提供排查指导并引导一键降级为 cURL 终端命令的容错防御机制。
+_避免使用 (Avoid)_: Error Interceptor, Proxy Hack, Network Fallback
+
+
 
 
 

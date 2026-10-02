@@ -32,7 +32,7 @@ describe('tools category taxonomy', () => {
     const flatToolCount = tools.length;
     const categorySum = toolsByCategory.reduce((sum, cat) => sum + cat.components.length, 0);
     expect(flatToolCount).toBe(categorySum);
-    expect(flatToolCount).toBe(111);
+    expect(flatToolCount).toBe(113);
 
     const allPaths = tools.map(t => t.path);
     expect(new Set(allPaths).size).toBe(flatToolCount);
@@ -76,6 +76,7 @@ describe('tools category taxonomy', () => {
     const converterCategory = toolsByCategory.find(cat => cat.name === 'converter');
     expect(converterCategory).toBeDefined();
     const paths = converterCategory!.components.map(t => t.path);
+    expect(paths).toHaveLength(25);
     expect(paths).toContain('/config-converter');
     expect(paths).toContain('/table-converter');
     expect(paths).toContain('/json-to-csv');
@@ -83,17 +84,18 @@ describe('tools category taxonomy', () => {
     expect(paths).toContain('/iban-validator-and-parser');
   });
 
-  it('验证代码基准构建工具已迁入 dev 分类，并扩充 Nginx 配置生成与 Mock 数据生成达到 23 款', () => {
+  it('验证代码基准构建工具已迁入 dev 分类，并扩充 HTTP 客户端与 Mock 数据生成达到 24 款', () => {
     const devCategory = toolsByCategory.find(cat => cat.name === 'dev');
     expect(devCategory).toBeDefined();
     const paths = devCategory!.components.map(t => t.path);
-    expect(paths).toHaveLength(23);
+    expect(paths).toHaveLength(24);
     expect(paths).toContain('/benchmark-builder');
     expect(paths).toContain('/mybatis-sql-converter');
     expect(paths).toContain('/cron-simulator');
     expect(paths).toContain('/snowflake-id-analyzer');
     expect(paths).toContain('/nginx-config-generator');
     expect(paths).toContain('/mock-data-generator');
+    expect(paths).toContain('/http-client');
   });
 
   it('验证数学与生活度量工具已整合至 calc 分类，并成功扩充两款新工具达到 7 款', () => {
@@ -124,11 +126,11 @@ describe('tools category taxonomy', () => {
     expect(mediaPaths).toContain('/favicon-generator');
   });
 
-  it('验证网络与 Web 分类扩充抓包日志分析与 CIDR 聚合计算器达到 18 款', () => {
+  it('验证网络与 Web 分类扩充抓包日志分析与 CIDR 聚合计算器达到 19 款', () => {
     const networkCategory = toolsByCategory.find(cat => cat.name === 'network');
     expect(networkCategory).toBeDefined();
     const paths = networkCategory!.components.map(t => t.path);
-    expect(paths).toHaveLength(18);
+    expect(paths).toHaveLength(19);
     expect(paths).toContain('/har-analyzer');
     expect(paths).toContain('/cidr-calculator');
     expect(paths).toContain('/ipv4-subnet-calculator');

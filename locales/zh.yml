@@ -350,6 +350,104 @@ tools:
     title: WebSocket & SSE 调试助手
     description: 纯客户端 WebSocket 全双工通信与 SSE 单向事件流调试，支持分帧时间轴、大模型流式聚合与心跳保活。
 
+  http-client:
+    title: HTTP 客户端
+    description: 纯客户端轻量级 HTTP 接口调试工具，支持多请求方法、参数与请求体构建、实时响应分析与 cURL 联动。
+    method: 请求方法
+    urlPlaceholder: 输入请求 URL (例如 http://localhost:8080/api/v1/users)
+    send: 发送
+    cancel: 取消
+    timeout: 超时
+    seconds: 秒
+    request: 请求配置
+    response: 响应结果
+    status: 状态码
+    time: 耗时
+    size: 大小
+    body: 响应体
+    headers: 响应头
+    pretty: 格式化高亮
+    raw: 原始文本
+    copyBody: 复制响应体
+    copyHeaders: 复制全部响应头
+    copySuccess: 复制成功
+    emptyResponse: 暂无响应数据，请点击“发送”按钮发起请求
+    sending: 请求发送中...
+    requestFailed: 请求失败
+    timeoutError: 请求超时，已自动中断连接
+    abortedError: 请求已被用户主动取消
+    headerKey: 标头名称
+    headerValue: 标头内容
+    noHeaders: 暂无响应标头
+    tabParams: 查询参数
+    tabHeaders: 请求标头
+    tabAuth: 认证鉴权
+    paramKey: 参数名 (Key)
+    paramValue: 参数值 (Value)
+    addParam: 添加参数
+    addHeader: 添加标头
+    headerKeyPlaceholder: 标头名称 (如 Content-Type)
+    headerValuePlaceholder: 标头内容
+    authType: 鉴权类型
+    authNone: 无鉴权 (None)
+    authBearer: Bearer Token
+    authBasic: Basic 身份认证
+    tokenPlaceholder: 请输入 Bearer 凭据令牌
+    usernamePlaceholder: 用户名 (Username)
+    passwordPlaceholder: 密码 (Password)
+    authHintBearer: '将自动在请求中注入 Authorization: Bearer <Token> 标头'
+    authHintBasic: '将自动 Base64 编码并注入 Authorization: Basic <Credentials> 标头'
+    noParams: 暂无查询参数，点击上方按钮新增
+    noCustomHeaders: 暂无自定义请求标头，点击上方按钮新增
+    delete: 删除
+    tabBody: 请求体
+    tabRequestSent: 实际发出的请求
+    bodyType: 载荷格式
+    bodyNone: 无 (None)
+    bodyJson: JSON 载荷
+    bodyFormData: 表单 (form-data)
+    bodyUrlEncoded: 表单 (x-www-form-urlencoded)
+    bodyRaw: 原始文本 (Raw)
+    prettify: 美化 JSON
+    prettifySuccess: 已完成 JSON 格式化
+    prettifyInvalid: 当前内容不是合法的 JSON 语法
+    jsonSyntaxError: JSON 语法错误
+    chooseFile: 选取文件
+    noFileChosen: 未选择文件
+    fieldTypeText: 文本
+    fieldTypeFile: 文件
+    addFormDataField: 添加表单字段
+    addUrlEncodedField: 添加表单字段
+    sentUrl: 目标 URL
+    sentHeaders: 最终编译请求标头
+    sentBody: 最终编译请求载荷
+    noSentBody: 无请求体载荷
+    copyAsCurl: 复制 cURL
+    copyAsCurlSuccess: 已复制 cURL 命令行到剪贴板
+    importCurl: 导入 cURL
+    openInCurlConverter: 在 cURL 转换器中打开
+    importCurlTitle: 从 cURL 命令导入
+    importCurlPlaceholder: "在此粘贴标准 cURL 命令 (例如: curl -X POST 'https://api.example.com' -H '...')"
+    importCurlConfirm: 解析并导入
+    importCurlSuccess: 已成功从 cURL 解析并填充请求表单
+    importCurlError: cURL 命令解析失败，请检查命令语法格式
+    corsGuardTitle: 跨域与网络诊断 (CORS Diagnostic Guard)
+    corsRemedies: 排查建议
+    runInTerminal: 复制 cURL 在本地终端中运行 (绕过浏览器跨域限制)
+    history: 历史记录
+    historyTitle: 请求历史记录
+    clearHistory: 清空历史
+    clearHistoryConfirm: 确定清空所有请求历史记录吗？
+    emptyHistory: 暂无请求历史记录
+    restoreRequest: 恢复此请求
+    restoreSuccess: 已恢复历史请求配置
+    filterHistoryPlaceholder: 搜索历史请求 URL 或方法...
+    historyCount: '共 {count} 条记录 (最多保留 20 条)'
+
+
+
+
+
   config-converter:
     title: Spring 配置与环境变量互转
     description: YAML、Properties、ENV 环境变量与 JSON 四合一互转，支持 Spring 宽松绑定规范与数组展开。

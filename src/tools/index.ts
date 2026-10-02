@@ -112,6 +112,7 @@ import { tool as harAnalyzer } from './har-analyzer';
 import { tool as cidrCalculator } from './cidr-calculator';
 import { tool as nginxConfigGenerator } from './nginx-config-generator';
 import { tool as mockDataGenerator } from './mock-data-generator';
+import { tool as httpClient } from './http-client';
 import { tool as p2pFileTransfer } from './p2p-file-transfer';
 
 export const toolsByCategory: ToolCategory[] = [
@@ -137,6 +138,7 @@ export const toolsByCategory: ToolCategory[] = [
       jsonToEntity,
       sqlDdlToEntity,
       websocketAndSseClient,
+      httpClient,
       cronSimulator,
       benchmarkBuilder,
       nginxConfigGenerator,

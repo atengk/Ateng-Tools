@@ -1,3 +1,4 @@
+// @vitest-environment jsdom
 /**
  * 全局路由与加载守卫单元测试
  * 验证 scrollBehavior 智能复位规则与 beforeEach/afterEach/onError 对 window.$loadingBar 的联动

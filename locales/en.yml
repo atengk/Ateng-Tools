@@ -352,6 +352,104 @@ tools:
     title: WebSocket & SSE Stream Client
     description: Client-side WebSocket full-duplex messaging and SSE stream debugger with frame timeline, LLM stream aggregation, and heartbeat keepalive.
 
+  http-client:
+    title: HTTP Client
+    description: Pure client-side lightweight HTTP debugging tool with multi-method support, payload builders, real-time response analysis, and cURL synergy.
+    method: Method
+    urlPlaceholder: Enter request URL (e.g. http://localhost:8080/api/v1/users)
+    send: Send
+    cancel: Cancel
+    timeout: Timeout
+    seconds: s
+    request: Request Configuration
+    response: Response Result
+    status: Status
+    time: Time
+    size: Size
+    body: Body
+    headers: Headers
+    pretty: Pretty
+    raw: Raw
+    copyBody: Copy Body
+    copyHeaders: Copy All Headers
+    copySuccess: Copied successfully
+    emptyResponse: No response yet. Click "Send" to dispatch a request.
+    sending: Sending request...
+    requestFailed: Request failed
+    timeoutError: Request timed out and was aborted
+    abortedError: Request was cancelled by user
+    headerKey: Header Name
+    headerValue: Header Value
+    noHeaders: No response headers
+    tabParams: Query Params
+    tabHeaders: Headers
+    tabAuth: Auth
+    paramKey: Key
+    paramValue: Value
+    addParam: Add Param
+    addHeader: Add Header
+    headerKeyPlaceholder: Header name (e.g. Content-Type)
+    headerValuePlaceholder: Header value
+    authType: Auth Type
+    authNone: No Auth (None)
+    authBearer: Bearer Token
+    authBasic: Basic Auth
+    tokenPlaceholder: Enter Bearer Token
+    usernamePlaceholder: Username
+    passwordPlaceholder: Password
+    authHintBearer: 'Will automatically inject Authorization: Bearer <Token> header'
+    authHintBasic: 'Will automatically Base64 encode and inject Authorization: Basic <Credentials> header'
+    noParams: No query parameters. Click above to add one.
+    noCustomHeaders: No custom headers. Click above to add one.
+    delete: Delete
+    tabBody: Body
+    tabRequestSent: Request Sent
+    bodyType: Payload Type
+    bodyNone: None
+    bodyJson: JSON
+    bodyFormData: form-data
+    bodyUrlEncoded: x-www-form-urlencoded
+    bodyRaw: Raw
+    prettify: Prettify JSON
+    prettifySuccess: JSON formatted successfully
+    prettifyInvalid: Invalid JSON syntax
+    jsonSyntaxError: JSON Syntax Error
+    chooseFile: Choose File
+    noFileChosen: No file chosen
+    fieldTypeText: Text
+    fieldTypeFile: File
+    addFormDataField: Add Form Field
+    addUrlEncodedField: Add Field
+    sentUrl: Target URL
+    sentHeaders: Final Compiled Headers
+    sentBody: Final Compiled Payload
+    noSentBody: No request payload
+    copyAsCurl: Copy cURL
+    copyAsCurlSuccess: cURL command copied to clipboard
+    importCurl: Import cURL
+    openInCurlConverter: Open in cURL Converter
+    importCurlTitle: Import from cURL Command
+    importCurlPlaceholder: "Paste standard cURL command here (e.g. curl -X POST 'https://api.example.com' -H '...')"
+    importCurlConfirm: Parse & Import
+    importCurlSuccess: Successfully imported and populated form from cURL
+    importCurlError: Failed to parse cURL command. Please check command syntax.
+    corsGuardTitle: CORS Diagnostic & Troubleshooting Guide
+    corsRemedies: Troubleshooting Suggestions
+    runInTerminal: Copy cURL to run in local terminal (bypasses browser CORS restrictions)
+    history: History
+    historyTitle: Request History
+    clearHistory: Clear History
+    clearHistoryConfirm: Are you sure you want to clear all request history?
+    emptyHistory: No request history yet
+    restoreRequest: Restore
+    restoreSuccess: Request configuration restored from history
+    filterHistoryPlaceholder: Filter by URL or method...
+    historyCount: '{count} records (up to 20 saved)'
+
+
+
+
+
   config-converter:
     title: Spring / Config Converter
     description: Convert seamlessly between YAML, Properties, ENV, and JSON with Spring relaxed-binding support.
