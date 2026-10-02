@@ -35,7 +35,10 @@ function toggleFavorite(event: MouseEvent) {
       }"
       @click="toggleFavorite"
     >
-      <n-icon size="18" :component="isFavorite ? IconStarFilled : IconStar" />
+      <n-icon size="18">
+        <IconStarFilled v-if="isFavorite" :size="18" />
+        <IconStar v-else :size="18" />
+      </n-icon>
     </c-button>
   </c-tooltip>
 </template>

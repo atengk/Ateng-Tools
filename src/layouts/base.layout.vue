@@ -9,6 +9,7 @@ import { useStyleStore } from '@/stores/style.store';
 import type { ToolCategory } from '@/tools/tools.types';
 import { useToolStore } from '@/tools/tools.store';
 import CollapsibleToolMenu from '@/components/CollapsibleToolMenu.vue';
+import { brandTokens } from '@/styles/tokens';
 
 const themeVars = useThemeVars();
 const styleStore = useStyleStore();
@@ -29,34 +30,35 @@ const tools = computed<ToolCategory[]>(() => [
 <template>
   <MenuLayout class="menu-layout" :class="{ isSmallScreen: styleStore.isSmallScreen }">
     <template #sider>
-      <!-- 左上角 64px 矢量品牌栏 -->
-      <RouterLink to="/" class="brand-header">
-        <div class="brand-logo">
-          <svg class="brand-logo-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M13 10V3L4 14h7v7l9-11h-7z" />
-          </svg>
-        </div>
-        <div class="brand-text">
-          <div class="brand-title-wrap">
-            <span class="brand-title">{{ $t('home.brand') }}</span>
-            <span class="brand-badge">{{ $t('home.badge') }}</span>
+      <div class="sidebar-wrapper">
+        <!-- 左上角 64px 矢量品牌栏 -->
+        <RouterLink to="/" class="brand-header">
+          <div class="brand-logo">
+            <svg class="brand-logo-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+            </svg>
           </div>
-          <div class="brand-subtitle">
-            {{ $t('home.subtitle') }}
+          <div class="brand-text">
+            <div class="brand-title-wrap">
+              <span class="brand-title">{{ $t('home.brand') }}</span>
+            </div>
+            <div class="brand-subtitle">
+              {{ $t('home.subtitle') }}
+            </div>
           </div>
-        </div>
-      </RouterLink>
+        </RouterLink>
 
-      <div class="sider-content">
-        <div v-if="styleStore.isSmallScreen" flex flex-col items-center mb-4>
-          <locale-selector w="90%" mb-2 />
-          <div flex justify-center>
-            <NavbarButtons />
+        <div class="sider-content">
+          <div v-if="styleStore.isSmallScreen" flex flex-col items-center mb-4>
+            <locale-selector w="90%" mb-2 />
+            <div flex justify-center>
+              <NavbarButtons />
+            </div>
           </div>
-        </div>
 
-        <!-- 侧边栏分类导航列表 (对齐原型) -->
-        <CollapsibleToolMenu :tools-by-category="tools" />
+          <!-- 侧边栏分类导航列表 (对齐原型) -->
+          <CollapsibleToolMenu :tools-by-category="tools" />
+        </div>
       </div>
     </template>
 
@@ -101,8 +103,8 @@ const tools = computed<ToolCategory[]>(() => [
   align-items: center;
   justify-content: space-between;
   gap: 16px;
-  padding-bottom: 16px;
-  margin-bottom: 20px;
+  padding-bottom: 10px;
+  margin-bottom: 10px;
   border-bottom: 1px solid v-bind('themeVars.borderColor');
 
   .nav-left {
@@ -114,8 +116,8 @@ const tools = computed<ToolCategory[]>(() => [
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      width: 36px;
-      height: 36px;
+      width: 34px;
+      height: 34px;
       border-radius: 8px;
       border: 1px solid v-bind('themeVars.borderColor');
       background-color: v-bind('themeVars.cardColor');
@@ -124,9 +126,9 @@ const tools = computed<ToolCategory[]>(() => [
       transition: all 0.18s ease;
 
       &:hover {
-        border-color: #2563eb;
-        color: #2563eb;
-        background-color: rgba(37, 99, 235, 0.05);
+        border-color: v-bind('themeVars.primaryColor');
+        color: v-bind('themeVars.primaryColor');
+        background-color: v-bind('brandTokens.primaryLightBg');
       }
     }
 
@@ -159,84 +161,78 @@ const tools = computed<ToolCategory[]>(() => [
   }
 }
 
-.sider-content {
-  padding-top: 72px;
-  padding-bottom: 40px;
-}
-
-.brand-header {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 64px;
+.sidebar-wrapper {
   display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 0 16px;
-  z-index: 10;
-  text-decoration: none;
-  border-bottom: 1px solid v-bind('themeVars.borderColor');
-  background-color: v-bind('themeVars.cardColor');
-  transition: all 0.2s ease;
-  user-select: none;
+  flex-direction: column;
+  height: 100%;
+  min-height: 100vh;
+  justify-content: space-between;
 
-  .brand-logo {
-    width: 38px;
-    height: 38px;
-    border-radius: 10px;
-    background: linear-gradient(135deg, #2563eb 0%, #3b82f6 100%);
+  .brand-header {
+    height: 64px;
+    flex-shrink: 0;
     display: flex;
     align-items: center;
-    justify-content: center;
-    color: #fff;
-    box-shadow: 0 2px 6px rgba(37, 99, 235, 0.3);
-    flex-shrink: 0;
+    gap: 12px;
+    padding: 0 16px;
+    text-decoration: none;
+    border-bottom: 1px solid v-bind('themeVars.borderColor');
+    background-color: v-bind('themeVars.cardColor');
+    transition: all 0.2s ease;
+    user-select: none;
 
-    .brand-logo-icon {
-      width: 20px;
-      height: 20px;
+    .brand-logo {
+      width: 38px;
+      height: 38px;
+      border-radius: 10px;
+      background: linear-gradient(135deg, #2563eb 0%, #3b82f6 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      box-shadow: 0 2px 6px rgba(37, 99, 235, 0.3);
+      flex-shrink: 0;
+
+      .brand-logo-icon {
+        width: 20px;
+        height: 20px;
+      }
+    }
+
+    .brand-text {
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+
+      .brand-title-wrap {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+
+        .brand-title {
+          font-size: 16px;
+          font-weight: 700;
+          line-height: 1.2;
+          color: v-bind('themeVars.textColorBase');
+          letter-spacing: normal;
+        }
+      }
+
+      .brand-subtitle {
+        font-size: 11px;
+        color: v-bind('themeVars.textColor3');
+        margin-top: 2px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
     }
   }
 
-  .brand-text {
-    display: flex;
-    flex-direction: column;
-    min-width: 0;
-
-    .brand-title-wrap {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-
-      .brand-title {
-        font-size: 16px;
-        font-weight: 700;
-        line-height: 1.2;
-        color: v-bind('themeVars.textColorBase');
-        letter-spacing: normal;
-      }
-
-      .brand-badge {
-        font-size: 10px;
-        font-weight: 600;
-        line-height: 1;
-        padding: 2px 5px;
-        border-radius: 4px;
-        background-color: rgba(37, 99, 235, 0.1);
-        border: 1px solid rgba(37, 99, 235, 0.25);
-        color: #2563eb;
-      }
-    }
-
-    .brand-subtitle {
-      font-size: 11px;
-      color: v-bind('themeVars.textColor3');
-      margin-top: 2px;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
+  .sider-content {
+    flex: 1;
+    overflow-y: auto;
+    padding: 8px 0;
   }
 }
 </style>

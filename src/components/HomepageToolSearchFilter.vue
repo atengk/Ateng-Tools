@@ -5,7 +5,7 @@
   @since 2026-10-02
 -->
 <script setup lang="ts">
-import { ref } from 'vue';
+import { computed, ref } from 'vue';
 import { Search as SearchIcon, X as ClearIcon } from '@vicons/tabler';
 import { NIcon, useThemeVars } from 'naive-ui';
 import { brandTokens } from '@/styles/tokens';
@@ -33,6 +33,11 @@ const emit = defineEmits<{
 const themeVars = useThemeVars();
 const inputRef = ref<HTMLInputElement>();
 const isFocused = ref(false);
+
+const isMac = computed(() => {
+  if (typeof navigator === 'undefined') return false;
+  return /(Mac|iPhone|iPod|iPad)/i.test(navigator.platform || navigator.userAgent);
+});
 
 function onInput(event: Event) {
   const target = event.target as HTMLInputElement;
@@ -114,10 +119,12 @@ defineExpose({
         </button>
 
         <!-- 桌面端快捷键指引 -->
-        <div class="shortcut-hints">
+        <div class="shortcut-hints select-none">
           <span v-if="!isSearching" class="shortcut-hint-item">
+            <kbd class="shortcut-kbd">{{ isMac ? '⌘' : 'Ctrl' }}</kbd>
+            <kbd class="shortcut-kbd">K</kbd>
+            <span class="shortcut-sep">/</span>
             <kbd class="shortcut-kbd">/</kbd>
-            <span class="hint-text">{{ $t('home.search.shortcutFocus') }}</span>
           </span>
           <span v-else class="shortcut-hint-item">
             <kbd class="shortcut-kbd">Esc</kbd>
@@ -248,6 +255,13 @@ defineExpose({
         background-color: rgba(125, 125, 125, 0.1);
         border: 1px solid rgba(125, 125, 125, 0.2);
         color: v-bind('themeVars.textColor2');
+      }
+
+      .shortcut-sep {
+        font-size: 11px;
+        color: v-bind('themeVars.textColor3');
+        opacity: 0.6;
+        margin: 0 1px;
       }
 
       .hint-text {

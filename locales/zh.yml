@@ -3,22 +3,25 @@ home:
   badge: 'v1.0'
   subtitle: '个人开发者在线工具箱'
   hero:
-    badge: 'Ateng-Tools 开发者工具箱'
-    architecture: '纯客户端离线安全架构'
+    badge: '100% 纯客户端离线'
+    architecture: '纯前端离线安全架构'
     title: '高效、私密、纯前端运行的开发辅助百宝箱'
-    description: '所有数据转换、加解密与格式化计算均在浏览器沙箱内存中本地完成，数据不经由任何远端服务器。全站精选收录 100+ 款开发调试与日常辅助利器。'
+    description: '全站计算零远端上传，数据不离开你的浏览器。'
     stats:
       total: '收录工具：'
       new: '自研新增：'
       privacy: '隐私保障：'
       privacyValue: '100% 零泄漏'
       unit: '款'
+  sidebar:
+    navigation: '分类导航'
+    domainCategories: '领域分类'
   filter:
     all: '全部工具'
     current: '当前分类：'
     noFavorites: '暂无收藏，点击工具卡片右上角的“☆”即可快速收录至此'
     noMatch: '未检索到匹配的小工具，尝试清除搜索或切换分类'
-    favoriteHint: '点击卡片右上角星号可添加或移出收藏'
+    favoriteHint: '点击卡片右上角星标快捷置顶'
   search:
     placeholder: '实时搜索工具名称、拼音首字母 (如 ewm) 或关键词...'
     clear: '清空搜索'
@@ -28,6 +31,41 @@ home:
     matchCuePinyin: '拼音: {value}'
     matchCueKeyword: '关键词: {value}'
     matchCuePath: '路径: {value}'
+  card:
+    offlineTag: '⚡ 纯前端离线'
+    openTool: '打开工具'
+    features:
+      fastForecast: '极速预测'
+      visualInteractive: '可视化交互'
+      commandCheatsheet: '命令行速查'
+      oneClickGenerate: '一键生成'
+      guiInterface: '图形界面'
+      formatting: '格式化'
+      minification: '极致压缩'
+      sqlOptimization: 'SQL 优化'
+      smartRestore: '智能还原'
+      permissionCalc: '权限计算'
+      distributed: '分布式'
+      modernSyntax: '现代语法'
+      cryptoSecurity: '加密安全'
+      realtimeTest: '实时测试'
+      apiDebugging: '接口调试'
+      tokenVerify: 'Token 校验'
+      quickCodec: '快捷编解码'
+      uniqueId: '唯一标识'
+      timezoneConvert: '时区换算'
+      textDiff: '文本比对'
+      qrCodeGenerate: '二维码生成'
+      barcodeGenerate: '条码生成'
+      pdfParse: '免装解析'
+      devAccelerate: '开发加速'
+      formatConvert: '格式转换'
+      localSecurity: '本地安全'
+      networkDebug: '网络调试'
+      textProcessing: '文本处理'
+      mediaGenerate: '媒体生成'
+      preciseMeasure: '精确度量'
+      readyOffline: '离线即用'
   attribution:
     forkNotice: '基于 IT-Tools 二开构建'
     licenseNotice: '© 2026 Ateng · 遵循 GPLv3 开源协议'
@@ -49,6 +87,7 @@ home:
     darkMode: '深色模式'
     lightMode: '浅色模式'
     mode: '颜色模式'
+    selectLanguage: '切换语言'
 commandPalette:
   placeholder: '搜索小工具名称、拼音首字母 (如 ewm) 或快捷指令...'
   emptyNotice: '未找到匹配的小工具或快捷指令'
@@ -119,6 +158,8 @@ search:
   placeholder: '输入以搜索工具或指令...'
 tools:
   regex-tester:
+    title: '正则表达式测试'
+    description: '在线测试并验证正则表达式与样本匹配效果，支持轨道图可视化'
     invalidRegex: '无效的正则表达式：{0}'
     cardRegex: '正则表达式配置'
     regexLabel: '待测试的正则表达式：'
@@ -148,7 +189,13 @@ tools:
     cardSample: '逆向生成示例匹配文本'
     cardDiagram: '正则表达式状态机可视化轨道图'
 
+  regex-memo:
+    title: '正则表达式速查备忘'
+    description: 'JavaScript 正则表达式语法、修饰符与常用模式速查'
+
   email-normalizer:
+    title: '邮箱地址规范化'
+    description: '将邮箱地址标准化处理，便于去重、对比与清洗'
     inputLabel: '待规范化的原始邮箱列表：'
     inputPlaceholder: '在此输入邮箱地址 (每行一个)...'
     outputLabel: '规范化后的邮箱地址：'
@@ -159,6 +206,8 @@ tools:
     copiedToast: '规范化邮箱地址已成功复制到剪贴板'
 
   ascii-text-drawer:
+    title: 'ASCII 艺术字生成器'
+    description: '输入普通文字，一键生成丰富字体的 ASCII 艺术文本'
     inputLabel: '待绘制的文本：'
     inputPlaceholder: '输入要绘制为 ASCII 艺术字的文本...'
     fontLabel: '艺术字体：'
@@ -168,6 +217,30 @@ tools:
     loadingFont: '正在加载字体渲染...'
     errorNotice: '当前配置参数导致生成错误，请尝试调整宽度或字体。'
     outputLabel: 'ASCII 艺术字文本：'
+
+  xml-to-json:
+    title: 'XML 转 JSON'
+    description: '在线将 XML 结构数据快速转换为 JSON 格式'
+    invalidXml: '输入的 XML 格式无效'
+    inputLabel: '输入的 XML 内容'
+    inputPlaceholder: '在此粘贴 XML 内容...'
+    outputLabel: '转换后的 JSON'
+
+  json-to-xml:
+    title: 'JSON 转 XML'
+    description: '在线将 JSON 结构数据快速转换为 XML 格式'
+    invalidJson: '输入的 JSON 格式无效'
+    inputLabel: '输入的 JSON 内容'
+    inputPlaceholder: '在此粘贴 JSON 内容...'
+    outputLabel: '转换后的 XML'
+
+  markdown-to-html:
+    title: 'Markdown 转 HTML'
+    description: '在线将 Markdown 格式文档转换为标准 HTML 格式'
+    inputLabel: '待转换的 Markdown 内容：'
+    inputPlaceholder: '在此输入 Markdown 内容...'
+    outputLabel: '转换后的 HTML：'
+    printPdf: '打印 / 导出为 PDF'
 
   safelink-decoder:
     title: '安全链接解码器'

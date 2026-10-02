@@ -3,22 +3,25 @@ home:
   badge: 'v1.0'
   subtitle: 'Handy online tools for developers'
   hero:
-    badge: 'Ateng-Tools Developer Toolbox'
+    badge: '100% Client-Side Offline'
     architecture: '100% Client-Side Safe Architecture'
     title: 'Handy, private, client-side tools for developers'
-    description: 'All conversions, encryption, and formatting take place entirely in your browser sandbox memory. No data is sent to external servers. Handcrafted collection of 100+ developer tools.'
+    description: 'All computations take place entirely in your browser. No data leaves your machine.'
     stats:
       total: 'Tools included:'
       new: 'Newly added:'
       privacy: 'Privacy guaranteed:'
       privacyValue: '100% Zero-Leak'
       unit: 'tools'
+  sidebar:
+    navigation: 'Navigation'
+    domainCategories: 'Categories'
   filter:
     all: 'All Tools'
     current: 'Current category:'
     noFavorites: 'No favorite tools yet. Click "☆" on any tool card to add it here.'
     noMatch: 'No matching tools found. Try clearing your search or switching categories.'
-    favoriteHint: 'Click the star icon to add or remove favorites'
+    favoriteHint: 'Click card star to pin here'
   search:
     placeholder: 'Search tools by name, pinyin initials (e.g. ewm), or keywords...'
     clear: 'Clear search'
@@ -28,6 +31,41 @@ home:
     matchCuePinyin: 'Pinyin: {value}'
     matchCueKeyword: 'Keyword: {value}'
     matchCuePath: 'Path: {value}'
+  card:
+    offlineTag: '⚡ 100% Offline'
+    openTool: 'Open'
+    features:
+      fastForecast: 'Fast Prediction'
+      visualInteractive: 'Visual Interactive'
+      commandCheatsheet: 'CLI Cheatsheet'
+      oneClickGenerate: 'Instant Gen'
+      guiInterface: 'GUI Interface'
+      formatting: 'Formatter'
+      minification: 'Minifier'
+      sqlOptimization: 'SQL Optimizer'
+      smartRestore: 'Smart Restore'
+      permissionCalc: 'Permission Calc'
+      distributed: 'Distributed'
+      modernSyntax: 'Modern Syntax'
+      cryptoSecurity: 'Crypto Security'
+      realtimeTest: 'Real-time Test'
+      apiDebugging: 'API Debug'
+      tokenVerify: 'Token Verify'
+      quickCodec: 'Quick Codec'
+      uniqueId: 'Unique ID'
+      timezoneConvert: 'Timezone Convert'
+      textDiff: 'Text Diff'
+      qrCodeGenerate: 'QR Code Gen'
+      barcodeGenerate: 'Barcode Gen'
+      pdfParse: 'Offline PDF'
+      devAccelerate: 'Dev Boost'
+      formatConvert: 'Format Convert'
+      localSecurity: 'Client Security'
+      networkDebug: 'Network Debug'
+      textProcessing: 'Text Processing'
+      mediaGenerate: 'Media Gen'
+      preciseMeasure: 'Precise Calc'
+      readyOffline: 'Offline Ready'
   attribution:
     forkNotice: 'Built upon IT-Tools'
     licenseNotice: '© 2026 Ateng · Licensed under GPLv3'
@@ -49,6 +87,7 @@ home:
     darkMode: 'Dark mode'
     lightMode: 'Light mode'
     mode: 'Toggle dark/light mode'
+    selectLanguage: 'Select language'
 commandPalette:
   placeholder: 'Search tools, Pinyin initials (e.g. ewm), or actions...'
   emptyNotice: 'No matching tools or actions found'
@@ -119,6 +158,8 @@ search:
   placeholder: 'Type to search a tool or a command...'
 tools:
   regex-tester:
+    title: 'Regex Tester'
+    description: 'Test your regular expressions with sample text and visualization.'
     invalidRegex: 'Invalid regex: {0}'
     cardRegex: 'Regex'
     regexLabel: 'Regex to test:'
@@ -148,7 +189,13 @@ tools:
     cardSample: 'Sample matching text'
     cardDiagram: 'Regex Diagram'
 
+  regex-memo:
+    title: 'Regex cheatsheet'
+    description: 'Javascript Regex/Regular Expression cheatsheet'
+
   email-normalizer:
+    title: 'Email normalizer'
+    description: 'Normalize email addresses to a standard format for easier comparison. Useful for deduplication and data cleaning.'
     inputLabel: 'Raw emails to normalize:'
     inputPlaceholder: 'Put your emails here (one per line)...'
     outputLabel: 'Normalized emails:'
@@ -159,6 +206,8 @@ tools:
     copiedToast: 'Normalized emails copied to the clipboard'
 
   ascii-text-drawer:
+    title: 'ASCII Art Text Generator'
+    description: 'Create ASCII art text with many fonts and styles.'
     inputLabel: 'Your text:'
     inputPlaceholder: 'Your text to draw'
     fontLabel: 'Font:'
@@ -168,6 +217,30 @@ tools:
     loadingFont: 'Loading font...'
     errorNotice: 'Current settings resulted in error.'
     outputLabel: 'Ascii Art text:'
+
+  xml-to-json:
+    title: 'XML to JSON'
+    description: 'Convert XML formatted text into JSON structure'
+    invalidXml: 'Invalid XML provided'
+    inputLabel: 'Input XML'
+    inputPlaceholder: 'Paste XML content here...'
+    outputLabel: 'Converted JSON'
+
+  json-to-xml:
+    title: 'JSON to XML'
+    description: 'Convert JSON formatted text into XML structure'
+    invalidJson: 'Invalid JSON provided'
+    inputLabel: 'Input JSON'
+    inputPlaceholder: 'Paste JSON content here...'
+    outputLabel: 'Converted XML'
+
+  markdown-to-html:
+    title: 'Markdown to HTML'
+    description: 'Convert Markdown formatted documents into standard HTML format'
+    inputLabel: 'Markdown content to convert:'
+    inputPlaceholder: 'Enter Markdown content here...'
+    outputLabel: 'Converted HTML:'
+    printPdf: 'Print / Export to PDF'
 
   safelink-decoder:
     title: 'Safelink decoder'

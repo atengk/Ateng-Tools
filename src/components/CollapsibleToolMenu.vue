@@ -1,353 +1,157 @@
+<!--
+  侧边栏扁平领域分类导航组件 (Flat Category Navigation)
+  100% 对齐原型设计：仅包含全量工具、我的收藏与 8 大领域分类联动，不展开二级冗长子菜单
+
+  @author Ateng
+  @since 2026-10-02
+-->
 <script setup lang="ts">
-import { useStorage } from '@vueuse/core';
-import { useThemeVars } from 'naive-ui';
-import { RouterLink, useRoute, useRouter } from 'vue-router';
-import { ChevronRight as IconChevronRight } from '@vicons/tabler';
-import MenuIconItem from './MenuIconItem.vue';
-import type { Tool, ToolCategory } from '@/tools/tools.types';
+import { computed } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
+import type { ToolCategory } from '@/tools/tools.types';
 import { useToolStore } from '@/tools/tools.store';
 import { useCategory } from '@/composable/category';
 
-const props = withDefaults(defineProps<{ toolsByCategory?: ToolCategory[] }>(), { toolsByCategory: () => [] });
-const { toolsByCategory } = toRefs(props);
+withDefaults(defineProps<{ toolsByCategory?: ToolCategory[] }>(), { toolsByCategory: () => [] });
+
 const route = useRoute();
 const router = useRouter();
 const toolStore = useToolStore();
-const themeVars = useThemeVars();
 const { getCategoryTitle } = useCategory();
-
-const makeLabel = (tool: Tool) => () => h(RouterLink, { to: tool.path }, { default: () => tool.name });
-const makeIcon = (tool: Tool) => () => h(MenuIconItem, { tool });
 
 const categoryEmojiMap: Record<string, string> = {
   all: '🏠',
-  '全部工具': '🏠',
-  'all tools': '🏠',
-  '我的常用收藏': '⭐',
-  '我的收藏': '⭐',
-  'favorite-tools': '⭐',
-  'your favorite tools': '⭐',
+  favorite: '⭐',
   dev: '💻',
-  '开发运维': '💻',
-  '开发': '💻',
-  development: '💻',
   converter: '🔄',
-  '格式转换': '🔄',
-  '转换器': '🔄',
   security: '🔐',
-  '加密安全': '🔐',
-  '加密': '🔐',
-  crypto: '🔐',
   network: '🌐',
-  '网络与 Web': '🌐',
-  '网络': '🌐',
-  'network & web': '🌐',
-  web: '🌐',
   text: '📝',
-  '文本与内容': '📝',
-  '文本': '📝',
-  'text & content': '📝',
   pdf: '📄',
-  'pdf 工具': '📄',
-  'pdf tools': '📄',
   media: '🖼️',
-  '图形多媒体': '🖼️',
-  '图片和视频': '🖼️',
-  'images and videos': '🖼️',
-  'images & videos': '🖼️',
-  'media & graphic': '🖼️',
   calc: '📐',
-  '计算度量': '📐',
-  '计算与度量': '📐',
-  '数学': '📐',
-  '测量': '📏',
-  math: '📐',
-  measurement: '📏',
-  'math & measurement': '📐',
-  data: '📊',
-  '数据': '📊',
 };
 
-function getCategoryEmoji(name: string): string {
-  return categoryEmojiMap[name] || categoryEmojiMap[name.toLowerCase()] || '📦';
-}
+// 预定义 8 大领域标准顺序
+const DOMAIN_CATEGORY_KEYS = [
+  'dev',
+  'converter',
+  'security',
+  'network',
+  'text',
+  'pdf',
+  'media',
+  'calc',
+];
 
-const collapsedCategories = useStorage<Record<string, boolean>>(
-  'ateng-tools:collapsed-categories',
-  {},
-  undefined,
-  {
-    deep: true,
-    serializer: {
-      read: v => (v ? JSON.parse(v) : {}),
-      write: v => JSON.stringify(v),
-    },
-  },
-);
+const totalToolsCount = computed(() => toolStore.tools.length);
+const favoriteCount = computed(() => toolStore.favoriteTools.length);
 
-// 监听当前路由，智能自动展开激活工具所在的分类
-watch(
-  () => route.path,
-  (currentPath) => {
-    if (!currentPath || currentPath === '/') {
-      return;
-    }
-    const matchedCategory = toolsByCategory.value.find(category =>
-      category.components.some(tool => tool.path === currentPath),
+const categoryList = computed(() => {
+  return DOMAIN_CATEGORY_KEYS.map((key) => {
+    const found = toolStore.toolsByCategory.find(
+      c => c.name.toLowerCase() === key.toLowerCase() || getCategoryTitle(c.name).toLowerCase() === key.toLowerCase(),
     );
-    if (matchedCategory) {
-      collapsedCategories.value[matchedCategory.name] = false;
-    }
-  },
-  { immediate: true },
-);
+    return {
+      key,
+      emoji: categoryEmojiMap[key] || '📦',
+      title: getCategoryTitle(key),
+      count: found ? found.components.length : 0,
+    };
+  });
+});
 
-function toggleCategoryCollapse(name: string, event?: Event) {
-  if (event) {
-    event.stopPropagation();
-  }
-  const current = collapsedCategories.value[name] ?? true;
-  collapsedCategories.value[name] = !current;
-}
-
-function handleCategorySelect(name: string) {
-  toolStore.setSelectedCategory(name);
+function handleCategorySelect(catKey: string) {
+  toolStore.setSelectedCategory(catKey);
   if (route.path !== '/') {
     router.push('/');
   }
 }
-
-const totalToolsCount = computed(() => toolStore.tools.length);
-
-const menuOptions = computed(() =>
-  toolsByCategory.value.map(({ name, components }) => {
-    const isCurrentActive = components.some(tool => tool.path === route.path);
-    const explicitlySet = name in collapsedCategories.value;
-    const isCollapsed = explicitlySet ? collapsedCategories.value[name] : !isCurrentActive;
-
-    return {
-      name,
-      count: components.length,
-      isCollapsed,
-      tools: components.map(tool => ({
-        label: makeLabel(tool),
-        icon: makeIcon(tool),
-        key: tool.path,
-      })),
-    };
-  }),
-);
 </script>
 
 <template>
-  <div class="sidebar-category-nav">
-    <div class="nav-section-title">
-      {{ $t('home.brand') }} · 分类导航
+  <div class="sidebar-category-nav select-none flex flex-col space-y-1 text-xs px-3 py-2">
+    <!-- 顶部分类导航分组标题 -->
+    <div class="px-2 py-1 text-[11px] font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider">
+      {{ $t('home.sidebar.navigation', '分类导航') }}
     </div>
 
-    <!-- 全部工具快捷项 (对齐原型) -->
-    <div
-      class="category-nav-item"
-      :class="{ active: route.path === '/' && toolStore.selectedCategory === 'all' }"
+    <!-- 全部工具快捷项 -->
+    <button
+      type="button"
+      class="nav-item w-full flex items-center justify-between px-3 py-2 rounded-lg font-medium transition-all text-left border-none cursor-pointer"
+      :class="route.path === '/' && toolStore.selectedCategory === 'all'
+        ? 'active-nav bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 font-bold'
+        : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 bg-transparent'"
       @click="handleCategorySelect('all')"
     >
-      <div class="item-left">
-        <span class="category-icon">🏠</span>
-        <span class="category-title">{{ $t('home.filter.all') }}</span>
+      <div class="flex items-center gap-2.5">
+        <span class="text-sm">🏠</span>
+        <span>{{ $t('home.filter.all', '全部工具') }}</span>
       </div>
-      <span class="count-pill highlight">
+      <span
+        class="count-badge px-1.5 py-0.5 rounded-full text-[10px] font-bold"
+        :class="route.path === '/' && toolStore.selectedCategory === 'all'
+          ? 'bg-blue-200/60 dark:bg-blue-900/80 text-blue-700 dark:text-blue-300'
+          : 'bg-slate-200/60 dark:bg-slate-800 text-slate-600 dark:text-slate-400'"
+      >
         {{ totalToolsCount }}
       </span>
-    </div>
+    </button>
 
-    <!-- 各分类导航手风琴列表 -->
-    <div
-      v-for="{ name, count, tools, isCollapsed } of menuOptions"
-      :key="name"
-      class="category-group"
-    >
-      <div
-        class="category-nav-item"
-        :class="{ active: route.path === '/' && toolStore.selectedCategory === name }"
-        @click="handleCategorySelect(name)"
+    <!-- 我的收藏快捷项 -->
+    <div class="pt-0.5">
+      <button
+        type="button"
+        class="nav-item w-full flex items-center justify-between px-3 py-2 rounded-lg font-medium transition-all text-left border-none cursor-pointer"
+        :class="route.path === '/' && toolStore.selectedCategory === 'favorite'
+          ? 'active-nav bg-amber-50 dark:bg-amber-950/60 text-amber-600 dark:text-amber-400 font-bold'
+          : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 bg-transparent'"
+        @click="handleCategorySelect('favorite')"
       >
-        <div class="item-left">
-          <span class="category-icon">{{ getCategoryEmoji(name) }}</span>
-          <span class="category-title">{{ getCategoryTitle(name) }}</span>
+        <div class="flex items-center gap-2.5">
+          <span class="text-amber-500 text-sm">⭐</span>
+          <span>{{ $t('home.categories.favoriteTools', '我的收藏') }}</span>
         </div>
-
-        <div class="item-right">
-          <span class="count-pill">
-            {{ count }}
-          </span>
-          <button
-            type="button"
-            class="collapse-toggle-btn"
-            :title="isCollapsed ? '展开工具清单' : '折叠工具清单'"
-            @click="toggleCategoryCollapse(name, $event)"
-          >
-            <span
-              class="arrow-icon"
-              :class="{ expanded: !isCollapsed }"
-            >
-              <n-icon size="14" :component="IconChevronRight" />
-            </span>
-          </button>
-        </div>
-      </div>
-
-      <n-collapse-transition :show="!isCollapsed">
-        <div class="menu-sub-wrapper">
-          <n-menu
-            class="submenu"
-            :value="route.path"
-            :collapsed-width="64"
-            :collapsed-icon-size="20"
-            :options="tools"
-            :indent="10"
-            :default-expand-all="true"
-          />
-        </div>
-      </n-collapse-transition>
+        <span class="count-badge px-1.5 py-0.5 rounded-full text-[10px] font-bold bg-slate-200/60 dark:bg-slate-800 text-slate-600 dark:text-slate-400">
+          {{ favoriteCount }}
+        </span>
+      </button>
     </div>
+
+    <!-- 领域分类分组标题 -->
+    <div class="pt-3 px-2 py-1 text-[11px] font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider">
+      {{ $t('home.sidebar.domainCategories', '领域分类') }}
+    </div>
+
+    <!-- 8 大领域分类导航项 -->
+    <button
+      v-for="cat in categoryList"
+      :key="cat.key"
+      type="button"
+      class="nav-item w-full flex items-center justify-between px-3 py-2 rounded-lg font-medium transition-all text-left border-none cursor-pointer"
+      :class="route.path === '/' && (toolStore.selectedCategory === cat.key || toolStore.selectedCategory.toLowerCase() === cat.key.toLowerCase() || getCategoryTitle(cat.key) === toolStore.selectedCategory)
+        ? 'active-nav bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 font-bold'
+        : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 bg-transparent'"
+      @click="handleCategorySelect(cat.key)"
+    >
+      <div class="flex items-center gap-2.5">
+        <span class="text-sm">{{ cat.emoji }}</span>
+        <span>{{ cat.title }}</span>
+      </div>
+      <span class="text-slate-400 text-[10px] font-normal">
+        {{ cat.count }}
+      </span>
+    </button>
   </div>
 </template>
 
 <style scoped lang="less">
-.sidebar-category-nav {
-  padding: 0 10px;
-  display: flex;
-  flex-direction: column;
-  gap: 3px;
-}
-
-.nav-section-title {
-  font-size: 11px;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  padding: 8px 10px 4px;
-  color: v-bind('themeVars.textColor3');
-}
-
-.category-nav-item {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 8px 10px;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: all 0.16s ease;
-  user-select: none;
-  border: 1px solid transparent;
+.nav-item {
+  outline: none;
 
   &:hover {
-    background-color: rgba(37, 99, 235, 0.05);
-  }
-
-  &.active {
-    background-color: rgba(37, 99, 235, 0.09);
-    border-color: rgba(37, 99, 235, 0.25);
-
-    .category-title {
-      color: #2563eb;
-      font-weight: 600;
-    }
-
-    .count-pill {
-      background-color: rgba(37, 99, 235, 0.18);
-      color: #2563eb;
-      font-weight: 700;
-    }
-  }
-
-  .item-left {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    min-width: 0;
-
-    .category-icon {
-      font-size: 14px;
-      line-height: 1;
-      flex-shrink: 0;
-    }
-
-    .category-title {
-      font-size: 13px;
-      color: v-bind('themeVars.textColor2');
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-  }
-
-  .item-right {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    flex-shrink: 0;
-  }
-
-  .count-pill {
-    font-size: 11px;
-    padding: 1px 6px;
-    border-radius: 9999px;
-    background-color: rgba(148, 163, 184, 0.16);
-    color: v-bind('themeVars.textColor3');
-    font-weight: 500;
-    line-height: 1.2;
-
-    &.highlight {
-      background-color: rgba(37, 99, 235, 0.12);
-      color: #2563eb;
-      font-weight: 700;
-    }
-  }
-
-  .collapse-toggle-btn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 20px;
-    height: 20px;
-    border-radius: 4px;
-    background: transparent;
-    border: none;
-    cursor: pointer;
-    color: v-bind('themeVars.textColor3');
-    padding: 0;
-    transition: all 0.16s ease;
-
-    &:hover {
-      background-color: rgba(0, 0, 0, 0.06);
-      color: v-bind('themeVars.textColor1');
-    }
-
-    .arrow-icon {
-      display: inline-flex;
-      transform: rotate(0deg);
-      transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-
-      &.expanded {
-        transform: rotate(90deg);
-      }
-    }
-  }
-}
-
-.menu-sub-wrapper {
-  padding-left: 12px;
-  margin: 2px 0 6px 12px;
-  border-left: 2px solid rgba(148, 163, 184, 0.2);
-
-  .submenu {
-    ::v-deep(.n-menu-item) {
-      height: 34px;
-    }
-    ::v-deep(.n-menu-item-content) {
-      font-size: 12px;
-    }
+    transform: translateX(1px);
   }
 }
 </style>

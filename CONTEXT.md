@@ -160,8 +160,12 @@ _避免使用 (Avoid)_: Value Cleaner, Quote Adder
 _避免使用 (Avoid)_: In-Page Search, Card Filter, Quick Search Input
 
 **Portal Hero Section**:
-首页主体顶部的居中一体化欢迎与核心入口单元，聚合离线私密安全标语、全站数据量度指标与即时全局搜索栏。
+首页主体顶部的通透极简居中欢迎与核心入口单元，剥离冗余大卡片底色与装饰性指标格子，高度控制在 105px 左右，直接聚合纯离线安全徽标与单真理源即时搜索栏。
 _避免使用 (Avoid)_: Top Banner, Welcome Box, Big Banner
+
+**Single Source Search**:
+全站首页的单真理源即时搜索交互架构，在首页彻底隐藏顶栏搜索条，并将全局快捷键（`Ctrl+K`、`⌘K`、`/`）100% 统一路由聚焦至中央主搜索框，消除双搜索歧义。
+_避免使用 (Avoid)_: Dual Search, Top Search Bar, Duplicate Search Box
 
 **Favorites Quick Shelf**:
 首页中以横向弹性微卡片呈现用户标星工具的轻量化陈列货架，提供领域图标、精简标题与拖拽手柄，避免在少量收藏时破坏网格平衡。
@@ -179,6 +183,14 @@ _避免使用 (Avoid)_: Icon Box, Round Icon, Tool Glyph
 全站首页与展示列表在大屏显示器下的标准化最大宽度容器与居中对齐基线，消除超宽屏下卡片横向拉伸失衡。
 _避免使用 (Avoid)_: Max Width Wrap, Page Container, Content Limiter
 
+**Favorites Chip Tile**:
+常用收藏货架中采用的紧凑横向弹性磁贴芯片（高度约 40px），仅包含 32px 微图标、工具标题、分类小标与快捷移出星标，彻底取代大面积全尺寸卡片。
+_避免使用 (Avoid)_: Favorite Card, Star Item, Bookmark Box
+
+**Dynamic Colorful Icon Palette**:
+为工具卡片微底色容器提供丰富视觉辨识度的多样化柔和浅底调色板（包含青、蓝、翠绿、紫、琥珀、橙、粉等），杜绝同一分类下卡片图标千篇一律单调发灰。
+_避免使用 (Avoid)_: Random Color, Icon Style, Theme Colors
+
 **Pinyin Token Indexer**:
 在客户端内存中将工具中文名称及描述预编译或实时提取为拼音全拼与拼音首字母缩写的轻量级分词索引引擎，用于增强 Fuse.js 模糊匹配在中文场景下的无感命中能力。
 _避免使用 (Avoid)_: Pinyin Converter, Chinese Search Helper, Pinyin Parser
@@ -186,6 +198,14 @@ _避免使用 (Avoid)_: Pinyin Converter, Chinese Search Helper, Pinyin Parser
 **Tool Category Filter**:
 首页用于按领域分类（如开发运维、数据转换、安全加密、网络测量等）即时筛选工具集合的交互式标签组。
 _避免使用 (Avoid)_: Tool Selector, Type Switcher, Category Pill
+
+**Flat Category Navigation**:
+侧边栏中采用的扁平单层领域分类导航，仅包含全量工具、收藏快捷项与 8 大领域分类及计数徽章，点击联动右侧分类筛选，不展开二级工具长列表，保持侧边栏清爽与高利用率。
+_避免使用 (Avoid)_: Tree Menu, Submenu List, Nested Navigation
+
+**Feature Highlight Tag**:
+在 Enhanced Tool Card 左下角以微字号呈现的具体工具专属能力亮点标签（如 `⚡ 极速预测`、`⚡ 可视化交互`），以个性化亮点替换同质化重复标签。
+_避免使用 (Avoid)_: Offline Tag, Card Badge, Tool Label
 
 **Enhanced Tool Card**:
 首页与工具列表呈现具体小工具的基础卡片单元，包含领域图标、多语言本地化名称、简短功能描述、新功能徽标、所属分类胶囊与收藏开关。

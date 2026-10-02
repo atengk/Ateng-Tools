@@ -7,7 +7,9 @@ import { toolsWithCategory } from './index';
 
 export const useToolStore = defineStore('tools', () => {
   const favoriteToolsName = useStorage('favoriteToolsName', []) as Ref<string[]>;
-  const { t } = useI18n();
+  const i18n = useI18n();
+  const t = i18n.t;
+  const hasKey = (key: string) => typeof i18n?.te === 'function' && i18n.te(key);
 
   const tools = computed<ToolWithCategory[]>(() => toolsWithCategory.map((tool) => {
     const toolI18nKey = tool.path.replace(/\//g, '');
@@ -15,9 +17,9 @@ export const useToolStore = defineStore('tools', () => {
     return ({
       ...tool,
       path: tool.path,
-      name: t(`tools.${toolI18nKey}.title`, tool.name),
-      description: t(`tools.${toolI18nKey}.description`, tool.description),
-      category: t(`tools.categories.${tool.category.toLowerCase()}`, tool.category),
+      name: hasKey(`tools.${toolI18nKey}.title`) ? t(`tools.${toolI18nKey}.title`) : tool.name,
+      description: hasKey(`tools.${toolI18nKey}.description`) ? t(`tools.${toolI18nKey}.description`) : tool.description,
+      category: tool.category,
     });
   }));
 

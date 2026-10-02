@@ -1,15 +1,39 @@
 <script setup lang="ts">
-import { IconDragDrop } from '@tabler/icons-vue';
 import { useHead } from '@vueuse/head';
 import { computed, onMounted, onUnmounted, ref, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import Draggable from 'vuedraggable';
 import { useThemeVars } from 'naive-ui';
 import ToolCard from '../components/ToolCard.vue';
+import FavoriteChipTile from '../components/FavoriteChipTile.vue';
 import HomepageToolSearchFilter from '../components/HomepageToolSearchFilter.vue';
 import { useToolStore } from '@/tools/tools.store';
 import { useCategory } from '@/composable/category';
 import { useToolSearch } from '@/composable/toolSearch';
+import { brandTokens } from '@/styles/tokens';
+import {
+  Calculator as IconCalculator,
+  Code as IconCode,
+  File as IconFile,
+  FileText as IconFileText,
+  Home as IconHome,
+  Photo as IconPhoto,
+  Refresh as IconRefresh,
+  ShieldLock as IconShieldLock,
+  World as IconWorld,
+} from '@vicons/tabler';
+
+const categoryIconMap: Record<string, any> = {
+  all: IconHome,
+  dev: IconCode,
+  converter: IconRefresh,
+  security: IconShieldLock,
+  network: IconWorld,
+  text: IconFileText,
+  pdf: IconFile,
+  media: IconPhoto,
+  calc: IconCalculator,
+};
 
 const toolStore = useToolStore();
 const theme = useThemeVars();
@@ -129,18 +153,45 @@ onUnmounted(() => {
   window.removeEventListener('keydown', handleGlobalKeydown);
 });
 
+const categoryEmojiMap: Record<string, string> = {
+  all: '',
+  favorite: '⭐',
+  dev: '💻',
+  converter: '🔄',
+  security: '🔐',
+  network: '🌐',
+  text: '📝',
+  pdf: '📄',
+  media: '🖼️',
+  calc: '📐',
+};
+
 const categoryOptions = computed(() => {
   if (isSearching.value) {
     return [
-      { key: 'all', label: t('home.filter.all'), count: searchedTools.value.length },
+      {
+        key: 'all',
+        label: t('home.filter.all'),
+        count: searchedTools.value.length,
+        emoji: '',
+        icon: categoryIconMap.all,
+      },
     ];
   }
   return [
-    { key: 'all', label: t('home.filter.all'), count: toolStore.tools.length },
+    {
+      key: 'all',
+      label: t('home.filter.all'),
+      count: toolStore.tools.length,
+      emoji: '',
+      icon: categoryIconMap.all,
+    },
     ...toolStore.toolsByCategory.map(cat => ({
       key: cat.name,
       label: getCategoryTitle(cat.name),
       count: cat.components.length,
+      emoji: categoryEmojiMap[cat.name] || '',
+      icon: categoryIconMap[cat.name] || IconHome,
     })),
   ];
 });
@@ -149,10 +200,17 @@ const filteredTools = computed(() => {
   if (isSearching.value) {
     return searchedTools.value;
   }
-  if (selectedCategory.value === 'all') {
+  const sel = selectedCategory.value?.toLowerCase() || 'all';
+  if (sel === 'all') {
     return toolStore.tools;
   }
-  return toolStore.tools.filter(tool => tool.category === selectedCategory.value);
+  if (sel === 'favorite') {
+    return favoriteTools.value;
+  }
+  return toolStore.tools.filter((tool) => {
+    const cat = tool.category?.toLowerCase() || '';
+    return cat === sel || getCategoryTitle(cat).toLowerCase() === sel;
+  });
 });
 
 // Update favorite tools order when drag is finished
@@ -164,25 +222,19 @@ function onUpdateFavoriteTools() {
 <template>
   <div class="home-page-container">
     <div class="content-wrapper">
-      <!-- 现代化 Hero 欢迎卡片 -->
-      <div class="hero-banner">
-        <div class="hero-content">
+      <!-- 现代化通透超薄 Hero 门户 (Portal Hero Section - 单行居中同行) -->
+      <section class="hero-banner">
+        <div class="hero-header-row">
           <div class="hero-badge">
-            <span class="hero-badge-icon">🛠️</span>
-            <span class="hero-badge-title">{{ $t('home.hero.badge') }}</span>
             <span class="pulse-dot" />
-            <span class="hero-badge-sub">{{ $t('home.hero.architecture') }}</span>
+            <span class="hero-badge-title">{{ $t('home.hero.badge') }}</span>
           </div>
 
           <h1 class="hero-title">
             {{ $t('home.hero.title') }}
           </h1>
-
-          <p class="hero-desc">
-            {{ $t('home.hero.description') }}
-          </p>
         </div>
-      </div>
+      </section>
 
       <!-- 首页即时搜索过滤栏 Homepage Tool Search Filter -->
       <HomepageToolSearchFilter
@@ -196,44 +248,36 @@ function onUpdateFavoriteTools() {
         @arrow-up="onArrowUp"
       />
 
-      <!-- 我的常用收藏区 (非空搜索时平滑折叠) -->
+      <!-- 我的常用收藏区 (灵动收藏货架：横向弹性磁贴芯片组，0 收藏静默隐藏) -->
       <transition name="fade">
-        <div v-show="!isSearching" class="favorites-section">
+        <section v-if="!isSearching && favoriteTools.length > 0" class="favorites-section">
           <div class="section-header">
-            <h2 class="section-title">
+            <div class="section-title-wrap">
               <span class="star-icon">★</span>
-              <span>{{ $t('home.categories.favoriteTools') }}</span>
+              <span class="section-title-text">{{ $t('home.categories.favoriteTools') }}</span>
               <span class="count-badge">{{ favoriteTools.length }}</span>
-              <c-tooltip :tooltip="$t('home.categories.favoritesDndToolTip')">
-                <n-icon :component="IconDragDrop" size="16" class="cursor-help opacity-60 hover:opacity-100" />
-              </c-tooltip>
-            </h2>
-            <span class="section-hint">{{ $t('home.filter.favoriteHint') }}</span>
+              <span class="section-sub-hint text-slate-400 text-[11px] font-normal hidden sm:inline">{{ $t('home.filter.favoriteHint') }}</span>
+            </div>
           </div>
 
-          <transition name="height">
-            <div v-if="favoriteTools.length > 0">
-              <Draggable
-                :list="favoriteTools"
-                class="grid grid-cols-1 gap-12px lg:grid-cols-3 md:grid-cols-3 sm:grid-cols-2 xl:grid-cols-4"
-                ghost-class="ghost-favorites-draggable"
-                item-key="name"
-                @end="onUpdateFavoriteTools"
-              >
-                <template #item="{ element: tool }">
-                  <ToolCard :tool="tool" />
-                </template>
-              </Draggable>
-            </div>
-            <div v-else class="empty-favorites">
-              {{ $t('home.filter.noFavorites') }}
-            </div>
-          </transition>
-        </div>
+          <div class="favorites-flow flex flex-wrap items-center gap-2.5">
+            <Draggable
+              :list="favoriteTools"
+              class="flex flex-wrap items-center gap-2.5"
+              ghost-class="ghost-favorites-draggable"
+              item-key="name"
+              @end="onUpdateFavoriteTools"
+            >
+              <template #item="{ element: tool }">
+                <FavoriteChipTile :tool="tool" />
+              </template>
+            </Draggable>
+          </div>
+        </section>
       </transition>
 
       <!-- 分类标签过滤器 Tool Category Filter -->
-      <div class="category-filter-section">
+      <section class="category-filter-section">
         <div class="filter-bar">
           <div class="category-pills">
             <button
@@ -241,17 +285,18 @@ function onUpdateFavoriteTools() {
               :key="cat.key"
               type="button"
               class="cat-pill"
-              :class="{ active: selectedCategory === cat.key }"
+              :class="{ active: selectedCategory === cat.key || selectedCategory.toLowerCase() === cat.key.toLowerCase() }"
               @click="selectedCategory = cat.key"
             >
+              <span v-if="cat.emoji" class="pill-emoji">{{ cat.emoji }}</span>
               <span>{{ cat.label }}</span>
               <span class="pill-count">({{ cat.count }})</span>
             </button>
           </div>
 
-          <div class="current-cat-indicator">
-            <span>{{ $t('home.filter.current') }}</span>
-            <strong>{{ isSearching ? $t('home.search.matchCount', { count: searchedTools.length }) : (selectedCategory === 'all' ? $t('home.filter.all') : getCategoryTitle(selectedCategory)) }}</strong>
+          <!-- 右侧精炼统计信息 (搜索时动态呈现，非搜索时保持清爽静默) -->
+          <div v-if="isSearching" class="search-result-stat text-xs text-slate-400">
+            <span>{{ $t('home.search.matchCount', { count: searchedTools.length }) }}</span>
           </div>
         </div>
 
@@ -273,79 +318,87 @@ function onUpdateFavoriteTools() {
             {{ $t('home.search.clear') }}
           </c-button>
         </div>
-      </div>
+      </section>
     </div>
   </div>
 </template>
 
 <style scoped lang="less">
 .home-page-container {
-  padding: 24px 0 60px;
+  padding: 0 0 60px;
 }
 
 .content-wrapper {
   display: flex;
   flex-direction: column;
-  gap: 24px;
+  gap: 12px;
+  max-width: 1360px;
+  margin: 0 auto;
+  width: 100%;
+  padding: 0 20px;
+  box-sizing: border-box;
+
+  @media (max-width: 640px) {
+    padding: 0 12px;
+    gap: 12px;
+  }
 }
 
 .hero-banner {
-  border-radius: 16px;
-  padding: 24px 28px;
-  border: 1px solid rgba(37, 99, 235, 0.22);
-  background: linear-gradient(135deg, rgba(37, 99, 235, 0.06) 0%, rgba(248, 250, 252, 0.95) 55%, rgba(59, 130, 246, 0.04) 100%);
-  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.04);
-  transition: all 0.2s ease;
+  text-align: center;
+  padding: 4px 12px 0;
+  margin: 0 auto;
+  max-width: 900px;
+  background: transparent;
+  border: none;
+  box-shadow: none;
 
-  :root.dark & {
-    background: linear-gradient(135deg, rgba(37, 99, 235, 0.12) 0%, rgba(30, 41, 59, 0.8) 100%);
-    border-color: rgba(37, 99, 235, 0.3);
-  }
-
-  .hero-content {
-    max-width: 800px;
+  .hero-header-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    flex-wrap: wrap;
   }
 
   .hero-badge {
     display: inline-flex;
     align-items: center;
-    gap: 8px;
-    padding: 4px 12px;
+    gap: 6px;
+    padding: 3px 10px;
     border-radius: 9999px;
-    font-size: 12px;
+    font-size: 11px;
     font-weight: 600;
-    margin-bottom: 12px;
-    border: 1px solid rgba(37, 99, 235, 0.2);
-    background-color: v-bind('theme.cardColor');
-    color: v-bind('theme.primaryColor');
+    border: 1px solid rgba(16, 185, 129, 0.3);
+    background-color: rgba(16, 185, 129, 0.08);
+    color: #059669;
+
+    :root.dark & {
+      border-color: rgba(16, 185, 129, 0.25);
+      background-color: rgba(16, 185, 129, 0.12);
+      color: #34d399;
+    }
 
     .pulse-dot {
       width: 6px;
       height: 6px;
       border-radius: 50%;
-      background-color: #2563eb;
+      background-color: #10b981;
       animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-    }
-
-    .hero-badge-sub {
-      font-weight: 400;
-      color: v-bind('theme.textColor3');
     }
   }
 
   .hero-title {
-    font-size: 24px;
-    font-weight: 800;
+    font-size: 20px;
+    font-weight: 900;
+    line-height: 1.3;
     letter-spacing: normal;
-    margin: 0 0 10px;
-    color: v-bind('theme.textColorBase');
-  }
-
-  .hero-desc {
-    font-size: 13px;
-    line-height: 1.6;
     margin: 0;
-    color: v-bind('theme.textColor2');
+    color: v-bind('theme.textColorBase');
+
+    @media (max-width: 640px) {
+      font-size: 17px;
+    }
   }
 }
 
@@ -354,45 +407,41 @@ function onUpdateFavoriteTools() {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    margin-bottom: 12px;
+    margin-bottom: 8px;
 
-    .section-title {
-      font-size: 15px;
-      font-weight: 700;
+    .section-title-wrap {
       display: flex;
       align-items: center;
-      gap: 8px;
-      color: v-bind('theme.textColorBase');
-      margin: 0;
+      gap: 6px;
 
       .star-icon {
         color: #f59e0b;
-        font-size: 16px;
+        font-size: 15px;
+      }
+
+      .section-title-text {
+        font-size: 13px;
+        font-weight: 700;
+        color: #d97706;
+
+        :root.dark & {
+          color: #f59e0b;
+        }
       }
 
       .count-badge {
-        font-size: 11px;
-        padding: 2px 7px;
+        font-size: 10px;
+        padding: 1px 6px;
         border-radius: 9999px;
-        background-color: rgba(148, 163, 184, 0.15);
-        color: v-bind('theme.textColor3');
-        font-weight: 600;
+        background-color: rgba(245, 158, 11, 0.15);
+        color: #d97706;
+        font-weight: 700;
+
+        :root.dark & {
+          color: #fbbf24;
+        }
       }
     }
-
-    .section-hint {
-      font-size: 12px;
-      color: v-bind('theme.textColor3');
-    }
-  }
-
-  .empty-favorites {
-    padding: 20px;
-    text-align: center;
-    font-size: 12px;
-    border-radius: 12px;
-    border: 1px dashed v-bind('theme.borderColor');
-    color: v-bind('theme.textColor3');
   }
 }
 
@@ -431,7 +480,7 @@ function onUpdateFavoriteTools() {
       .cat-pill {
         display: inline-flex;
         align-items: center;
-        gap: 4px;
+        gap: 6px;
         padding: 6px 14px;
         border-radius: 8px;
         font-size: 12px;
@@ -442,9 +491,18 @@ function onUpdateFavoriteTools() {
         background-color: v-bind('theme.cardColor');
         color: v-bind('theme.textColor2');
 
+        .cat-pill-icon {
+          flex-shrink: 0;
+          transition: transform 0.15s ease;
+        }
+
         &:hover {
           border-color: v-bind('theme.primaryColor');
           color: v-bind('theme.primaryColor');
+
+          .cat-pill-icon {
+            transform: scale(1.1);
+          }
         }
 
         &.active {
@@ -465,14 +523,11 @@ function onUpdateFavoriteTools() {
       }
     }
 
-    .current-cat-indicator {
+    .search-result-stat {
       font-size: 12px;
       color: v-bind('theme.textColor3');
-
-      strong {
-        color: v-bind('theme.primaryColor');
-        margin-left: 4px;
-      }
+      font-weight: 500;
+      white-space: nowrap;
     }
   }
 

@@ -1,7 +1,8 @@
 <script setup lang="ts">
-import { IconBrandGithub, IconInfoCircle, IconMoon, IconSun } from '@tabler/icons-vue';
+import { BrandGithub, Moon, Sun } from '@vicons/tabler';
 import { useThemeVars } from 'naive-ui';
 import { useStyleStore } from '@/stores/style.store';
+import { brandTokens } from '@/styles/tokens';
 
 const styleStore = useStyleStore();
 const { isDarkTheme } = toRefs(styleStore);
@@ -18,19 +19,12 @@ const themeVars = useThemeVars();
         :aria-label="$t('home.nav.mode')"
         @click="styleStore.toggleDark()"
       >
-        <n-icon v-if="isDarkTheme" size="18" :component="IconSun" />
-        <n-icon v-else size="18" :component="IconMoon" />
+        <n-icon v-if="isDarkTheme" size="18" :component="Sun" />
+        <n-icon v-else size="18" :component="Moon" />
       </button>
     </c-tooltip>
 
-    <!-- 关于按钮 -->
-    <c-tooltip :tooltip="$t('home.nav.about')" position="bottom">
-      <router-link to="/about" class="nav-btn icon-btn" :aria-label="$t('home.nav.aboutLabel')">
-        <n-icon size="18" :component="IconInfoCircle" />
-      </router-link>
-    </c-tooltip>
-
-    <!-- 原型同款 GitHub 仓库卡片按钮 -->
+    <!-- 原型同款 GitHub Star 胶囊按钮 -->
     <a
       href="https://github.com/atengk/Ateng-Tools"
       target="_blank"
@@ -38,9 +32,8 @@ const themeVars = useThemeVars();
       class="github-link-btn"
       :title="$t('home.nav.githubRepository')"
     >
-      <n-icon size="16" :component="IconBrandGithub" />
-      <span class="github-text">GitHub</span>
-      <span class="star-badge">★ Star</span>
+      <n-icon size="15" :component="BrandGithub" />
+      <span class="star-text">Star</span>
     </a>
   </div>
 </template>
@@ -67,9 +60,9 @@ const themeVars = useThemeVars();
   transition: all 0.18s ease;
 
   &:hover {
-    border-color: #2563eb;
-    color: #2563eb;
-    background-color: rgba(37, 99, 235, 0.05);
+    border-color: v-bind('themeVars.primaryColor');
+    color: v-bind('themeVars.primaryColor');
+    background-color: v-bind('brandTokens.primaryLightBg');
   }
 }
 
@@ -82,36 +75,22 @@ const themeVars = useThemeVars();
   border-radius: 8px;
   border: 1px solid v-bind('themeVars.borderColor');
   background-color: v-bind('themeVars.cardColor');
-  color: v-bind('themeVars.textColor1');
+  color: v-bind('themeVars.textColor2');
   text-decoration: none;
   font-size: 12px;
   font-weight: 500;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+  cursor: pointer;
   transition: all 0.18s ease;
 
   &:hover {
-    border-color: #2563eb;
-    box-shadow: 0 2px 6px rgba(37, 99, 235, 0.15);
+    border-color: v-bind('themeVars.primaryColor');
+    color: v-bind('themeVars.primaryColor');
+    background-color: v-bind('brandTokens.primaryLightBg');
   }
 
-  .github-text {
-    @media (max-width: 640px) {
-      display: none;
-    }
-  }
-
-  .star-badge {
-    font-size: 10px;
-    font-weight: 700;
-    line-height: 1;
-    padding: 2px 5px;
-    border-radius: 4px;
-    background-color: rgba(37, 99, 235, 0.12);
-    color: #2563eb;
-
-    @media (max-width: 640px) {
-      display: none;
-    }
+  .star-text {
+    font-size: 12px;
+    font-weight: 500;
   }
 }
 </style>

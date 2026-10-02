@@ -1,29 +1,50 @@
 /**
  * @vitest-environment jsdom
- * 增强工具卡片高亮与微标签单元测试
+ * 增强工具卡片高亮、微容器与底栏单元测试
  *
  * @author Ateng
  * @since 2026-10-02
  */
+import { markRaw } from 'vue';
 import { describe, expect, it, vi } from 'vitest';
 import { mount } from '@vue/test-utils';
 import ToolCard from './ToolCard.vue';
 
-vi.mock('vue-i18n', async () => {
-  const actual = await vi.importActual<any>('vue-i18n');
-  return {
-    ...actual,
-    useI18n: () => ({
-      t: (key: string, params?: Record<string, unknown>) => {
-        if (key === 'home.search.matchCuePinyin') return `拼音: ${params?.value}`;
-        if (key === 'home.search.matchCueKeyword') return `关键词: ${params?.value}`;
-        if (key === 'home.search.matchCuePath') return `路径: ${params?.value}`;
-        return key;
-      },
-      te: () => true,
-    }),
-  };
-});
+const mockDict: Record<string, string> = {
+  'home.search.matchCuePinyin': '拼音: {value}',
+  'home.search.matchCueKeyword': '关键词: {value}',
+  'home.search.matchCuePath': '路径: {value}',
+  'home.card.offlineTag': '⚡ 纯前端离线',
+  'home.card.openTool': '打开工具',
+  'home.card.features.qrCodeGenerate': '二维码生成',
+};
+
+vi.mock('vue-i18n', () => ({
+  createI18n: () => ({
+    global: {
+      t: (k: string) => k,
+    },
+  }),
+  useI18n: () => ({
+    t: (key: string, params?: any) => {
+      let val = mockDict[key] ?? (typeof params === 'string' ? params : key);
+      if (params && typeof params !== 'string') {
+        Object.entries(params).forEach(([k, v]) => {
+          val = val.replace(`{${k}}`, String(v));
+        });
+      }
+      return val;
+    },
+    te: (key: string) => key in mockDict,
+  }),
+}));
+
+vi.mock('./FavoriteButton.vue', () => ({
+  default: {
+    name: 'FavoriteButton',
+    template: '<button class="fav-btn" />',
+  },
+}));
 
 vi.mock('@/composable/category', () => ({
   useCategory: () => ({
@@ -38,7 +59,7 @@ const mockTool = {
   keywords: ['qrcode', '2d barcode'],
   category: 'dev',
   component: async () => ({}),
-  icon: {} as any,
+  icon: markRaw({ render: () => null }),
   isNew: false,
 };
 
@@ -53,16 +74,19 @@ const commonMountOptions = {
     },
     mocks: {
       $t: (key: string, params?: Record<string, unknown>) => {
-        if (key === 'home.search.matchCuePinyin') return `拼音: ${params?.value}`;
-        if (key === 'home.search.matchCueKeyword') return `关键词: ${params?.value}`;
-        if (key === 'home.search.matchCuePath') return `路径: ${params?.value}`;
-        return key;
+        let val = mockDict[key] ?? key;
+        if (params) {
+          Object.entries(params).forEach(([k, v]) => {
+            val = val.replace(`{${k}}`, String(v));
+          });
+        }
+        return val;
       },
     },
   },
 };
 
-describe('ToolCard 搜索高亮与 Match Cue Badge 渲染', () => {
+describe('ToolCard 组件单元测试', () => {
   it('1. 无搜索高亮范围时，正常渲染完整纯文本标题', () => {
     const wrapper = mount(ToolCard, {
       ...commonMountOptions,
@@ -116,5 +140,51 @@ describe('ToolCard 搜索高亮与 Match Cue Badge 渲染', () => {
     });
 
     expect(wrapper.find('.tool-card').classes()).toContain('is-keyboard-active');
+  });
+
+  it('5. 渲染 40x40 微底色图标容器，并根据工具应用原型风格的多彩浅底主题', () => {
+    const wrapper = mount(ToolCard, {
+      ...commonMountOptions,
+      props: {
+        tool: mockTool,
+      },
+    });
+
+    const iconWrapper = wrapper.find('.tool-icon-wrapper');
+    expect(iconWrapper.exists()).toBe(true);
+    expect(iconWrapper.classes()).toContain('w-10');
+    expect(iconWrapper.classes()).toContain('h-10');
+    expect(iconWrapper.classes()).toContain('rounded-xl');
+  });
+
+  it('6. 渲染卡片底部辅助操作底栏 (左侧特性亮点词，右侧打开工具指引)', () => {
+    const wrapper = mount(ToolCard, {
+      ...commonMountOptions,
+      props: {
+        tool: mockTool,
+      },
+    });
+
+    const footer = wrapper.find('.tool-card-footer');
+    expect(footer.exists()).toBe(true);
+    expect(footer.find('.card-feature-tag').exists()).toBe(true);
+    expect(footer.find('.card-feature-tag').text()).toContain('二维码生成');
+    expect(footer.find('.card-open-action').text()).toContain('打开工具');
+  });
+
+  it('7. 对 JSON 类工具优先渲染原生极客字形 { }', () => {
+    const wrapper = mount(ToolCard, {
+      ...commonMountOptions,
+      props: {
+        tool: {
+          ...mockTool,
+          name: 'JSON 工作台',
+          path: '/json-studio',
+        },
+      },
+    });
+
+    const iconWrapper = wrapper.find('.tool-icon-wrapper');
+    expect(iconWrapper.text()).toContain('{ }');
   });
 });
