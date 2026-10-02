@@ -32,7 +32,7 @@ describe('tools category taxonomy', () => {
     const flatToolCount = tools.length;
     const categorySum = toolsByCategory.reduce((sum, cat) => sum + cat.components.length, 0);
     expect(flatToolCount).toBe(categorySum);
-    expect(flatToolCount).toBe(113);
+    expect(flatToolCount).toBe(114);
 
     const allPaths = tools.map(t => t.path);
     expect(new Set(allPaths).size).toBe(flatToolCount);
@@ -84,11 +84,12 @@ describe('tools category taxonomy', () => {
     expect(paths).toContain('/iban-validator-and-parser');
   });
 
-  it('验证代码基准构建工具已迁入 dev 分类，并扩充 HTTP 客户端与 Mock 数据生成达到 24 款', () => {
+  it('验证代码基准构建工具已迁入 dev 分类，并扩充 HTTP 客户端、Mock 数据生成与 JSON Studio 达到 25 款', () => {
     const devCategory = toolsByCategory.find(cat => cat.name === 'dev');
     expect(devCategory).toBeDefined();
     const paths = devCategory!.components.map(t => t.path);
-    expect(paths).toHaveLength(24);
+    expect(paths).toHaveLength(25);
+    expect(paths).toContain('/json-studio');
     expect(paths).toContain('/benchmark-builder');
     expect(paths).toContain('/mybatis-sql-converter');
     expect(paths).toContain('/cron-simulator');

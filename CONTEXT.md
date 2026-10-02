@@ -155,6 +155,14 @@ _避免使用 (Avoid)_: Value Cleaner, Quote Adder
 
 ### 首页与工具发现体系 (Homepage & Tool Discovery)
 
+**Homepage Tool Search Filter**:
+首页主体区域中常驻的即时交互式搜索过滤组件，提供多维权重分级检索、拼音全拼与首字母匹配，并直接驱动本页 Enhanced Tool Card 的毫秒级重排与过滤展示。
+_避免使用 (Avoid)_: In-Page Search, Card Filter, Quick Search Input
+
+**Pinyin Token Indexer**:
+在客户端内存中将工具中文名称及描述预编译或实时提取为拼音全拼与拼音首字母缩写的轻量级分词索引引擎，用于增强 Fuse.js 模糊匹配在中文场景下的无感命中能力。
+_避免使用 (Avoid)_: Pinyin Converter, Chinese Search Helper, Pinyin Parser
+
 **Tool Category Filter**:
 首页用于按领域分类（如开发运维、数据转换、安全加密、网络测量等）即时筛选工具集合的交互式标签组。
 _避免使用 (Avoid)_: Tool Selector, Type Switcher, Category Pill
@@ -162,6 +170,10 @@ _避免使用 (Avoid)_: Tool Selector, Type Switcher, Category Pill
 **Enhanced Tool Card**:
 首页与工具列表呈现具体小工具的基础卡片单元，包含领域图标、多语言本地化名称、简短功能描述、新功能徽标、所属分类胶囊与收藏开关。
 _避免使用 (Avoid)_: Tool Box, App Tile, Utility Item
+
+**Match Cue Badge**:
+在 Enhanced Tool Card 上呈现非标题可见字段（如拼音首字母缩写、内部 keywords 或别名）命中线索的微型视觉徽标。
+_避免使用 (Avoid)_: Search Hint, Match Tag, Hit Label
 
 **Brand Attribution Banner**:
 用于规范声明本工具箱基于 IT-Tools 开源项目二次开发构建并致谢原作者的合规展示单元。
@@ -348,6 +360,32 @@ _避免使用 (Avoid)_: Response DTO, HTTP Result, Output Chunk
 **CORS Diagnostic Guard**:
 在纯客户端请求遭遇跨域资源共享（CORS）策略拦截或网络失败时，负责智能诊断异常类型、提供排查指导并引导一键降级为 cURL 终端命令的容错防御机制。
 _避免使用 (Avoid)_: Error Interceptor, Proxy Hack, Network Fallback
+
+### JSON 工作台 (JSON Studio)
+
+**JSON Studio**:
+Ateng-Tools 中用于纯客户端一站式 JSON 语法高亮编辑、可视化树形交互、JSONPath 提取过滤、非标语法智能修复、字符串转义还原及多维格式转换的集成工作台。
+_避免使用 (Avoid)_: JSON Editor, JSON Formatter, JSON Tool, JSON Prettify
+
+**Interactive Tree Explorer**:
+在 JSON Studio 中支持节点按层级折叠展开、数据类型徽章区分、绝对 JSONPath 路径一键复制与节点值即时提取的交互式树形视图。
+_避免使用 (Avoid)_: Tree View, JSON Tree, Object Hierarchy
+
+**JSONPath Query Engine**:
+在纯客户端基于标准 JSONPath 语法对内存中的 JSON 结构进行多层级检索、条件过滤与匹配项独立提取的查询引擎。
+_避免使用 (Avoid)_: JSON Filter, Path Search, Query Runner
+
+**JSON Smart Repair**:
+纯客户端智能识别并修复非标 JSON（补全缺失引号、单双引号纠正、剥离多行与行内注释、清除尾随逗号及纠偏 Python 非标布尔/空字面量）的容错清洗算法。
+_避免使用 (Avoid)_: JSON Fixer, Syntax Corrector, Error Cleaner
+
+**Key Case Transformer**:
+对深度嵌套 JSON 数据结构中的所有键名批量执行大小驼峰、下划线与中划线命名风格递归转换的算法服务。
+_避免使用 (Avoid)_: Key Rename, Case Switcher, Field Formatter
+
+**JSON Metric Inspector**:
+对 JSON 结构进行深度解析，度量其最大嵌套深度、各类型节点分布、Key 数量与字节量级的高维统计透视器。
+_避免使用 (Avoid)_: JSON Stats, Size Counter, Node Analyzer
 
 
 

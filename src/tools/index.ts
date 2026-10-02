@@ -113,12 +113,14 @@ import { tool as cidrCalculator } from './cidr-calculator';
 import { tool as nginxConfigGenerator } from './nginx-config-generator';
 import { tool as mockDataGenerator } from './mock-data-generator';
 import { tool as httpClient } from './http-client';
+import { tool as jsonStudio } from './json-studio';
 import { tool as p2pFileTransfer } from './p2p-file-transfer';
 
 export const toolsByCategory: ToolCategory[] = [
   {
     name: 'dev',
     components: [
+      jsonStudio,
       gitMemo,
       randomPortGenerator,
       crontabGenerator,

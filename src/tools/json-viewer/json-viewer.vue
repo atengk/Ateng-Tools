@@ -2,12 +2,14 @@
 import JSON5 from 'json5';
 import { useStorage } from '@vueuse/core';
 import { useI18n } from 'vue-i18n';
+import { useRouter } from 'vue-router';
 import { formatJson } from './json.models';
 import { withDefaultOnError } from '@/utils/defaults';
 import { useValidation } from '@/composable/validation';
 import TextareaCopyable from '@/components/TextareaCopyable.vue';
 
 const { t } = useI18n();
+const router = useRouter();
 const inputElement = ref<HTMLElement>();
 
 const rawJson = useStorage('json-prettify:raw-json', '{"hello": "world", "foo": "bar"}');
@@ -27,6 +29,21 @@ const rawJsonValidation = useValidation({
 </script>
 
 <template>
+  <n-alert
+    type="info"
+    class="mb-4"
+    :title="t('tools.json-studio.legacyBannerTitle', '✨ 体验全新一代 JSON 综合工作台 (JSON Studio)')"
+  >
+    <div class="flex flex-wrap items-center justify-between gap-3">
+      <span class="text-xs">
+        {{ t('tools.json-studio.legacyBannerDesc', '集成 VSCode 级 Monaco 编辑器、交互式树形图、JSONPath 语法提取、非标容错修复与命名风格转换。') }}
+      </span>
+      <n-button size="small" type="primary" secondary @click="router.push('/json-studio')">
+        {{ t('tools.json-studio.legacyBannerBtn', '立即前往体验') }}
+      </n-button>
+    </div>
+  </n-alert>
+
   <div style="flex: 0 0 100%">
     <div style="margin: 0 auto; max-width: 600px" flex justify-center gap-3>
       <n-form-item :label="$t('tools.json-prettify.sortKeys', '键名按字母排序')" label-placement="left" label-width="120">

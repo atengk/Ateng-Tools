@@ -396,7 +396,17 @@ export function parseFileChunkPayload(payload: unknown): FileChunkPayload | null
 
   const p = payload as Record<string, unknown>;
   if (typeof p.transferId === 'string' && typeof p.chunkIndex === 'number' && p.chunkIndex >= 0) {
-    if (p.data instanceof ArrayBuffer || p.data instanceof Uint8Array || ArrayBuffer.isView(p.data)) {
+    const isBufferLike =
+      p.data instanceof ArrayBuffer ||
+      p.data instanceof Uint8Array ||
+      ArrayBuffer.isView(p.data) ||
+      (typeof p.data === 'object' &&
+        p.data !== null &&
+        (Object.prototype.toString.call(p.data) === '[object ArrayBuffer]' ||
+          Object.prototype.toString.call(p.data) === '[object Uint8Array]' ||
+          'byteLength' in (p.data as Record<string, unknown>)));
+
+    if (isBufferLike) {
       return {
         transferId: p.transferId,
         chunkIndex: p.chunkIndex,

@@ -1308,6 +1308,131 @@ tools:
     customIceServer: "Custom STUN / TURN Server (Optional)"
     customIceServerPlaceholder: "e.g. stun:stun.example.com:3478, multiple separated by newline or comma"
 
+  json-studio:
+    title: JSON Studio
+    description: Client-side all-in-one JSON workbench with syntax highlighting, tree exploration, JSONPath extraction, smart repair, and conversions.
+    formatBtn: Format / Prettify
+    minifyBtn: Minify
+    sampleBtn: Sample Data
+    clearBtn: Clear
+    copyBtn: Copy
+    downloadBtn: Download
+    indentLabel: Indentation
+    indent2Spaces: 2 Spaces
+    indent4Spaces: 4 Spaces
+    indentTab: Tab
+    editorTitle: JSON Code Editor
+    editorPlaceholder: Paste or type JSON content here...
+    statusValid: Valid JSON
+    statusInvalid: Syntax Error
+    linesCount: Lines
+    charsCount: Characters
+    sizeCount: Size
+    copySuccessToast: Content copied to clipboard
+    clearSuccessToast: Editor cleared
+    sampleLoadedToast: Sample JSON data loaded
+    downloadSuccessToast: JSON file download started
+    formatSuccessToast: JSON formatted successfully
+    minifySuccessToast: JSON minified successfully
+    emptyWarningToast: Please enter JSON content first
+    tabTreeTitle: Tree Explorer
+    tabRepairTitle: Repair & Escape
+    tabJsonPathTitle: JSONPath Query
+    tabTransformTitle: Transformations
+    tabMetricsTitle: Metrics
+    treeComingSoon: Interactive Tree Explorer coming soon (Issue #61)
+    repairComingSoon: Smart Repair & String Escape coming soon (Issue #62)
+    jsonPathComingSoon: JSONPath Query Engine coming soon (Issue #63)
+    transformComingSoon: Key Case & Flattening coming soon (Issue #64)
+    metricRawSize: Raw Size
+    metricFormattedSize: Formatted Size
+    metricMinifiedSize: Minified Size
+    metricLineCount: Total Lines
+    metricStatus: Parsing Status
+    treeSearchPlaceholder: Search node key, value, or JSONPath...
+    expandAll: Expand All
+    collapseAll: Collapse All
+    expandLevel1: Level 1
+    expandLevel2: Level 2
+    expandLevel3: Level 3
+    copyPathSuccessToast: 'Copied JSONPath: {path}'
+    copyValueSuccessToast: Node value copied to clipboard
+    treeEmpty: Enter valid JSON on the left to inspect tree
+    treeSearchNoMatch: No nodes matching "{query}"
+    searchMatchesCount: "{count} matches"
+    repairSectionTitle: Non-standard Syntax Smart Repair
+    repairSectionDesc: Auto-fix unquoted keys, single quotes, trailing commas, strip comments, and fix Python literals.
+    repairRunBtn: Check & Smart Repair
+    repairValidTip: Current JSON syntax is strictly valid, no repair needed.
+    repairSuccessToast: 'Smart repair completed with {count} corrections applied'
+    repairFailedToast: Smart repair failed, please inspect syntax structure
+    applyToEditorBtn: Apply to Left Editor
+    copyRepairedBtn: Copy Repaired JSON
+    appliedToEditorToast: Applied repaired JSON to editor successfully
+    escapeSectionTitle: String Escape & Unescape
+    escapeSectionDesc: Restore escaped JSON from logs (containing \") or escape JSON into code string literals.
+    unescapeBtn: Unescape to JSON
+    escapeBtn: Escape to Code String
+    unescapeSuccessToast: Unescape completed successfully
+    escapeSuccessToast: Escape completed successfully
+    copyOutputBtn: Copy Result
+    jsonPathSectionTitle: JSONPath Query & Extraction
+    jsonPathSectionDesc: Query JSON using standard JSONPath with wildcard extraction, slicing, deep recursion, and filter predicates.
+    jsonPathPlaceholder: 'Enter JSONPath expression, e.g. $.store.book[*].author or $..price...'
+    jsonPathRunBtn: Run Query
+    jsonPathPresetsLabel: Query Presets
+    jsonPathPresetAllAuthors: All Book Authors ($..author)
+    jsonPathPresetAllBooks: All Books ($.store.book[*])
+    jsonPathPresetCheapBooks: Books Under $10 (price < 10)
+    jsonPathPresetFirstTwoBooks: First 2 Books ($.store.book[0:2])
+    jsonPathPresetAllPrices: All Prices Across Tree ($..price)
+    jsonPathMatchesBadge: "{count} nodes matched"
+    jsonPathNoMatches: No matching nodes found
+    jsonPathSyntaxError: "Syntax Error: {error}"
+    jsonPathCopyResultsBtn: Copy Extracted Results
+    jsonPathExportResultsBtn: Export as JSON
+    jumpToTreeBtn: Highlight in Tree Explorer
+    clearTreeHighlightBtn: Clear Tree Highlights
+    jsonPathQuerySuccessToast: Query finished with {count} matches
+    jsonPathExportSuccessToast: Query results download started
+    transformCaseSectionTitle: Deep Key Case Transformation
+    transformCaseSectionDesc: Recursively convert all object key cases throughout deep nested structures without altering values.
+    caseCamel: camelCase
+    caseSnake: snake_case
+    caseKebab: kebab-case
+    casePascal: PascalCase
+    transformRunBtn: Transform Case
+    transformCaseSuccessToast: Key cases converted successfully
+    flattenSectionTitle: Flatten & Unflatten (Dot-Notation)
+    flattenSectionDesc: Flatten deep JSON into single-level dot/bracket path keys (e.g. user.name, items[0].id) or symmetrically restore.
+    flattenBtn: Flatten Structure
+    unflattenBtn: Unflatten to Nested JSON
+    flattenSuccessToast: Flattening completed
+    unflattenSuccessToast: Unflattening completed
+    metricMaxDepth: Max Nesting Depth
+    metricTotalKeys: Total Property Keys
+    metricTotalArrays: Total Arrays
+    metricMaxArrayLength: Max Array Length
+    metricLeafCount: Leaf Value Nodes
+    metricCompressionRatio: Compression Ratio
+    metricTypeDistribution: Value Type Distribution
+    typeObject: Object
+    typeArray: Array
+    typeString: String
+    typeNumber: Number
+    typeBoolean: Boolean
+    typeNull: Null
+    guardLargeTitle: ⚡ Large Text Mode Active (2MB ~ 10MB)
+    guardLargeDesc: Data volume is large. Tree explorer is folded on demand. We recommend using JSONPath queries to target nodes.
+    guardExtremeTitle: ⚠️ Massive Data Warning (> 10MB)
+    guardExtremeDesc: Input volume exceeds 10MB. We recommend using minification and export, avoiding full tree expansion to maintain browser responsiveness.
+    legacyBannerTitle: ✨ Discover the all-new JSON Studio
+    legacyBannerDesc: Integrated with VSCode Monaco editor, tree explorer, JSONPath queries, smart repair, and key transformations.
+    legacyBannerBtn: Open JSON Studio
+
+
+
+
 
 
 

@@ -1304,6 +1304,131 @@ tools:
     customIceServer: 自定义 STUN / TURN 服务器 (可选)
     customIceServerPlaceholder: 如 stun:stun.example.com:3478，多条换行或逗号分隔
 
+  json-studio:
+    title: JSON 工作台
+    description: 纯客户端一站式 JSON 语法高亮编辑、可视化交互、JSONPath 提取、非标语法修复与格式转换。
+    formatBtn: 格式化排版
+    minifyBtn: 单行压缩
+    sampleBtn: 示例数据
+    clearBtn: 清空输入
+    copyBtn: 复制内容
+    downloadBtn: 导出文件
+    indentLabel: 缩进设置
+    indent2Spaces: 2 空格
+    indent4Spaces: 4 空格
+    indentTab: Tab 制表符
+    editorTitle: JSON 代码编辑器
+    editorPlaceholder: 请在此输入或粘贴 JSON 内容...
+    statusValid: 语法有效
+    statusInvalid: 语法错误
+    linesCount: 行数
+    charsCount: 字符数
+    sizeCount: 体积
+    copySuccessToast: 内容已复制至剪贴板
+    clearSuccessToast: 编辑器内容已清空
+    sampleLoadedToast: 已加载示例 JSON 数据
+    downloadSuccessToast: JSON 文件已开始下载
+    formatSuccessToast: JSON 格式化排版完成
+    minifySuccessToast: JSON 单行压缩完成
+    emptyWarningToast: 请先输入 JSON 内容
+    tabTreeTitle: 交互式树形图
+    tabRepairTitle: 清洗修复与转义
+    tabJsonPathTitle: JSONPath 提取
+    tabTransformTitle: 结构与命名转换
+    tabMetricsTitle: 度量大纲
+    treeComingSoon: 交互式树形透视器即将就绪 (工单 #61)
+    repairComingSoon: 语法智能修复与字符串转义即将就绪 (工单 #62)
+    jsonPathComingSoon: JSONPath 实时检索与双轨联动即将就绪 (工单 #63)
+    transformComingSoon: 键名风格批量转换与结构扁平化即将就绪 (工单 #64)
+    metricRawSize: 原始体积
+    metricFormattedSize: 格式化体积
+    metricMinifiedSize: 压缩后体积
+    metricLineCount: 总行数
+    metricStatus: 解析状态
+    treeSearchPlaceholder: 搜索节点键名、数值或 JSONPath...
+    expandAll: 全部展开
+    collapseAll: 全部折叠
+    expandLevel1: 1 层
+    expandLevel2: 2 层
+    expandLevel3: 3 层
+    copyPathSuccessToast: '已复制绝对路径: {path}'
+    copyValueSuccessToast: 节点值已复制至剪贴板
+    treeEmpty: 请在左侧输入有效 JSON 以生成交互树形图
+    treeSearchNoMatch: 未找到匹配 "{query}" 的节点
+    searchMatchesCount: '匹配 {count} 处'
+    repairSectionTitle: 非标语法智能容错修复
+    repairSectionDesc: 智能补全未加引号的键名、纠正单引号、清除尾随逗号、剥离代码注释并纠偏 Python 字面量。
+    repairRunBtn: 检测并智能修复
+    repairValidTip: 当前编辑器中的 JSON 语法严格合法，无需修复。
+    repairSuccessToast: '智能修复成功，检测到 {count} 项语法纠偏'
+    repairFailedToast: 智能修复未成功，请检查语法结构
+    applyToEditorBtn: 应用回左侧编辑器
+    copyRepairedBtn: 复制修复后内容
+    appliedToEditorToast: 已成功将修复内容应用回编辑器
+    escapeSectionTitle: 字符串双向转义与反转义
+    escapeSectionDesc: 解决从日志中复制出来的转义 JSON 字符串（包含 \"）还原，或将 JSON 转义为代码嵌入字面量。
+    unescapeBtn: 反转义还原 JSON (Unescape)
+    escapeBtn: 转义为代码字符串 (Escape)
+    unescapeSuccessToast: 反转义还原完成
+    escapeSuccessToast: 代码字符串转义完成
+    copyOutputBtn: 复制结果
+    jsonPathSectionTitle: JSONPath 语法查询与结果提取
+    jsonPathSectionDesc: 基于标准 JSONPath 语法执行条件过滤、通配抽取或深度递归检索，支持双轨联动与一键导出。
+    jsonPathPlaceholder: '输入 JSONPath 表达式，如 $.store.book[*].author 或 $..price...'
+    jsonPathRunBtn: 执行查询
+    jsonPathPresetsLabel: 快速预设示例
+    jsonPathPresetAllAuthors: 所有书籍作者 ($..author)
+    jsonPathPresetAllBooks: 所有书籍对象 ($.store.book[*])
+    jsonPathPresetCheapBooks: 价格小于 10 的书籍 (price < 10)
+    jsonPathPresetFirstTwoBooks: 前两本书籍 ($.store.book[0:2])
+    jsonPathPresetAllPrices: 全树所有价格属性 ($..price)
+    jsonPathMatchesBadge: '共命中 {count} 个节点'
+    jsonPathNoMatches: 未检索到任何匹配的节点
+    jsonPathSyntaxError: '表达式语法错误: {error}'
+    jsonPathCopyResultsBtn: 复制提取结果
+    jsonPathExportResultsBtn: 导出为 JSON
+    jumpToTreeBtn: 在树形图中透视高亮
+    clearTreeHighlightBtn: 清除树形高亮
+    jsonPathQuerySuccessToast: '查询完成，共命中 {count} 个节点'
+    jsonPathExportSuccessToast: 提取结果文件已开始下载
+    transformCaseSectionTitle: 键名命名风格全递归转换
+    transformCaseSectionDesc: 全递归遍历深层嵌套对象与对象数组，批量统一属性键名格式（值内容保持原样）。
+    caseCamel: camelCase (小驼峰)
+    caseSnake: snake_case (下划线)
+    caseKebab: kebab-case (中划线)
+    casePascal: PascalCase (大驼峰)
+    transformRunBtn: 执行风格转换
+    transformCaseSuccessToast: 键名风格批量转换完成
+    flattenSectionTitle: 点号路径扁平化与逆还原 (Flatten ↔ Unflatten)
+    flattenSectionDesc: 将深层嵌套 JSON 展开为单层点号/方括号路径字典（如 user.name, items[0].id），或 100% 对称无损逆还原。
+    flattenBtn: 扁平化展开 (Flatten)
+    unflattenBtn: 逆还原嵌套对象 (Unflatten)
+    flattenSuccessToast: 扁平化转换完成
+    unflattenSuccessToast: 逆还原嵌套结构完成
+    metricMaxDepth: 最大嵌套深度
+    metricTotalKeys: 属性键总数 (Keys)
+    metricTotalArrays: 数组数量
+    metricMaxArrayLength: 数组最大长度
+    metricLeafCount: 叶子数据节点数
+    metricCompressionRatio: 压缩体积节省率
+    metricTypeDistribution: 数据类型占比分布
+    typeObject: 对象 (Object)
+    typeArray: 数组 (Array)
+    typeString: 字符串 (String)
+    typeNumber: 数值 (Number)
+    typeBoolean: 布尔值 (Boolean)
+    typeNull: 空值 (null)
+    guardLargeTitle: ⚡ 大文本模式已激活 (2MB ~ 10MB)
+    guardLargeDesc: 当前数据体积较大，树形透视器已启用按需折叠，推荐优先通过 JSONPath 定向检索目标节点。
+    guardExtremeTitle: ⚠️ 巨型数据防御警告 (> 10MB)
+    guardExtremeDesc: 当前输入体积已超过 10MB，建议优先使用单行压缩与文件导出，谨慎进行全树全展开或密集搜索以保障浏览器流畅度。
+    legacyBannerTitle: ✨ 体验全新一代 JSON 综合工作台 (JSON Studio)
+    legacyBannerDesc: 集成 VSCode 级 Monaco 编辑器、交互式树形图、JSONPath 语法提取、非标容错修复与命名风格转换。
+    legacyBannerBtn: 立即前往体验
+
+
+
+
 
 
 
