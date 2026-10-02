@@ -32,7 +32,7 @@ describe('tools category taxonomy', () => {
     const flatToolCount = tools.length;
     const categorySum = toolsByCategory.reduce((sum, cat) => sum + cat.components.length, 0);
     expect(flatToolCount).toBe(categorySum);
-    expect(flatToolCount).toBe(114);
+    expect(flatToolCount).toBe(115);
 
     const allPaths = tools.map(t => t.path);
     expect(new Set(allPaths).size).toBe(flatToolCount);
@@ -120,7 +120,8 @@ describe('tools category taxonomy', () => {
     const mediaCategory = toolsByCategory.find(cat => cat.name === 'media');
     expect(mediaCategory).toBeDefined();
     const mediaPaths = mediaCategory!.components.map(t => t.path);
-    expect(mediaPaths).toHaveLength(7);
+    expect(mediaPaths).toHaveLength(8);
+    expect(mediaPaths).toContain('/id-photo-maker');
     expect(mediaPaths).toContain('/image-studio');
     expect(mediaPaths).toContain('/qrcode-generator');
     expect(mediaPaths).toContain('/barcode-generator');

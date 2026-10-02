@@ -443,6 +443,32 @@ _避免使用 (Avoid)_: Key Rename, Case Switcher, Field Formatter
 对 JSON 结构进行深度解析，度量其最大嵌套深度、各类型节点分布、Key 数量与字节量级的高维统计透视器。
 _避免使用 (Avoid)_: JSON Stats, Size Counter, Node Analyzer
 
+### 证件照制作工坊 (ID Photo Maker)
+
+**ID Photo Maker**:
+Ateng-Tools 中用于纯客户端一站式规格裁切、合规构图、背景替换、冲印排版与目标体积约束压缩的独立证件照生成工具。
+_避免使用 (Avoid)_: ID Photo Generator, Passport Tool, Photo Cutout, Portrait Maker
+
+**Photo Spec Preset**:
+包含官方标准毫米尺寸（如一寸 25×35mm、二寸 35×49mm、小二寸 35×45mm）、300 DPI 对应像素宽高矩阵与特定考试/证照用途分类的结构化规格模型。
+_避免使用 (Avoid)_: Size Template, Photo Dimension, Spec Item
+
+**Compliance Guideline Grid**:
+在人像编辑视窗中用于辅助用户对齐头顶距、眼平线、下巴基线及半身轮廓的标准证件照几何参考辅助线体系。
+_避免使用 (Avoid)_: Face Ruler, Alignment Mask, Crop Lines
+
+**Tolerance Matting Engine**:
+在纯客户端基于欧几里得色彩距离（Euclidean Color Distance）与容差阈值进行纯色或接近纯色背景分割，并提供边缘羽化（Edge Feathering）与手动擦除/保留修容画笔的轻量级算法。
+_避免使用 (Avoid)_: Magic Wand, Background Eraser, Color Cutter
+
+**Print Sheet Layout**:
+将多张合规证件照按最佳几何间距与裁切标记虚线自动排列在 5寸 (89×127mm) 或 6寸 (102×152mm) 冲印相纸上的排版渲染管道。
+_避免使用 (Avoid)_: Multi-photo Grid, Print Canvas, Tiling Sheet
+
+**KB Target Compressor**:
+针对报名网站对文件大小（如 20KB~50KB）的硬性指标，通过二分搜索（Binary Search）动态逼近最优质量因子并在纯客户端沙箱内导出符合字节阈值限制的图像压缩器。
+_避免使用 (Avoid)_: Size Limiter, Image Shrinker, Quality Seeker
+
 
 
 

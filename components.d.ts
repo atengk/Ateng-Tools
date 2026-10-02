@@ -123,6 +123,7 @@ declare module '@vue/runtime-core' {
     IconMdiTranslate: typeof import('~icons/mdi/translate')['default']
     IconMdiTriangleDown: typeof import('~icons/mdi/triangle-down')['default']
     IconMdiVideo: typeof import('~icons/mdi/video')['default']
+    IdPhotoMaker: typeof import('./src/tools/id-photo-maker/id-photo-maker.vue')['default']
     ImageStudio: typeof import('./src/tools/image-studio/image-studio.vue')['default']
     ImageToPdf: typeof import('./src/tools/image-to-pdf/image-to-pdf.vue')['default']
     InputCopyable: typeof import('./src/components/InputCopyable.vue')['default']

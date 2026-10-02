@@ -115,6 +115,7 @@ import { tool as mockDataGenerator } from './mock-data-generator';
 import { tool as httpClient } from './http-client';
 import { tool as jsonStudio } from './json-studio';
 import { tool as p2pFileTransfer } from './p2p-file-transfer';
+import { tool as idPhotoMaker } from './id-photo-maker';
 
 export const toolsByCategory: ToolCategory[] = [
   {
@@ -250,6 +251,7 @@ export const toolsByCategory: ToolCategory[] = [
   {
     name: 'media',
     components: [
+      idPhotoMaker,
       imageStudio,
       qrCodeGenerator,
       wifiQrCodeGenerator,
