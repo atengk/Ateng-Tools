@@ -69,26 +69,6 @@ function onUpdateFavoriteTools() {
           <p class="hero-desc">
             {{ $t('home.hero.description') }}
           </p>
-
-          <div class="hero-stats">
-            <div class="stat-item">
-              <span class="dot bg-blue" />
-              <span class="stat-label">{{ $t('home.hero.stats.total') }}</span>
-              <strong class="stat-val">{{ toolStore.tools.length }} {{ $t('home.hero.stats.unit') }}</strong>
-            </div>
-
-            <div class="stat-item">
-              <span class="dot bg-green" />
-              <span class="stat-label">{{ $t('home.hero.stats.new') }}</span>
-              <strong class="stat-val">{{ toolStore.newTools.length }} {{ $t('home.hero.stats.unit') }}</strong>
-            </div>
-
-            <div class="stat-item">
-              <span class="dot bg-amber" />
-              <span class="stat-label">{{ $t('home.hero.stats.privacy') }}</span>
-              <strong class="stat-val">{{ $t('home.hero.stats.privacyValue') }}</strong>
-            </div>
-          </div>
         </div>
       </div>
 
@@ -227,44 +207,8 @@ function onUpdateFavoriteTools() {
   .hero-desc {
     font-size: 13px;
     line-height: 1.6;
-    margin: 0 0 18px;
+    margin: 0;
     color: v-bind('theme.textColor2');
-  }
-
-  .hero-stats {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 10px;
-
-    .stat-item {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      padding: 6px 12px;
-      border-radius: 8px;
-      font-size: 12px;
-      border: 1px solid v-bind('theme.borderColor');
-      background-color: v-bind('theme.cardColor');
-
-      .dot {
-        width: 8px;
-        height: 8px;
-        border-radius: 50%;
-
-        &.bg-blue { background-color: #2563eb; }
-        &.bg-green { background-color: #10b981; }
-        &.bg-amber { background-color: #f59e0b; }
-      }
-
-      .stat-label {
-        color: v-bind('theme.textColor3');
-      }
-
-      .stat-val {
-        color: v-bind('theme.textColorBase');
-        font-weight: 700;
-      }
-    }
   }
 }
 

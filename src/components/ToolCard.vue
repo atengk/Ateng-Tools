@@ -24,14 +24,6 @@ const { getCategoryTitle } = useCategory();
             {{ getCategoryTitle(tool.category) }}
           </span>
 
-          <span
-            v-if="tool.isNew"
-            class="new-badge text-[10px] px-1.5 py-0.5 rounded-full font-bold text-white leading-none"
-            :style="{ backgroundColor: theme.primaryColor }"
-          >
-            {{ $t('toolCard.new') }}
-          </span>
-
           <FavoriteButton :tool="tool" />
         </div>
       </div>
