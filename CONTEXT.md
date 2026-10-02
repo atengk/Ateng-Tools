@@ -469,7 +469,43 @@ _避免使用 (Avoid)_: Multi-photo Grid, Print Canvas, Tiling Sheet
 针对报名网站对文件大小（如 20KB~50KB）的硬性指标，通过二分搜索（Binary Search）动态逼近最优质量因子并在纯客户端沙箱内导出符合字节阈值限制的图像压缩器。
 _避免使用 (Avoid)_: Size Limiter, Image Shrinker, Quality Seeker
 
+### 人民币大写金额转换器 (RMB Amount Converter)
 
+**RMB Amount Converter**:
+Ateng-Tools 中用于纯客户端将阿拉伯数字金额与中文金融大写金额进行合规双向转换的轻量级工具。
+_避免使用 (Avoid)_: Money Words, Capital Number, Currency Translator
 
+**Financial Uppercase Grammar**:
+中国人民银行规定的会计与票据标准中文大写数码（零、壹、贰...）与币别单位（元、角、分、整）规范。
+_避免使用 (Avoid)_: Chinese Number, Big Digits, Money Text
 
+### 中国居民身份证透视器 (Chinese ID Card Inspector)
+
+**Chinese ID Card Inspector**:
+Ateng-Tools 中用于纯客户端验证 18 位中国居民身份证合法性、推演户籍归属与年龄生理特征、并提供安全脱敏掩码与测试样本的工具。
+_避免使用 (Avoid)_: ID Card Validator, Citizen Checker, ID Tool
+
+**Checksum Mod 11-2**:
+ISO 7064:1983.MOD 11-2 校验码加权求和算法，用于判定 18 位居民身份证第 18 位校验位的数学合法性。
+_避免使用 (Avoid)_: Mod Check, Last Digit Calc, ID Parity
+
+### 规范化 Git 提交生成器 (Conventional Commits Generator)
+
+**Conventional Commits Generator**:
+Ateng-Tools 中用于纯客户端引导式组装符合 Conventional Commits 规范的结构化 Git 提交信息并提供一键终端命令复制的开发者工具。
+_避免使用 (Avoid)_: Commit Helper, Git Message Builder, Commit Formatter
+
+**Commit Structure Spec**:
+由变更类型（Type）、影响范围（Scope）、重大破坏标记（Breaking Mark）、简短摘要（Subject）、详细正文（Body）及脚注关联（Footer）构成的标准提交模型。
+_避免使用 (Avoid)_: Message DTO, Git Input, Commit Template
+
+### CSS 视觉工坊 (CSS Visual Studio)
+
+**CSS Visual Studio**:
+Ateng-Tools 中用于纯客户端所见即所得调试多重阴影、毛玻璃拟态、异形圆角及流体排版并即时导出纯净 CSS 与 UnoCSS 类名的样式工作台。
+_避免使用 (Avoid)_: CSS Maker, Style Generator, Shadow Builder
+
+**Multi-layer Shadow Stacker**:
+支持内外阴影混合、离散光源位移与透明度微调的可视化多层投影叠加引擎。
+_避免使用 (Avoid)_: Shadow List, Box Shadow Model, Elevation Array
 

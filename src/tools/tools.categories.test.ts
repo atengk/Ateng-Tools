@@ -32,7 +32,7 @@ describe('tools category taxonomy', () => {
     const flatToolCount = tools.length;
     const categorySum = toolsByCategory.reduce((sum, cat) => sum + cat.components.length, 0);
     expect(flatToolCount).toBe(categorySum);
-    expect(flatToolCount).toBe(115);
+    expect(flatToolCount).toBe(119);
 
     const allPaths = tools.map(t => t.path);
     expect(new Set(allPaths).size).toBe(flatToolCount);
@@ -48,11 +48,11 @@ describe('tools category taxonomy', () => {
     expect(categoryNames).not.toContain('development');
   });
 
-  it('验证安全凭证与认证工具已归拢至 security 分类，扩充大文件校验与证书解析达到 15 款', () => {
+  it('验证安全凭证与认证工具已归拢至 security 分类，扩充大文件校验与证书解析达到 16 款', () => {
     const securityCategory = toolsByCategory.find(cat => cat.name === 'security');
     expect(securityCategory).toBeDefined();
     const paths = securityCategory!.components.map(t => t.path);
-    expect(paths).toHaveLength(15);
+    expect(paths).toHaveLength(16);
     expect(paths).toContain('/jwt-parser');
     expect(paths).toContain('/otp-generator');
     expect(paths).toContain('/basic-auth-generator');
@@ -60,6 +60,7 @@ describe('tools category taxonomy', () => {
     expect(paths).toContain('/rsa-key-pair-generator');
     expect(paths).toContain('/file-checksum');
     expect(paths).toContain('/x509-certificate-inspector');
+    expect(paths).toContain('/chinese-id-card-inspector');
   });
 
   it('验证差异对比与富文本编辑工具已归拢至 text 分类', () => {
@@ -72,23 +73,24 @@ describe('tools category taxonomy', () => {
     expect(paths).toContain('/slugify-string');
   });
 
-  it('验证复杂结构与原数据类工具已归拢至 converter 分类', () => {
+  it('验证复杂结构与原数据类工具已归拢至 converter 分类，扩充人民币大写转换达到 26 款', () => {
     const converterCategory = toolsByCategory.find(cat => cat.name === 'converter');
     expect(converterCategory).toBeDefined();
     const paths = converterCategory!.components.map(t => t.path);
-    expect(paths).toHaveLength(25);
+    expect(paths).toHaveLength(26);
     expect(paths).toContain('/config-converter');
     expect(paths).toContain('/table-converter');
     expect(paths).toContain('/json-to-csv');
     expect(paths).toContain('/phone-parser-and-formatter');
     expect(paths).toContain('/iban-validator-and-parser');
+    expect(paths).toContain('/rmb-amount-converter');
   });
 
-  it('验证代码基准构建工具已迁入 dev 分类，并扩充 HTTP 客户端、Mock 数据生成与 JSON Studio 达到 25 款', () => {
+  it('验证代码基准构建工具已迁入 dev 分类，并扩充 Git 规范提交与 CSS 视觉工坊达到 27 款', () => {
     const devCategory = toolsByCategory.find(cat => cat.name === 'dev');
     expect(devCategory).toBeDefined();
     const paths = devCategory!.components.map(t => t.path);
-    expect(paths).toHaveLength(25);
+    expect(paths).toHaveLength(27);
     expect(paths).toContain('/json-studio');
     expect(paths).toContain('/benchmark-builder');
     expect(paths).toContain('/mybatis-sql-converter');
@@ -97,6 +99,8 @@ describe('tools category taxonomy', () => {
     expect(paths).toContain('/nginx-config-generator');
     expect(paths).toContain('/mock-data-generator');
     expect(paths).toContain('/http-client');
+    expect(paths).toContain('/conventional-commits-generator');
+    expect(paths).toContain('/css-visual-studio');
   });
 
   it('验证数学与生活度量工具已整合至 calc 分类，并成功扩充两款新工具达到 7 款', () => {

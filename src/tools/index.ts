@@ -116,11 +116,17 @@ import { tool as httpClient } from './http-client';
 import { tool as jsonStudio } from './json-studio';
 import { tool as p2pFileTransfer } from './p2p-file-transfer';
 import { tool as idPhotoMaker } from './id-photo-maker';
+import { tool as rmbAmountConverter } from './rmb-amount-converter';
+import { tool as chineseIdCardInspector } from './chinese-id-card-inspector';
+import { tool as conventionalCommitsGenerator } from './conventional-commits-generator';
+import { tool as cssVisualStudio } from './css-visual-studio';
 
 export const toolsByCategory: ToolCategory[] = [
   {
     name: 'dev',
     components: [
+      conventionalCommitsGenerator,
+      cssVisualStudio,
       jsonStudio,
       gitMemo,
       randomPortGenerator,
@@ -151,6 +157,7 @@ export const toolsByCategory: ToolCategory[] = [
   {
     name: 'converter',
     components: [
+      rmbAmountConverter,
       dateTimeConverter,
       baseConverter,
       romanNumeralConverter,
@@ -181,6 +188,7 @@ export const toolsByCategory: ToolCategory[] = [
   {
     name: 'security',
     components: [
+      chineseIdCardInspector,
       tokenGenerator,
       hashText,
       bcrypt,
