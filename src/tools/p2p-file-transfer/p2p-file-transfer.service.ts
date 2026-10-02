@@ -7,6 +7,7 @@
 
 import { deflateSync, inflateSync, zip } from 'fflate';
 import { Base64 } from 'js-base64';
+import jsQR from 'jsqr';
 import type {
   DeviceType,
   FileAckPayload,
@@ -684,6 +685,63 @@ export function decompressSdp(compressed: string): string {
   } catch (err: unknown) {
     const errorMsg = err instanceof Error ? err.message : String(err);
     throw new Error(`无效的 SDP 压缩数据: ${errorMsg}`);
+  }
+}
+
+/**
+ * 默认高可用公网 STUN 穿透服务器集群（包含全球与中国大陆高速节点，解决非同 WiFi 跨网穿透问题）
+ */
+export const DEFAULT_ICE_SERVERS: RTCIceServer[] = [
+  { urls: 'stun:stun.cloudflare.com:3478' },
+  { urls: 'stun:stun.miwifi.com:3478' },
+  { urls: 'stun:stun.qq.com:3478' },
+  { urls: 'stun:stun.chat.bilibili.com:3478' },
+  { urls: 'stun:stun.sipgate.net:3478' },
+];
+
+/**
+ * 组装 PeerJS / WebRTC ICE 服务器列表
+ *
+ * @param customServer 用户自定义的单个或多个 STUN/TURN URL
+ * @return 组装后的 RTCIceServer 数组
+ */
+export function buildPeerIceServers(customServer?: string): RTCIceServer[] {
+  const result: RTCIceServer[] = [...DEFAULT_ICE_SERVERS];
+  if (customServer && customServer.trim()) {
+    const urls = customServer
+      .split(/[\n,;]/)
+      .map((u) => u.trim())
+      .filter(Boolean);
+    if (urls.length > 0) {
+      result.unshift({ urls });
+    }
+  }
+  return result;
+}
+
+/**
+ * 从图像的原始像素数据中检测并解析二维码内容
+ *
+ * @param data RGBA 像素数组
+ * @param width 图像宽度
+ * @param height 图像高度
+ * @return 解析到的文本字符串，未识别到则返回 null
+ */
+export function decodeQrFromImageData(
+  data: Uint8ClampedArray,
+  width: number,
+  height: number,
+): string | null {
+  if (!data || width <= 0 || height <= 0) {
+    return null;
+  }
+  try {
+    const code = jsQR(data, width, height, {
+      inversionAttempts: 'dontInvert',
+    });
+    return code ? code.data : null;
+  } catch {
+    return null;
   }
 }
 

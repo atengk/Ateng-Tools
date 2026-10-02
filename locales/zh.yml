@@ -1200,6 +1200,11 @@ tools:
     cameraPermissionError: 无法访问摄像头设备，请使用文本复制粘贴方式
     cameraScanning: 请将二维码置于取景框中...
     switchModeWarning: 切换模式将断开当前正在进行的连接，是否继续？
+    iceTimeoutTip: 跨网络 P2P 直连握手耗时较长，可能受运营商对称型 NAT 隔离限制。建议连接同一 Wi-Fi 或手机热点，或使用纯离线气隙模式互扫。
+    selectImageScan: 相册 / 图片识别
+    qrNotFoundInImage: 未在选取的图片中识别到有效二维码，请确认图片清晰
+    customIceServer: 自定义 STUN / TURN 服务器 (可选)
+    customIceServerPlaceholder: 如 stun:stun.example.com:3478，多条换行或逗号分隔
 
 
 

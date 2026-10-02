@@ -1204,6 +1204,11 @@ tools:
     cameraPermissionError: Cannot access camera device. Please use text copy & paste.
     cameraScanning: Align QR code within the frame...
     switchModeWarning: Switching connection mode will disconnect current session. Continue?
+    iceTimeoutTip: "Cross-network P2P direct connection is taking longer, possibly restricted by carrier symmetric NAT. We recommend connecting to the same Wi-Fi/hotspot or using Air-Gapped mode."
+    selectImageScan: Album / Image Scan
+    qrNotFoundInImage: No valid QR code detected in the selected image. Please ensure it is clear.
+    customIceServer: "Custom STUN / TURN Server (Optional)"
+    customIceServerPlaceholder: "e.g. stun:stun.example.com:3478, multiple separated by newline or comma"
 
 
 

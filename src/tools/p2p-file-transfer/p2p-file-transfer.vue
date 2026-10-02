@@ -48,6 +48,7 @@ import {
   BUFFER_LOW_WATER_MARK,
   DEFAULT_CHUNK_SIZE,
   assembleFileBlob,
+  buildPeerIceServers,
   buildRoomShareUrl,
   calculateChunkCount,
   compressSdp,
@@ -57,6 +58,7 @@ import {
   createFileMetaMessage,
   createProtocolMessage,
   createTextMessage,
+  decodeQrFromImageData,
   decompressSdp,
   detectCurrentDeviceInfo,
   formatFileSize,
@@ -136,7 +138,29 @@ const customSignaling = ref<CustomPeerConfig>({
   port: 9000,
   path: '/',
   secure: true,
+  iceServer: '',
 });
+
+// 跨网络连接超时诊断状态
+const showIceTimeoutAlert = ref<boolean>(false);
+let connectingTimer: ReturnType<typeof setTimeout> | null = null;
+
+function startConnectingTimer() {
+  clearConnectingTimer();
+  showIceTimeoutAlert.value = false;
+  connectingTimer = setTimeout(() => {
+    if (status.value === 'connecting') {
+      showIceTimeoutAlert.value = true;
+    }
+  }, 12000);
+}
+
+function clearConnectingTimer() {
+  if (connectingTimer) {
+    clearTimeout(connectingTimer);
+    connectingTimer = null;
+  }
+}
 
 // 离线气隙模式状态
 const connectionMode = ref<ConnectionMode>('relay');
@@ -149,6 +173,7 @@ const airgapInputAnswer = ref<string>('');
 const isAirgapGenerating = ref<boolean>(false);
 const showCameraModal = ref<boolean>(false);
 const cameraVideoRef = ref<HTMLVideoElement | null>(null);
+const scanImageInputRef = ref<HTMLInputElement | null>(null);
 let cameraStream: MediaStream | null = null;
 let cameraScanFrame: number | null = null;
 let airgapPc: RTCPeerConnection | null = null;
@@ -307,6 +332,8 @@ function handleIncomingProtocolData(raw: unknown) {
     }
     case 'connect-accept': {
       status.value = 'connected';
+      clearConnectingTimer();
+      showIceTimeoutAlert.value = false;
       if (msg.payload && typeof msg.payload === 'object' && 'device' in msg.payload) {
         remoteDevice.value = msg.payload.device as PeerDeviceInfo;
       }
@@ -676,7 +703,23 @@ function handleSwitchConnectionMode(newMode: ConnectionMode) {
 let currentScanTarget: 'offer' | 'answer' = 'offer';
 
 /**
- * 启动摄像头扫描二维码
+ * 统一处理二维码识别命中
+ */
+function onQrDetected(rawText: string) {
+  if (!rawText || !rawText.trim()) return;
+  stopCameraScan();
+  const content = rawText.trim();
+  if (currentScanTarget === 'offer') {
+    airgapInputOffer.value = content;
+    handleParseOfferAndGenerateAnswer();
+  } else {
+    airgapInputAnswer.value = content;
+    handleApplyAirgapAnswer();
+  }
+}
+
+/**
+ * 启动摄像头扫描二维码（双核驱动：原生 BarcodeDetector + jsqr 全平台降级）
  */
 async function startCameraScan(target: 'offer' | 'answer') {
   currentScanTarget = target;
@@ -697,32 +740,65 @@ async function startCameraScan(target: 'offer' | 'answer') {
     }
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    let detector: any = null;
     if ('BarcodeDetector' in window) {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const detector = new (window as any).BarcodeDetector({ formats: ['qr_code'] });
-      const scanLoop = async () => {
-        if (!showCameraModal.value || !cameraVideoRef.value) return;
-        try {
-          const codes = await detector.detect(cameraVideoRef.value);
-          if (codes && codes.length > 0 && codes[0].rawValue) {
-            const raw = codes[0].rawValue;
-            stopCameraScan();
-            if (currentScanTarget === 'offer') {
-              airgapInputOffer.value = raw;
-              handleParseOfferAndGenerateAnswer();
-            } else {
-              airgapInputAnswer.value = raw;
-              handleApplyAirgapAnswer();
-            }
-            return;
-          }
-        } catch {
-          // ignore detector frame errors
-        }
-        cameraScanFrame = requestAnimationFrame(scanLoop);
-      };
-      cameraScanFrame = requestAnimationFrame(scanLoop);
+      try {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        detector = new (window as any).BarcodeDetector({ formats: ['qr_code'] });
+      } catch {
+        detector = null;
+      }
     }
+
+    const scanCanvas = document.createElement('canvas');
+    let lastScanTime = 0;
+
+    const scanLoop = async (time: number) => {
+      if (!showCameraModal.value || !cameraVideoRef.value) return;
+
+      // 限制检测频率为 100ms 一次，兼顾流畅度与电量损耗
+      if (time - lastScanTime >= 100) {
+        lastScanTime = time;
+        const video = cameraVideoRef.value;
+
+        // 1. 优先尝试硬件加速的原生 BarcodeDetector
+        if (detector) {
+          try {
+            const codes = await detector.detect(video);
+            if (codes && codes.length > 0 && codes[0].rawValue) {
+              onQrDetected(codes[0].rawValue);
+              return;
+            }
+          } catch {
+            // 原生异常时自动降级
+          }
+        }
+
+        // 2. 无缝降级至纯前端内存解码器 jsqr（支持 iOS Safari、微信、Firefox 及所有 WebView）
+        if (video.readyState >= HTMLMediaElement.HAVE_CURRENT_DATA) {
+          const width = video.videoWidth;
+          const height = video.videoHeight;
+          if (width > 0 && height > 0) {
+            scanCanvas.width = width;
+            scanCanvas.height = height;
+            const ctx = scanCanvas.getContext('2d', { willReadFrequently: true });
+            if (ctx) {
+              ctx.drawImage(video, 0, 0, width, height);
+              const imageData = ctx.getImageData(0, 0, width, height);
+              const qrText = decodeQrFromImageData(imageData.data, width, height);
+              if (qrText) {
+                onQrDetected(qrText);
+                return;
+              }
+            }
+          }
+        }
+      }
+
+      cameraScanFrame = requestAnimationFrame(scanLoop);
+    };
+
+    cameraScanFrame = requestAnimationFrame(scanLoop);
   } catch {
     stopCameraScan();
     message.warning(t('tools.p2p-file-transfer.cameraPermissionError'));
@@ -730,7 +806,7 @@ async function startCameraScan(target: 'offer' | 'answer') {
 }
 
 /**
- * 停止摄像头扫描
+ * 停止摄像头扫描与资源释放
  */
 function stopCameraScan() {
   if (cameraScanFrame) {
@@ -742,6 +818,53 @@ function stopCameraScan() {
     cameraStream = null;
   }
   showCameraModal.value = false;
+}
+
+/**
+ * 触发相册/图片文件选择
+ */
+function handleTriggerPickImage() {
+  if (scanImageInputRef.value) {
+    scanImageInputRef.value.value = '';
+    scanImageInputRef.value.click();
+  }
+}
+
+/**
+ * 处理用户上传的二维码图片并离线解析
+ */
+function handleScanImageUpload(e: Event) {
+  const target = e.target as HTMLInputElement;
+  if (!target.files || target.files.length === 0) return;
+
+  const file = target.files[0];
+  const reader = new FileReader();
+
+  reader.onload = (event) => {
+    const dataUrl = event.target?.result as string;
+    if (!dataUrl) return;
+
+    const img = new Image();
+    img.onload = () => {
+      const canvas = document.createElement('canvas');
+      canvas.width = img.naturalWidth;
+      canvas.height = img.naturalHeight;
+      const ctx = canvas.getContext('2d', { willReadFrequently: true });
+      if (ctx) {
+        ctx.drawImage(img, 0, 0);
+        const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        const qrText = decodeQrFromImageData(imageData.data, canvas.width, canvas.height);
+        if (qrText) {
+          onQrDetected(qrText);
+        } else {
+          message.warning(t('tools.p2p-file-transfer.qrNotFoundInImage'));
+        }
+      }
+    };
+    img.src = dataUrl;
+  };
+
+  reader.readAsDataURL(file);
 }
 
 
@@ -1120,6 +1243,8 @@ function handleApproveConnection() {
   );
 
   status.value = 'connected';
+  clearConnectingTimer();
+  showIceTimeoutAlert.value = false;
   if (pendingApproval.value) {
     remoteDevice.value = pendingApproval.value.device;
   }
@@ -1145,6 +1270,8 @@ function handleRejectConnection() {
  * 主动断开当前活动直连通道
  */
 function handleDisconnect() {
+  clearConnectingTimer();
+  showIceTimeoutAlert.value = false;
   stopHeartbeat();
   if (activeConn) {
     activeConn.close();
@@ -1197,10 +1324,14 @@ function initPeer() {
     roomShareUrl.value = buildRoomShareUrl(window.location.href, myPeerId.value);
   }
 
-  // 2. 装配 Peer 配置选项
+  // 2. 装配 Peer 配置选项（内置国内与全球高可用 STUN 穿透服务器集群）
+  const iceServers = buildPeerIceServers(customSignaling.value.iceServer);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let peerOptions: any = {
     debug: 1,
+    config: {
+      iceServers,
+    },
   };
 
   if (customSignaling.value.enabled && customSignaling.value.host) {
@@ -1231,6 +1362,7 @@ function initPeer() {
     myPeerId.value = id;
 
     if (role.value === 'client') {
+      startConnectingTimer();
       // 客户端发起向主机的直连呼叫
       const conn = peerInstance!.connect(targetRoomId.value, { reliable: true });
       activeConn = conn;
@@ -1266,6 +1398,8 @@ function initPeer() {
           }),
         );
         status.value = 'connected';
+        clearConnectingTimer();
+        showIceTimeoutAlert.value = false;
         remoteDevice.value = clientDevice;
         startHeartbeat();
       } else {
@@ -1305,6 +1439,7 @@ onMounted(() => {
 });
 
 onBeforeUnmount(() => {
+  clearConnectingTimer();
   stopHeartbeat();
   handleClearReceived();
   stopCameraScan();
@@ -1714,6 +1849,17 @@ onBeforeUnmount(() => {
 
       <!-- 右栏：操作指引与数据就绪区域 -->
       <div class="lg:col-span-7 min-w-0 space-y-4">
+        <!-- 跨网络连接超时诊断提示 -->
+        <n-alert
+          v-if="showIceTimeoutAlert && status === 'connecting'"
+          type="warning"
+          class="text-xs leading-relaxed"
+          closable
+          @close="showIceTimeoutAlert = false"
+        >
+          {{ t('tools.p2p-file-transfer.iceTimeoutTip') }}
+        </n-alert>
+
         <!-- 未连接时的使用引导 -->
         <n-card v-if="status !== 'connected'" class="shadow-sm h-full" size="small">
           <template #header>
@@ -2255,6 +2401,15 @@ onBeforeUnmount(() => {
           <n-form-item :label="t('tools.p2p-file-transfer.signalingSecure')">
             <n-switch v-model:value="customSignaling.secure" />
           </n-form-item>
+
+          <n-form-item :label="t('tools.p2p-file-transfer.customIceServer')">
+            <n-input
+              v-model:value="customSignaling.iceServer"
+              type="textarea"
+              :rows="2"
+              :placeholder="t('tools.p2p-file-transfer.customIceServerPlaceholder')"
+            />
+          </n-form-item>
         </n-form>
 
         <div class="flex justify-end gap-2 pt-2">
@@ -2263,6 +2418,7 @@ onBeforeUnmount(() => {
             @click="
               customSignaling.enabled = false;
               customSignaling.host = '';
+              customSignaling.iceServer = '';
               showSignalingModal = false;
               handleRecreateRoom();
             "
@@ -2272,7 +2428,7 @@ onBeforeUnmount(() => {
           <n-button
             type="primary"
             @click="
-              customSignaling.enabled = Boolean(customSignaling.host);
+              customSignaling.enabled = Boolean(customSignaling.host || customSignaling.iceServer);
               showSignalingModal = false;
               handleRecreateRoom();
             "
@@ -2282,6 +2438,15 @@ onBeforeUnmount(() => {
         </div>
       </div>
     </n-modal>
+
+    <!-- 隐藏的扫码图片选择器 -->
+    <input
+      ref="scanImageInputRef"
+      type="file"
+      accept="image/*"
+      class="hidden"
+      @change="handleScanImageUpload"
+    />
 
     <!-- 摄像头扫码识别模态框 -->
     <n-modal
@@ -2307,8 +2472,14 @@ onBeforeUnmount(() => {
         </div>
       </div>
       <template #action>
-        <div class="flex justify-end">
-          <n-button secondary @click="stopCameraScan">
+        <div class="flex justify-between items-center w-full">
+          <n-button secondary size="small" @click="handleTriggerPickImage">
+            <template #icon>
+              <n-icon :component="Photo" />
+            </template>
+            {{ t('tools.p2p-file-transfer.selectImageScan') }}
+          </n-button>
+          <n-button secondary size="small" @click="stopCameraScan">
             关闭
           </n-button>
         </div>

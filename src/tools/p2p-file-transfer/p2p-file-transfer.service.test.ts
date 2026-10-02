@@ -9,6 +9,7 @@ import { describe, expect, it } from 'vitest';
 import { unzipSync } from 'fflate';
 import {
   assembleFileBlob,
+  buildPeerIceServers,
   buildRoomShareUrl,
   calculateChunkCount,
   compressSdp,
@@ -19,7 +20,9 @@ import {
   createProtocolMessage,
   createTextMessage,
   decompressSdp,
+  decodeQrFromImageData,
   deduplicateFileNames,
+  DEFAULT_ICE_SERVERS,
   detectCurrentDeviceInfo,
   formatFileSize,
   formatLatency,
@@ -413,7 +416,60 @@ describe('p2p-file-transfer service', () => {
       expect(() => decompressSdp('invalid-corrupted-base64-content!')).toThrow('无效的 SDP 压缩数据');
     });
   });
+
+  describe('buildPeerIceServers', () => {
+    it('无自定义服务器时返回默认高可用 STUN 集群', () => {
+      const servers = buildPeerIceServers();
+      expect(servers).toEqual(DEFAULT_ICE_SERVERS);
+      expect(servers.length).toBeGreaterThan(0);
+      expect(servers.some((s) => String(s.urls).includes('cloudflare'))).toBe(true);
+      expect(servers.some((s) => String(s.urls).includes('miwifi'))).toBe(true);
+    });
+
+    it('传入空字符串或纯空白时返回默认 STUN 集群', () => {
+      expect(buildPeerIceServers('')).toEqual(DEFAULT_ICE_SERVERS);
+      expect(buildPeerIceServers('   \n  ')).toEqual(DEFAULT_ICE_SERVERS);
+    });
+
+    it('传入自定义 STUN/TURN URL 时将其置于最优先位置', () => {
+      const custom = 'stun:custom.stun.example.com:3478, turn:turn.example.com:3478?transport=udp';
+      const servers = buildPeerIceServers(custom);
+
+      expect(servers.length).toBe(DEFAULT_ICE_SERVERS.length + 1);
+      expect(servers[0].urls).toEqual([
+        'stun:custom.stun.example.com:3478',
+        'turn:turn.example.com:3478?transport=udp',
+      ]);
+    });
+
+    it('支持按换行符或分号分割多个自定义 ICE 服务器', () => {
+      const custom = 'stun:stun1.example.com:3478\nstun:stun2.example.com:3478;turn:turn3.example.com:3478';
+      const servers = buildPeerIceServers(custom);
+
+      expect(servers[0].urls).toEqual([
+        'stun:stun1.example.com:3478',
+        'stun:stun2.example.com:3478',
+        'turn:turn3.example.com:3478',
+      ]);
+    });
+  });
+
+  describe('decodeQrFromImageData', () => {
+    it('输入空数据或非法宽高时安全返回 null', () => {
+      expect(decodeQrFromImageData(new Uint8ClampedArray(0), 0, 0)).toBeNull();
+      expect(decodeQrFromImageData(new Uint8ClampedArray(10), -1, 10)).toBeNull();
+      expect(decodeQrFromImageData(null as any, 100, 100)).toBeNull();
+    });
+
+    it('纯空白像素图像未识别到二维码时返回 null', () => {
+      const width = 100;
+      const height = 100;
+      const emptyData = new Uint8ClampedArray(width * height * 4); // 全 0 黑色像素
+      expect(decodeQrFromImageData(emptyData, width, height)).toBeNull();
+    });
+  });
 });
+
 
 
 

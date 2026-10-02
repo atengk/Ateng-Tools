@@ -34,6 +34,7 @@ export interface CustomPeerConfig {
   port: number;
   path: string;
   secure: boolean;
+  iceServer?: string;
 }
 
 /**
