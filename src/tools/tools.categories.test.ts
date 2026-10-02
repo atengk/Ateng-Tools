@@ -32,7 +32,7 @@ describe('tools category taxonomy', () => {
     const flatToolCount = tools.length;
     const categorySum = toolsByCategory.reduce((sum, cat) => sum + cat.components.length, 0);
     expect(flatToolCount).toBe(categorySum);
-    expect(flatToolCount).toBe(119);
+    expect(flatToolCount).toBe(123);
 
     const allPaths = tools.map(t => t.path);
     expect(new Set(allPaths).size).toBe(flatToolCount);
@@ -48,12 +48,13 @@ describe('tools category taxonomy', () => {
     expect(categoryNames).not.toContain('development');
   });
 
-  it('验证安全凭证与认证工具已归拢至 security 分类，扩充大文件校验与证书解析达到 16 款', () => {
+  it('验证安全凭证与认证工具已归拢至 security 分类，扩充 JWT 签名工坊等达到 17 款', () => {
     const securityCategory = toolsByCategory.find(cat => cat.name === 'security');
     expect(securityCategory).toBeDefined();
     const paths = securityCategory!.components.map(t => t.path);
-    expect(paths).toHaveLength(16);
+    expect(paths).toHaveLength(17);
     expect(paths).toContain('/jwt-parser');
+    expect(paths).toContain('/jwt-signer');
     expect(paths).toContain('/otp-generator');
     expect(paths).toContain('/basic-auth-generator');
     expect(paths).toContain('/token-generator');
@@ -86,11 +87,12 @@ describe('tools category taxonomy', () => {
     expect(paths).toContain('/rmb-amount-converter');
   });
 
-  it('验证代码基准构建工具已迁入 dev 分类，并扩充 Git 规范提交与 CSS 视觉工坊达到 27 款', () => {
+  it('验证代码基准构建工具已迁入 dev 分类，并扩充 SVG 组件转换器达到 28 款', () => {
     const devCategory = toolsByCategory.find(cat => cat.name === 'dev');
     expect(devCategory).toBeDefined();
     const paths = devCategory!.components.map(t => t.path);
-    expect(paths).toHaveLength(27);
+    expect(paths).toHaveLength(28);
+    expect(paths).toContain('/svg-to-component-converter');
     expect(paths).toContain('/json-studio');
     expect(paths).toContain('/benchmark-builder');
     expect(paths).toContain('/mybatis-sql-converter');
@@ -103,11 +105,13 @@ describe('tools category taxonomy', () => {
     expect(paths).toContain('/css-visual-studio');
   });
 
-  it('验证数学与生活度量工具已整合至 calc 分类，并成功扩充两款新工具达到 7 款', () => {
+  it('验证数学与生活度量工具已整合至 calc 分类，并成功扩充物理单位换算器与决策转盘达到 9 款', () => {
     const calcCategory = toolsByCategory.find(cat => cat.name === 'calc');
     expect(calcCategory).toBeDefined();
     const paths = calcCategory!.components.map(t => t.path);
-    expect(paths).toHaveLength(7);
+    expect(paths).toHaveLength(9);
+    expect(paths).toContain('/unit-converter');
+    expect(paths).toContain('/decision-wheel');
     expect(paths).toContain('/math-evaluator');
     expect(paths).toContain('/temperature-converter');
     expect(paths).toContain('/chronometer');

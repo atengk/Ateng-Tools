@@ -509,3 +509,42 @@ _避免使用 (Avoid)_: CSS Maker, Style Generator, Shadow Builder
 支持内外阴影混合、离散光源位移与透明度微调的可视化多层投影叠加引擎。
 _避免使用 (Avoid)_: Shadow List, Box Shadow Model, Elevation Array
 
+### 万能物理单位换算器 (Universal Unit Converter)
+
+**Universal Unit Converter**:
+Ateng-Tools 中用于纯客户端在长度、面积、质量、体积、速度、压力、功率与能量 8 大物理维度间，支持公制、英制与中国市制全矩阵响应式双向联动的度量转换工具。
+_避免使用 (Avoid)_: Unit Calculator, Measure Tool, Physics Converter
+
+**Dimension Matrix**:
+以国际标准基本单位为绝对基准中枢进行任意非标单位无损双向换算的比率换算拓扑矩阵。
+_避免使用 (Avoid)_: Unit List, Rate Table, Convert Map
+
+### SVG 优化与组件转换器 (SVG Component Converter)
+
+**SVG Component Converter**:
+Ateng-Tools 中用于纯客户端清洗矢量图无用元数据、自适应重构 viewBox 并一键编译为 Vue 3 / React 图标组件及 Data URI 的开发者工具。
+_避免使用 (Avoid)_: SVG Optimizer, SVG to Code, Icon Builder
+
+**Sanitized SVG Tree**:
+基于 DOMParser 在客户端移除 XML 命名空间、冗余属性与固定尺寸并保留矢量路径特征的规范化几何节点树。
+_避免使用 (Avoid)_: Cleaned XML, SVG AST, Parsed Tag
+
+### JWT 签名与验签工坊 (JWT Signer & Verifier)
+
+**JWT Signer & Verifier**:
+Ateng-Tools 中基于浏览器原生 Web Crypto API 纯离线进行 HMAC 密钥签名、载荷防篡改比对与过期时效推演的安全工具。
+_避免使用 (Avoid)_: JWT Maker, Token Creator, JWT Generator
+
+**Offline Key Derivation**:
+在浏览器沙箱内存中将文本 Secret 派生为 CryptoKey 并执行 HMAC-SHA256 签名的纯客户端算法流程。
+_避免使用 (Avoid)_: Local Secret, Crypto Hack, Key Generator
+
+### 随机决策转盘 (Decision Wheel)
+
+**Decision Wheel**:
+Ateng-Tools 中用于纯客户端自定义选项与权重、基于 Canvas 物理动效进行随机抽签、摇号与决策判定的交互式小工具。
+_避免使用 (Avoid)_: Lucky Draw, Fortune Wheel, Random Picker
+
+**Inertial Physics Spin**:
+基于角加速度、指数衰减摩擦力与动态角度吸附实现的纯客户端转盘惯性旋转物理渲染引擎。
+_避免使用 (Avoid)_: Spin Animation, Wheel Tween, Rotate Timer

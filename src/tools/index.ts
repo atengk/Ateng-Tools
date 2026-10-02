@@ -120,11 +120,16 @@ import { tool as rmbAmountConverter } from './rmb-amount-converter';
 import { tool as chineseIdCardInspector } from './chinese-id-card-inspector';
 import { tool as conventionalCommitsGenerator } from './conventional-commits-generator';
 import { tool as cssVisualStudio } from './css-visual-studio';
+import { tool as unitConverter } from './unit-converter';
+import { tool as svgToComponentConverter } from './svg-to-component-converter';
+import { tool as jwtSigner } from './jwt-signer';
+import { tool as decisionWheel } from './decision-wheel';
 
 export const toolsByCategory: ToolCategory[] = [
   {
     name: 'dev',
     components: [
+      svgToComponentConverter,
       conventionalCommitsGenerator,
       cssVisualStudio,
       jsonStudio,
@@ -188,6 +193,7 @@ export const toolsByCategory: ToolCategory[] = [
   {
     name: 'security',
     components: [
+      jwtSigner,
       chineseIdCardInspector,
       tokenGenerator,
       hashText,
@@ -272,6 +278,8 @@ export const toolsByCategory: ToolCategory[] = [
   {
     name: 'calc',
     components: [
+      unitConverter,
+      decisionWheel,
       mathEvaluator,
       etaCalculator,
       percentageCalculator,
