@@ -1,15 +1,19 @@
 <script setup lang="ts">
 import { IconDragDrop } from '@tabler/icons-vue';
 import { useHead } from '@vueuse/head';
-import { computed, ref } from 'vue';
+import { computed, onMounted, onUnmounted, ref, watch } from 'vue';
+import { useRouter } from 'vue-router';
 import Draggable from 'vuedraggable';
 import { useThemeVars } from 'naive-ui';
 import ToolCard from '../components/ToolCard.vue';
+import HomepageToolSearchFilter from '../components/HomepageToolSearchFilter.vue';
 import { useToolStore } from '@/tools/tools.store';
 import { useCategory } from '@/composable/category';
+import { useToolSearch } from '@/composable/toolSearch';
 
 const toolStore = useToolStore();
 const theme = useThemeVars();
+const router = useRouter();
 const { t } = useI18n();
 const { getCategoryTitle } = useCategory();
 
@@ -19,13 +23,118 @@ useHead({
 
 const favoriteTools = computed(() => toolStore.favoriteTools);
 
+// 搜索文本与状态机
+const searchQuery = ref('');
+const isSearching = computed(() => searchQuery.value.trim().length > 0);
+const previousCategory = ref<string>('all');
+const searchFilterRef = ref<InstanceType<typeof HomepageToolSearchFilter>>();
+const activeCardIndex = ref(0);
+
 // Selected category filter: synchronized with toolStore for sidebar navigation
 const selectedCategory = computed({
   get: () => toolStore.selectedCategory,
   set: (val: string) => toolStore.setSelectedCategory(val),
 });
 
+// 全库多维拼音检索管线
+const { searchResult, filteredTools: searchedTools } = useToolSearch({
+  tools: computed(() => toolStore.tools),
+  searchQuery,
+});
+
+// 快速索引检索结果元数据（高亮区间与 Match Cue Badge）
+const searchResultMap = computed(() => {
+  const map = new Map<string, (typeof searchResult.value)[number]>();
+  if (isSearching.value) {
+    for (const item of searchResult.value) {
+      map.set(item.tool.path, item);
+    }
+  }
+  return map;
+});
+
+// 监听搜索词变化重置键盘聚焦项
+watch(searchQuery, () => {
+  activeCardIndex.value = 0;
+});
+
+// 监听搜索状态，实现全库穿透与分类记忆无缝还原
+watch(isSearching, (searching) => {
+  if (searching) {
+    if (selectedCategory.value !== 'all') {
+      previousCategory.value = selectedCategory.value;
+      selectedCategory.value = 'all';
+    }
+  } else {
+    if (previousCategory.value && previousCategory.value !== 'all') {
+      selectedCategory.value = previousCategory.value;
+    }
+  }
+});
+
+function onClearSearch() {
+  searchQuery.value = '';
+  if (previousCategory.value && previousCategory.value !== 'all') {
+    selectedCategory.value = previousCategory.value;
+  }
+}
+
+function onArrowDown() {
+  if (filteredTools.value.length === 0) return;
+  activeCardIndex.value = (activeCardIndex.value + 1) % filteredTools.value.length;
+}
+
+function onArrowUp() {
+  if (filteredTools.value.length === 0) return;
+  activeCardIndex.value = (activeCardIndex.value - 1 + filteredTools.value.length) % filteredTools.value.length;
+}
+
+function onSubmitSearch() {
+  if (filteredTools.value.length === 0) return;
+  const target = filteredTools.value[activeCardIndex.value] || filteredTools.value[0];
+  if (target?.path) {
+    router.push(target.path);
+  }
+}
+
+// 辅助检测当前焦点是否处于表单输入控件中
+function isEditableElement(el: EventTarget | null): boolean {
+  if (!el || !(el instanceof HTMLElement)) return false;
+  const tag = el.tagName.toLowerCase();
+  return tag === 'input' || tag === 'textarea' || el.isContentEditable;
+}
+
+function handleGlobalKeydown(e: KeyboardEvent) {
+  const isCtrlOrMetaK = (e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k';
+  if (isCtrlOrMetaK) {
+    e.preventDefault();
+    searchFilterRef.value?.focus();
+    return;
+  }
+
+  if (e.key === '/' && !isEditableElement(e.target)) {
+    e.preventDefault();
+    searchFilterRef.value?.focus();
+  } else if (e.key === 'Escape' && isSearching.value) {
+    onClearSearch();
+    searchFilterRef.value?.blur();
+  }
+}
+
+onMounted(() => {
+  window.addEventListener('keydown', handleGlobalKeydown);
+});
+
+onUnmounted(() => {
+  window.removeEventListener('keydown', handleGlobalKeydown);
+});
+
 const categoryOptions = computed(() => {
+  if (isSearching.value) {
+    return [
+      { key: 'all', label: t('home.filter.all'), count: searchedTools.value.length },
+    ];
+  }
   return [
     { key: 'all', label: t('home.filter.all'), count: toolStore.tools.length },
     ...toolStore.toolsByCategory.map(cat => ({
@@ -37,6 +146,9 @@ const categoryOptions = computed(() => {
 });
 
 const filteredTools = computed(() => {
+  if (isSearching.value) {
+    return searchedTools.value;
+  }
   if (selectedCategory.value === 'all') {
     return toolStore.tools;
   }
@@ -72,39 +184,53 @@ function onUpdateFavoriteTools() {
         </div>
       </div>
 
-      <!-- 我的常用收藏区 -->
-      <div class="favorites-section">
-        <div class="section-header">
-          <h2 class="section-title">
-            <span class="star-icon">★</span>
-            <span>{{ $t('home.categories.favoriteTools') }}</span>
-            <span class="count-badge">{{ favoriteTools.length }}</span>
-            <c-tooltip :tooltip="$t('home.categories.favoritesDndToolTip')">
-              <n-icon :component="IconDragDrop" size="16" class="cursor-help opacity-60 hover:opacity-100" />
-            </c-tooltip>
-          </h2>
-          <span class="section-hint">{{ $t('home.filter.favoriteHint') }}</span>
-        </div>
+      <!-- 首页即时搜索过滤栏 Homepage Tool Search Filter -->
+      <HomepageToolSearchFilter
+        ref="searchFilterRef"
+        v-model="searchQuery"
+        :matched-count="searchedTools.length"
+        :is-searching="isSearching"
+        @clear="onClearSearch"
+        @submit="onSubmitSearch"
+        @arrow-down="onArrowDown"
+        @arrow-up="onArrowUp"
+      />
 
-        <transition name="height">
-          <div v-if="favoriteTools.length > 0">
-            <Draggable
-              :list="favoriteTools"
-              class="grid grid-cols-1 gap-12px lg:grid-cols-3 md:grid-cols-3 sm:grid-cols-2 xl:grid-cols-4"
-              ghost-class="ghost-favorites-draggable"
-              item-key="name"
-              @end="onUpdateFavoriteTools"
-            >
-              <template #item="{ element: tool }">
-                <ToolCard :tool="tool" />
-              </template>
-            </Draggable>
+      <!-- 我的常用收藏区 (非空搜索时平滑折叠) -->
+      <transition name="fade">
+        <div v-show="!isSearching" class="favorites-section">
+          <div class="section-header">
+            <h2 class="section-title">
+              <span class="star-icon">★</span>
+              <span>{{ $t('home.categories.favoriteTools') }}</span>
+              <span class="count-badge">{{ favoriteTools.length }}</span>
+              <c-tooltip :tooltip="$t('home.categories.favoritesDndToolTip')">
+                <n-icon :component="IconDragDrop" size="16" class="cursor-help opacity-60 hover:opacity-100" />
+              </c-tooltip>
+            </h2>
+            <span class="section-hint">{{ $t('home.filter.favoriteHint') }}</span>
           </div>
-          <div v-else class="empty-favorites">
-            {{ $t('home.filter.noFavorites') }}
-          </div>
-        </transition>
-      </div>
+
+          <transition name="height">
+            <div v-if="favoriteTools.length > 0">
+              <Draggable
+                :list="favoriteTools"
+                class="grid grid-cols-1 gap-12px lg:grid-cols-3 md:grid-cols-3 sm:grid-cols-2 xl:grid-cols-4"
+                ghost-class="ghost-favorites-draggable"
+                item-key="name"
+                @end="onUpdateFavoriteTools"
+              >
+                <template #item="{ element: tool }">
+                  <ToolCard :tool="tool" />
+                </template>
+              </Draggable>
+            </div>
+            <div v-else class="empty-favorites">
+              {{ $t('home.filter.noFavorites') }}
+            </div>
+          </transition>
+        </div>
+      </transition>
 
       <!-- 分类标签过滤器 Tool Category Filter -->
       <div class="category-filter-section">
@@ -125,16 +251,27 @@ function onUpdateFavoriteTools() {
 
           <div class="current-cat-indicator">
             <span>{{ $t('home.filter.current') }}</span>
-            <strong>{{ selectedCategory === 'all' ? $t('home.filter.all') : getCategoryTitle(selectedCategory) }}</strong>
+            <strong>{{ isSearching ? $t('home.search.matchCount', { count: searchedTools.length }) : (selectedCategory === 'all' ? $t('home.filter.all') : getCategoryTitle(selectedCategory)) }}</strong>
           </div>
         </div>
 
         <!-- 工具卡片网格 -->
         <div v-if="filteredTools.length > 0" class="grid grid-cols-1 gap-12px lg:grid-cols-3 md:grid-cols-3 sm:grid-cols-2 xl:grid-cols-4 mt-4">
-          <ToolCard v-for="tool in filteredTools" :key="tool.name" :tool="tool" />
+          <ToolCard
+            v-for="(tool, index) in filteredTools"
+            :key="tool.name"
+            :tool="tool"
+            :match-range="searchResultMap.get(tool.path)?.matchRange"
+            :match-cue-type="searchResultMap.get(tool.path)?.matchCueType"
+            :match-cue-value="searchResultMap.get(tool.path)?.matchCueValue"
+            :is-active="isSearching && activeCardIndex === index"
+          />
         </div>
         <div v-else class="empty-search-state">
-          {{ $t('home.filter.noMatch') }}
+          <p>{{ $t('home.filter.noMatch') }}</p>
+          <c-button v-if="isSearching" size="small" class="mt-3" @click="onClearSearch">
+            {{ $t('home.search.clear') }}
+          </c-button>
         </div>
       </div>
     </div>

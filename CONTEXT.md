@@ -159,6 +159,26 @@ _避免使用 (Avoid)_: Value Cleaner, Quote Adder
 首页主体区域中常驻的即时交互式搜索过滤组件，提供多维权重分级检索、拼音全拼与首字母匹配，并直接驱动本页 Enhanced Tool Card 的毫秒级重排与过滤展示。
 _避免使用 (Avoid)_: In-Page Search, Card Filter, Quick Search Input
 
+**Portal Hero Section**:
+首页主体顶部的居中一体化欢迎与核心入口单元，聚合离线私密安全标语、全站数据量度指标与即时全局搜索栏。
+_避免使用 (Avoid)_: Top Banner, Welcome Box, Big Banner
+
+**Favorites Quick Shelf**:
+首页中以横向弹性微卡片呈现用户标星工具的轻量化陈列货架，提供领域图标、精简标题与拖拽手柄，避免在少量收藏时破坏网格平衡。
+_避免使用 (Avoid)_: Favorite Grid, Star List, Bookmark Row
+
+**Categorized Segmented Control**:
+首页中结合 Tabler 原生矢量领域图标与计数徽章的交互式分类过滤组件，支持无冗余状态展示与大屏自适应排布。
+_避免使用 (Avoid)_: Category Pills, Type Filter, Tag Bar
+
+**Micro-Surfaced Icon Container**:
+在 Enhanced Tool Card 中包裹 Tabler 矢量图标的柔和半透明浅底圆角微容器，强化图标聚焦度并统一几何韵律。
+_避免使用 (Avoid)_: Icon Box, Round Icon, Tool Glyph
+
+**Viewport Rhythm Boundary**:
+全站首页与展示列表在大屏显示器下的标准化最大宽度容器与居中对齐基线，消除超宽屏下卡片横向拉伸失衡。
+_避免使用 (Avoid)_: Max Width Wrap, Page Container, Content Limiter
+
 **Pinyin Token Indexer**:
 在客户端内存中将工具中文名称及描述预编译或实时提取为拼音全拼与拼音首字母缩写的轻量级分词索引引擎，用于增强 Fuse.js 模糊匹配在中文场景下的无感命中能力。
 _避免使用 (Avoid)_: Pinyin Converter, Chinese Search Helper, Pinyin Parser
@@ -194,6 +214,22 @@ _避免使用 (Avoid)_: Category ID, Type Tag, Section Name
 **Taxonomy Admission Gate**:
 Ateng-Tools 全站增设新顶层工具分类的硬性准入规则与防御门禁：仅当目标专业垂直领域在纯客户端能够支撑至少 3 款及以上高内聚小工具，且其心智模型与现有八大领域清晰正交时，方可通过架构评估升格为新分类，杜绝随意增设导致分类单薄与碎片化。
 _避免使用 (Avoid)_: Category Filter Rule, Taxonomy Policy, Group Barrier
+
+**Global Command Palette**:
+全站顶层通用的悬浮式全局命令面板与快速跳转弹窗，基于半透明毛玻璃高斯模糊背景与一体化 Spotlight 质感卡片构建，全面复用纯客户端拼音检索引擎与多维权重排序，支持全键盘极客导航、初始高频推荐与系统快捷动作执行。
+_避免使用 (Avoid)_: Search Dialog, Pop Search, Quick Window, Spotlight Clone
+
+**Command Option Descriptor**:
+在全局命令面板中表达单个可选项（工具跳转项、系统状态切换、外部文档链接）的规范化模型，包含标题、简述、分组标识、Tabler 矢量图标与执行回调。
+_避免使用 (Avoid)_: Palette Item, Result Row, Command Node
+
+**Spotlight Surface Container**:
+具有大圆角、多层微阴影与无边框沉浸式搜索头的全局命令面板核心卡片容器，遵循 Surface Elevation Hierarchy 语义层级标准。
+_避免使用 (Avoid)_: Search Box, Modal Frame, Popup Card
+
+**Keyboard Action Deck**:
+固定停靠于全局命令面板底部的轻量快捷键指引状态栏，提供方向键切换、回车跳转与 Esc 关闭等键盘极客操作提示。
+_避免使用 (Avoid)_: Shortcut Bar, Footer Hints, Key Helper
 
 ### 图片处理工作台 (Image Studio)
 

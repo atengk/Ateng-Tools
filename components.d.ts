@@ -97,6 +97,7 @@ declare module '@vue/runtime-core' {
     HashText: typeof import('./src/tools/hash-text/hash-text.vue')['default']
     HmacGenerator: typeof import('./src/tools/hmac-generator/hmac-generator.vue')['default']
     'Home.page': typeof import('./src/pages/Home.page.vue')['default']
+    HomepageToolSearchFilter: typeof import('./src/components/HomepageToolSearchFilter.vue')['default']
     HtmlEntities: typeof import('./src/tools/html-entities/html-entities.vue')['default']
     HtmlWysiwygEditor: typeof import('./src/tools/html-wysiwyg-editor/html-wysiwyg-editor.vue')['default']
     HttpClient: typeof import('./src/tools/http-client/http-client.vue')['default']

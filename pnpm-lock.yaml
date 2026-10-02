@@ -176,6 +176,9 @@ importers:
       pinia:
         specifier: ^2.0.34
         version: 2.0.34(typescript@5.2.2)(vue@3.3.4)
+      pinyin-match:
+        specifier: ^1.2.10
+        version: 1.2.10
       plausible-tracker:
         specifier: ^0.3.8
         version: 0.3.8
@@ -4747,6 +4750,9 @@ packages:
         optional: true
       typescript:
         optional: true
+
+  pinyin-match@1.2.10:
+    resolution: {integrity: sha512-Xo1uMd9n56/xP2EAn7yfApnTmAGCLGqxFIm1fuOnSMty0xhqRF3+ZwVjp2yWFD/alv60RUWa/cZoQSeTSp1HxA==}
 
   pkg-types@1.0.3:
     resolution: {integrity: sha512-nN7pYi0AQqJnoLPC9eHFQ8AcyaixBUOwvqc5TDnIKCMEE6I0y8P7OKA7fPexsXGCGxQDl/cmrLAp26LhcwxZ4A==}
@@ -11255,6 +11261,8 @@ snapshots:
       vue-demi: 0.13.11(vue@3.3.4)
     optionalDependencies:
       typescript: 5.2.2
+
+  pinyin-match@1.2.10: {}
 
   pkg-types@1.0.3:
     dependencies:

@@ -93,6 +93,7 @@
     "pdfjs-dist": "^3.11.174",
     "peerjs": "^1.5.5",
     "pinia": "^2.0.34",
+    "pinyin-match": "^1.2.10",
     "plausible-tracker": "^0.3.8",
     "qrcode": "^1.5.1",
     "randexp": "^0.5.3",

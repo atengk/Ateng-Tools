@@ -19,6 +19,15 @@ home:
     noFavorites: 'No favorite tools yet. Click "☆" on any tool card to add it here.'
     noMatch: 'No matching tools found. Try clearing your search or switching categories.'
     favoriteHint: 'Click the star icon to add or remove favorites'
+  search:
+    placeholder: 'Search tools by name, pinyin initials (e.g. ewm), or keywords...'
+    clear: 'Clear search'
+    matchCount: '{count} tools found'
+    shortcutFocus: 'Press / to focus'
+    shortcutClear: 'Esc to clear'
+    matchCuePinyin: 'Pinyin: {value}'
+    matchCueKeyword: 'Keyword: {value}'
+    matchCuePath: 'Path: {value}'
   attribution:
     forkNotice: 'Built upon IT-Tools'
     licenseNotice: '© 2026 Ateng · Licensed under GPLv3'
@@ -40,6 +49,34 @@ home:
     darkMode: 'Dark mode'
     lightMode: 'Light mode'
     mode: 'Toggle dark/light mode'
+commandPalette:
+  placeholder: 'Search tools, Pinyin initials (e.g. ewm), or actions...'
+  emptyNotice: 'No matching tools or actions found'
+  categories:
+    tools: 'Tools'
+    actions: 'Actions'
+    externalLinks: 'External Links'
+    pages: 'Pages'
+    frequent: 'Recommended Tools'
+  shortcuts:
+    navigate: 'Navigate'
+    select: 'Select'
+    close: 'Close'
+  randomTool:
+    name: 'Open Random Tool'
+    description: 'Pick and open a tool from the collection at random'
+  toggleTheme:
+    name: 'Toggle Dark/Light Mode'
+    description: 'Switch between light and dark theme appearance'
+  github:
+    name: 'GitHub Repository'
+    description: 'View Ateng-Tools source code and star on GitHub'
+  reportIssue:
+    name: 'Submit Feedback & Issues'
+    description: 'Submit an issue, suggestion, or bug report'
+  about:
+    name: 'About Ateng-Tools'
+    description: 'Learn about the architecture and open-source acknowledgements'
 about:
   content: >
     # About Ateng-Tools

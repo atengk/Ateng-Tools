@@ -19,6 +19,15 @@ home:
     noFavorites: '暂无收藏，点击工具卡片右上角的“☆”即可快速收录至此'
     noMatch: '未检索到匹配的小工具，尝试清除搜索或切换分类'
     favoriteHint: '点击卡片右上角星号可添加或移出收藏'
+  search:
+    placeholder: '实时搜索工具名称、拼音首字母 (如 ewm) 或关键词...'
+    clear: '清空搜索'
+    matchCount: '找到 {count} 款工具'
+    shortcutFocus: '按 / 聚焦'
+    shortcutClear: 'Esc 清空'
+    matchCuePinyin: '拼音: {value}'
+    matchCueKeyword: '关键词: {value}'
+    matchCuePath: '路径: {value}'
   attribution:
     forkNotice: '基于 IT-Tools 二开构建'
     licenseNotice: '© 2026 Ateng · 遵循 GPLv3 开源协议'
@@ -40,6 +49,34 @@ home:
     darkMode: '深色模式'
     lightMode: '浅色模式'
     mode: '颜色模式'
+commandPalette:
+  placeholder: '搜索小工具名称、拼音首字母 (如 ewm) 或快捷指令...'
+  emptyNotice: '未找到匹配的小工具或快捷指令'
+  categories:
+    tools: '小工具'
+    actions: '快捷操作'
+    externalLinks: '外部链接'
+    pages: '系统页面'
+    frequent: '常用推荐'
+  shortcuts:
+    navigate: '切换'
+    select: '选择'
+    close: '关闭'
+  randomTool:
+    name: '随机打开小工具'
+    description: '从工具库中随机挑选并打开一个小工具'
+  toggleTheme:
+    name: '切换明暗颜色模式'
+    description: '在浅色与深色主题外观之间即时切换'
+  github:
+    name: 'GitHub 开源仓库'
+    description: '前往 GitHub 查看 Ateng-Tools 源码与点亮 Star'
+  reportIssue:
+    name: '提交反馈与建议'
+    description: '向 Ateng-Tools 提交 Issue、功能建议或缺陷反馈'
+  about:
+    name: '关于 Ateng-Tools'
+    description: '了解 Ateng-Tools 的架构理念与开源致谢'
 about:
   content: >
     # 关于 Ateng-Tools

@@ -61,4 +61,24 @@ describe('Command Palette Store', () => {
     expect(githubOption).toBeDefined();
     expect(githubOption?.icon).toBeDefined();
   });
+
+  it('2. 空输入时展示常用推荐小工具与快捷操作，并生成 flatOptions 扁平列表', () => {
+    const store = useCommandPaletteStore();
+    store.searchPrompt = '';
+
+    expect(store.flatOptions.length).toBeGreaterThan(0);
+    const hasActions = store.flatOptions.some(opt => opt.category === '快捷操作');
+    expect(hasActions).toBe(true);
+  });
+
+  it('3. 输入拼音首字母 (如 ewm) 能够精准匹配到工具并附带匹配线索', () => {
+    const store = useCommandPaletteStore();
+    store.searchPrompt = 'ewm';
+
+    const results = store.filteredSearchResult;
+    const tools = results['小工具'] ?? [];
+    const qrTool = tools.find(t => t.name.includes('二维码') || t.id?.includes('qr'));
+    expect(qrTool).toBeDefined();
+    expect(qrTool?.matchCueType).toBe('pinyin');
+  });
 });

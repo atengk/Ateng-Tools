@@ -82,7 +82,7 @@ const tools = computed<ToolCategory[]>(() => [
 
         <!-- 顶栏右侧：搜索栏 + 语言选择 + 模式切换 + GitHub Star 按钮 -->
         <div class="nav-right">
-          <command-palette class="nav-search-bar" />
+          <command-palette v-if="!isHomePage" class="nav-search-bar" />
 
           <locale-selector v-if="!styleStore.isSmallScreen" />
 
